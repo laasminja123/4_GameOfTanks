@@ -4,7 +4,12 @@ public class Player {
 
     private String ID;
     private Tank tank;
-    private String nickname;
+    private final String nickname;
+
+    public Player(String nickname) {
+        this.nickname = nickname;
+        this.tank = new Tank(5.0f, 3.0f);
+    }
 
     public String getID() {
         return ID;

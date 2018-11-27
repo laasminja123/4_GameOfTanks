@@ -57,7 +57,7 @@ public class ConnectionManager extends Thread {
                         //
                     }
 
-                    for (PlayerHandler handler: connections) {
+                    for (PlayerHandler handler : connections) {
                         handler.sendData();
                     }
                 }
@@ -79,6 +79,17 @@ public class ConnectionManager extends Thread {
             players.add(handler.getData().getPlayer());
         }
         return players;
+    }
+
+    public void close() {
+        try {
+            for (PlayerHandler handler : connections) {
+                handler.socket.close();
+            }
+            server.close();
+        } catch (IOException e) {
+            //
+        }
     }
 
 }

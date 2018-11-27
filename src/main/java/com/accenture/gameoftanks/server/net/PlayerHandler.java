@@ -41,10 +41,6 @@ public class PlayerHandler extends Thread {
         }
     }
 
-//    Object object = read.object
-//    if (object = instanceof data)
-//    Data data = (Data)object;
-
     public void sendData() {
         if (streamIn == null || streamOut == null || data == null) {
             return;
@@ -55,6 +51,10 @@ public class PlayerHandler extends Thread {
         } catch (IOException exc) {
             //
         }
+    }
+
+    public Data getData() {
+        return this.data;
     }
 
 }

@@ -18,16 +18,24 @@ public class PlayerConnection {
     private ObjectInputStream streamIn;
     private ObjectOutputStream streamOut;
     private Data data;
+    private String host;
+    private int port;
 
-    public PlayerConnection(Player player) {
+
+    public PlayerConnection(String host, int port, Player player) {
+        this.host = host;
+        this.port = port;
         this.player = player;
+    }
 
+    private void init() {
         try {
-            client = new Socket("localhost", ConnectionManager.PORT);
+            client = new Socket(host, port);
             this.streamIn = new ObjectInputStream(client.getInputStream());
             this.streamOut = new ObjectOutputStream(client.getOutputStream());
         } catch (java.io.IOException e) {
             e.printStackTrace();
+            throw new RuntimeException("Failed to connect server");
         }
         this.data = new Data(player);
 
@@ -41,12 +49,30 @@ public class PlayerConnection {
                     } catch (InterruptedException exc) {
                         //
                     }
-
                     sendData();
                 }
             }
         });
         thread.start();
+
+        // create data receiving loop
+        Thread thread2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Object object = streamIn.readObject();
+
+                        if (object instanceof Data) {
+                            data = (Data) object;
+                        }
+                    } catch (IOException | ClassNotFoundException exc) {
+                        //
+                    }
+                }
+            }
+        });
+        thread2.start();
     }
 
     public void sendData() {

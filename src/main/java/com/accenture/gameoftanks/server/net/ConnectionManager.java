@@ -74,6 +74,9 @@ public class ConnectionManager extends Thread {
 
     public List<Player> getPlayers() {
         List<Player> players = new LinkedList<>();
+        for (PlayerHandler handler : connections) {
+            players.add(handler.getData().getPlayer());
+        }
         return players;
     }
 

@@ -1,26 +1,60 @@
 package com.accenture.gameoftanks.server.net;
 
-import com.accenture.gameoftanks.core.Player;
+import com.accenture.gameoftanks.net.Data;
 
-import java.io.DataInputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 
-public class PlayerHandler implements Runnable {
+public class PlayerHandler extends Thread {
 
     public Socket socket;
-    private DataInputStream streamIn;
-    private Player player;
+    private ObjectInputStream streamIn;
+    private ObjectOutputStream streamOut;
+    private Data data;
 
     public PlayerHandler(Socket socket) {
         this.socket = socket;
-//        this.player =
+
+        try {
+            this.streamIn = new ObjectInputStream(socket.getInputStream());
+            this.streamOut = new ObjectOutputStream(socket.getOutputStream());
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void run() {
+        // wait for data from client
+        while (true) {
+            try {
+                Object object = streamIn.readObject();
+
+                if (object instanceof Data) {
+                    this.data = (Data) object;
+                }
+            } catch (IOException | ClassNotFoundException exc) {
+                //
+            }
+        }
     }
 
 //    Object object = read.object
 //    if (object = instanceof data)
 //    Data data = (Data)object;
+
+    public void sendData() {
+        if (streamIn == null || streamOut == null || data == null) {
+            return;
+        }
+        try {
+            streamOut.flush();
+            streamOut.writeObject(this.data);
+        } catch (IOException exc) {
+            //
+        }
+    }
 
 }

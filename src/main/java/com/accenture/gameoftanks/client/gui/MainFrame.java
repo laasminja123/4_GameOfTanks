@@ -1,5 +1,8 @@
 package com.accenture.gameoftanks.client.gui;
 
+import com.accenture.gameoftanks.client.net.PlayerConnection;
+import com.accenture.gameoftanks.core.Player;
+
 import javax.swing.*;
 import java.applet.Applet;
 import java.awt.*;
@@ -7,7 +10,14 @@ import java.awt.event.*;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-class MainFrame extends Frame implements WindowListener, ActionListener, KeyListener {
+public class MainFrame extends JFrame implements WindowListener, ActionListener, KeyListener {
+
+    // GUI
+    private JTextField portEdit;
+    private JTextField addressEdit;
+
+    // Network
+    private PlayerConnection playerConnection;
 
     private enum Actions {
         UP,
@@ -17,20 +27,22 @@ class MainFrame extends Frame implements WindowListener, ActionListener, KeyList
         SHOOT,
         PORT,
         CONNECT,
-
     }
 
+    public MainFrame() {
+        initComponents();
+    }
 
-    public static void main(String[] args) {
+    private void initComponents() {
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        MainFrame instance = new MainFrame();
-        JTextField port = new JTextField();
-        JTextField connUrl = new JTextField();
+        portEdit = new JTextField();
+        addressEdit = new JTextField();
 
-        JFrame f0 = new JFrame("Games Of Tanks");
-        f0.setSize(800, 650);
-        f0.setVisible(true);
-        f0.addKeyListener(new KeyListener() {
+        //JFrame f0 = new JFrame("Games Of Tanks");
+        setSize(800, 650);
+        setTitle("Game Of Tanks");
+        addKeyListener(new KeyListener() {
 
             public void keyTyped(KeyEvent e) {
                 if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
@@ -66,19 +78,19 @@ class MainFrame extends Frame implements WindowListener, ActionListener, KeyList
             }
         });
 
-        f0.setFocusable(true);
-        f0.requestFocusInWindow();
+        //f0.setFocusable(true);
+        //f0.requestFocusInWindow();
 
         JLabel text = new JLabel("openGL please here");
 
         JPanel f1 = new JPanel();
-        f0.getContentPane().setLayout(null);
+        getContentPane().setLayout(null);
         f1.add(text);
         f1.setSize(780, 450);
         f1.setLocation(10, 0);
         f1.setVisible(true);
         f1.setBackground(Color.gray);
-        f0.add(f1);
+        getContentPane().add(f1);
 
         JButton mvmU = new JButton();
         JLabel lblu = new JLabel("Up");
@@ -88,9 +100,9 @@ class MainFrame extends Frame implements WindowListener, ActionListener, KeyList
         mvmU.setBackground(Color.green);
         mvmU.setLocation(560, 470);
         mvmU.add(lblu);
-        f0.add(mvmU);
+        getContentPane().add(mvmU);
         mvmU.setActionCommand(Actions.UP.name());
-        mvmU.addActionListener(instance);
+        mvmU.addActionListener(this);
 
         JButton mvmR = new JButton();
         JLabel lblr = new JLabel("Right");
@@ -100,9 +112,9 @@ class MainFrame extends Frame implements WindowListener, ActionListener, KeyList
         mvmR.setBackground(Color.green);
         mvmR.setLocation(610, 495);
         mvmR.add(lblr);
-        f0.add(mvmR);
+        getContentPane().add(mvmR);
         mvmR.setActionCommand(Actions.RIGHT.name());
-        mvmR.addActionListener(instance);
+        mvmR.addActionListener(this);
 
         JButton mvmL = new JButton();
         JLabel lbll = new JLabel("Left");
@@ -112,9 +124,9 @@ class MainFrame extends Frame implements WindowListener, ActionListener, KeyList
         mvmL.setBackground(Color.green);
         mvmL.setLocation(510, 495);
         mvmL.add(lbll);
-        f0.add(mvmL);
+        getContentPane().add(mvmL);
         mvmL.setActionCommand(Actions.LEFT.name());
-        mvmL.addActionListener(instance);
+        mvmL.addActionListener(this);
 
         JButton mvmD = new JButton();
         JLabel lbld = new JLabel("Down");
@@ -124,9 +136,9 @@ class MainFrame extends Frame implements WindowListener, ActionListener, KeyList
         mvmD.setBackground(Color.green);
         mvmD.setLocation(560, 495);
         mvmD.add(lbld);
-        f0.add(mvmD);
+        getContentPane().add(mvmD);
         mvmD.setActionCommand(Actions.DOWN.name());
-        mvmD.addActionListener(instance);
+        mvmD.addActionListener(this);
 
 
         JButton shootBtn = new JButton();
@@ -137,15 +149,16 @@ class MainFrame extends Frame implements WindowListener, ActionListener, KeyList
         shootBtn.setBackground(Color.green);
         shootBtn.setLocation(360, 495);
         shootBtn.add(shotTxt);
-        f0.add(shootBtn);
+        getContentPane().add(shootBtn);
         shootBtn.setActionCommand(Actions.SHOOT.name());
-        shootBtn.addActionListener(instance);
+        shootBtn.addActionListener(this);
 
-        instance.requestFocusInWindow();
+        //instance.requestFocusInWindow();
 
-        port.setSize(100, 40);
-        port.setLocation(60, 525);
-        f0.add(port);
+        portEdit.setSize(100, 40);
+        portEdit.setLocation(60, 525);
+        portEdit.setText("9999");
+        getContentPane().add(portEdit);
 
         JButton portBtn = new JButton();
         JLabel portTxt = new JLabel("CONNECT PORT");
@@ -155,14 +168,15 @@ class MainFrame extends Frame implements WindowListener, ActionListener, KeyList
         portBtn.setBackground(Color.blue);
         portBtn.setLocation(320, 495);
         portBtn.add(portTxt);
-        f0.add(portBtn);
+        getContentPane().add(portBtn);
         portBtn.setActionCommand(Actions.PORT.name());
-        portBtn.addActionListener(instance);
+        portBtn.addActionListener(this);
 
 
-        connUrl.setSize(100, 40);
-        connUrl.setLocation(60, 465);
-        f0.add(connUrl);
+        addressEdit.setSize(100, 40);
+        addressEdit.setLocation(60, 465);
+        addressEdit.setText("localhost");
+        getContentPane().add(addressEdit);
 
         JButton connBtn = new JButton();
         JLabel connTxt = new JLabel("CONNECTION");
@@ -172,11 +186,9 @@ class MainFrame extends Frame implements WindowListener, ActionListener, KeyList
         connBtn.setBackground(Color.blue);
         connBtn.setLocation(320, 465);
         connBtn.add(connTxt);
-        f0.add(connBtn);
+        getContentPane().add(connBtn);
         connBtn.setActionCommand(Actions.CONNECT.name());
-        connBtn.addActionListener(instance);
-
-
+        connBtn.addActionListener(this);
     }
 
     public void windowClosing(WindowEvent e) {
@@ -212,6 +224,7 @@ class MainFrame extends Frame implements WindowListener, ActionListener, KeyList
         } else if (evt.getActionCommand() == Actions.PORT.name()) {
             System.out.println("gimme that port");
         } else if (evt.getActionCommand() == Actions.CONNECT.name()) {
+            connect();
             System.out.println("connection here we go");
         }
     }
@@ -226,6 +239,35 @@ class MainFrame extends Frame implements WindowListener, ActionListener, KeyList
 
     public void keyReleased(KeyEvent e) {
 
+    }
+
+    private void connect() {
+        String address = addressEdit.getText();
+        int port;
+
+        try {
+            port = Integer.parseInt(portEdit.getText());
+        } catch (NumberFormatException exc) {
+            printMessage("Bad Port Number!");
+            return;
+        }
+        String nick = null; // TODO nick field
+
+        // TODO check values
+        if (playerConnection == null) {
+            Player player = new Player(nick);
+            playerConnection = new PlayerConnection(address, port, player);
+
+            try {
+                playerConnection.init();
+            } catch (RuntimeException exc) {
+                printMessage(exc.getMessage());
+            }
+        }
+    }
+
+    private void printMessage(String message) {
+        JOptionPane.showMessageDialog(null, message);
     }
 
 }

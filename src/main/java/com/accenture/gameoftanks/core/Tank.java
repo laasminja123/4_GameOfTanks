@@ -6,6 +6,8 @@ public class Tank {
     private int currentHp;
     private boolean live = false;
     private Position position;
+    private Intent intent;
+
 
 
     public Position getPosition() {
@@ -13,15 +15,20 @@ public class Tank {
 
     }
 
-
-    public int getCurrentHp() {
-        return currentHp;
-
+    public Intent getIntent() {
+        return intent;
     }
 
-        public void isAlive(boolean live) {
-        if (!live) {
-        return;
+
+
+    public int getCurrentHp() {
+                return currentHp;
+
+            }
+
+            public void isAlive(boolean live) {
+                if (!live) {
+                    return;
         }
     }
 }

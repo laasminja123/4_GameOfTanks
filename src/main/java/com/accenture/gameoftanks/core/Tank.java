@@ -7,8 +7,21 @@ public class Tank {
     private boolean live = false;
     private Position position;
     private Intent intent;
+    float thrust;
+    float mass;
+    float maxSpeed;
 
+    public float getThrust() {
+        return thrust;
+    }
 
+    public float getMass() {
+        return mass;
+    }
+
+    public float getMaxSpeed() {
+        return maxSpeed;
+    }
 
     public Position getPosition() {
         return position;

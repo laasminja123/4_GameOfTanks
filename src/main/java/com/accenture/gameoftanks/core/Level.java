@@ -27,8 +27,8 @@ public class Level {
         Position position = tank.getPosition();
 
         //Get tankFullPosition (tank center coordinate +  tank length)
-        float tankFullPositionX = position.posX + tank.length;
-        float tankFullPositionY = position.posY + tank.width;
+        float tankFullPositionX = position.posX + tank.length/2;
+        float tankFullPositionY = position.posY + tank.width/2;
 
         if (tankFullPositionX > rightBoundary) {
             position.posX = rightBoundary - tank.length/2;

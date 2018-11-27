@@ -1,6 +1,5 @@
 package com.accenture.gameoftanks.server.net;
 
-import com.accenture.gameoftanks.client.Session;
 import com.accenture.gameoftanks.core.Player;
 
 import java.io.IOException;
@@ -12,11 +11,11 @@ import java.util.Vector;
 
 public class ConnectionManager extends Thread {
 
-    public static final int PORT = 9999; // port to listen on
+    public static final int PORT = 9999;
     public static final int TIME_STEP_MSEC = 50;
 
     private ServerSocket server;
-    private Vector<PlayerHandler> connections; // change from Session to PlayerConnection and don't forget to import it as well
+    private Vector<PlayerHandler> connections;
 
     public ConnectionManager() {
         this.connections = new Vector<PlayerHandler>();
@@ -29,6 +28,7 @@ public class ConnectionManager extends Thread {
 
     @Override
     public void run() {
+        //listen to new connections loop
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -46,6 +46,7 @@ public class ConnectionManager extends Thread {
         });
         thread.start();
 
+        // send data to all clients loop
         Thread thread2 = new Thread(new Runnable() {
             @Override
             public void run() {

@@ -27,7 +27,7 @@ public class PlayerHandler extends Thread {
     }
 
     public void run() {
-        // wait for data from client
+        // wait for data from client loop
         while (true) {
             try {
                 Object object = streamIn.readObject();

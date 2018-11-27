@@ -2,7 +2,6 @@ package com.accenture.gameoftanks.client.net;
 
 import com.accenture.gameoftanks.core.Player;
 import com.accenture.gameoftanks.net.Data;
-import com.accenture.gameoftanks.server.net.ConnectionManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -38,7 +37,7 @@ public class PlayerConnection {
         }
         this.data = new Data(player);
 
-        // create data sending loop
+        // send data to server loop
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {

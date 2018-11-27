@@ -46,7 +46,7 @@ public class Level {
         }
 
 
-        if (tankFullPositionY > bottomBoundary) {
+        if (tankFullPositionY < bottomBoundary) {
             position.posY = bottomBoundary + tank.width/2;
             position.vy = 0;
         }

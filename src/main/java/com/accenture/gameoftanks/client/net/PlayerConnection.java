@@ -21,14 +21,13 @@ public class PlayerConnection {
     private String host;
     private int port;
 
-
     public PlayerConnection(String host, int port, Player player) {
         this.host = host;
         this.port = port;
         this.player = player;
     }
 
-    private void init() {
+    public void init() {
         try {
             client = new Socket(host, port);
             this.streamIn = new ObjectInputStream(client.getInputStream());

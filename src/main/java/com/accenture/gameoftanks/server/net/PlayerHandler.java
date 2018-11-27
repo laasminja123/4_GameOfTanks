@@ -42,6 +42,7 @@ public class PlayerHandler extends Thread {
     }
 
     public void sendData() {
+        System.out.println("Server sending data to Player");
         if (streamIn == null || streamOut == null || data == null) {
             return;
         }

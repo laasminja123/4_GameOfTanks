@@ -1,7 +1,11 @@
 package com.accenture.gameoftanks.server;
 
+import com.accenture.gameoftanks.server.core.Service;
+
 public class Session {
     public static void main(String [] args) {
-        // todo: start server
+        Service service = new Service();
+        service.start();
+        System.out.println("Server for Game of Tanks started!");
     }
 }

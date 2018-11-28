@@ -51,44 +51,48 @@ public class Intent implements Serializable {
     }
 
     //Method that computes player intention
+    //Method that computes player intention
     public void computeIntent(boolean left, boolean top, boolean right, boolean bottom) {
         //Angle when player press top and bottom or left and right at the same time
-        if (top == true && bottom == true && right == false && left == false || left == true && right == true && top == false && bottom == false) {
+        if (top && bottom && right == false && left == false || left == true && right == true && top == false && bottom == false) {
             this.moveAngle = 0;
         }
         //Angle when player press top right
-        if (top == true && bottom == false && left == false && right == true) {
+        if (top && bottom == false && left == false && right) {
             this.moveAngle = (float)Math.toRadians(45);
         }
         //Angle when player press top
-        if (top == true && bottom == false && left == false && right == false) {
+        if (top && bottom == false && left == false && right == false) {
             this.moveAngle = (float)Math.toRadians(90);
         }
         //Angle when player press top and left
-        if (top == true && bottom == false && left == true && right == false) {
+        if (top && bottom == false && left && right == false) {
             this.moveAngle = (float)Math.toRadians(135);
         }
         //Angle when player press left
-        if (left == true && bottom == false && top == false && right == false) {
+        if (left && bottom == false && top == false && right == false) {
             this.moveAngle = (float)Math.toRadians(180);
         }
         //Angle when player press left and bottom
-        if (bottom == true && top == false && left == true && right == false) {
+        if (bottom && top == false && left && right == false) {
             this.moveAngle = (float)Math.toRadians(220);
         }
 
         //Angle when player press bottom
-        if (bottom == true && top == false && left == false && right == false) {
+        if (bottom && top == false && left == false && right == false) {
             this.moveAngle = (float)Math.toRadians(270);
         }
         //Angle when player press bottom and right
-        if (bottom == true && top == false && left == false && right == true) {
+        if (bottom && top == false && left == false && right) {
             this.moveAngle = (float)Math.toRadians(315);
         }
         //Angle when player press right
-        if (right == true && bottom == false && top == false && left == false) {
+        if (right && bottom == false && top == false && left == false) {
             this.moveAngle = (float)Math.toRadians(360);
+            System.out.println("sdljfd");
         }
+
+
 
 
     }

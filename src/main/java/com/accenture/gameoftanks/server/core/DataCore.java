@@ -23,7 +23,7 @@ public class DataCore extends Thread {
 
     @Override
     public void run() {
-        //
+        /*
         while (onDemand) {
             try {
                 Thread.sleep(TIME_STEP_MSEC);
@@ -42,5 +42,6 @@ public class DataCore extends Thread {
                 }
             }
         }
+        */
     }
 }

@@ -1,10 +1,13 @@
 package com.accenture.gameoftanks.core;
+import java.io.Serializable;
 import java.lang.Math;
-public class Intent {
+public class Intent implements Serializable {
     private boolean onMove;
     private boolean onShot;
     private float moveAngle;
     private float shotAngle;
+
+    public Intent() {}
 
     //Generate constructor
     public Intent(boolean onMove, boolean onShot, float moveAngle, float shotAngle) {

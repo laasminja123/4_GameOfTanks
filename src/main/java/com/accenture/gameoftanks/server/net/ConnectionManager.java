@@ -12,18 +12,13 @@ import java.util.Vector;
 public class ConnectionManager extends Thread {
 
     public static final int PORT = 9999;
-    public static final int TIME_STEP_MSEC = 50;
+    public static final int TIME_STEP_MSEC = 1000;
 
     private ServerSocket server;
     private Vector<PlayerHandler> connections;
 
     public ConnectionManager() {
-        this.connections = new Vector<PlayerHandler>();
-        try {
-            this.server = new ServerSocket(PORT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.connections = new Vector<>();
     }
 
     @Override
@@ -32,15 +27,23 @@ public class ConnectionManager extends Thread {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
-                    try {
-                        Socket socket = server.accept();
-                        PlayerHandler playerHandler = new PlayerHandler(socket);
-                        connections.add(playerHandler);
-                        playerHandler.start();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                try {
+                    server = new ServerSocket(PORT);
+                    System.out.println("Server Socket created!");
+
+                    while (true) {
+                        try {
+                            Socket socket = server.accept();
+                            System.out.println("Player connected");
+                            PlayerHandler playerHandler = new PlayerHandler(ConnectionManager.this, socket);
+                            connections.add(playerHandler);
+                            playerHandler.start();
+                        } catch (IOException exc) {
+                            exc.printStackTrace();
+                        }
                     }
+                } catch (IOException exc) {
+                    exc.printStackTrace();
                 }
             }
         });
@@ -54,10 +57,10 @@ public class ConnectionManager extends Thread {
                     try {
                         Thread.sleep(TIME_STEP_MSEC);
                     } catch (InterruptedException exc) {
-                        //
+                        exc.printStackTrace();
                     }
 
-                    for (PlayerHandler handler : connections) {
+                    for (PlayerHandler handler: connections) {
                         handler.sendData();
                     }
                 }
@@ -69,27 +72,21 @@ public class ConnectionManager extends Thread {
             thread.join();
             thread2.join();
         } catch (InterruptedException exc) {
-            //
+            exc.printStackTrace();
         }
     }
 
     public List<Player> getPlayers() {
         List<Player> players = new LinkedList<>();
+
         for (PlayerHandler handler : connections) {
             players.add(handler.getData().getPlayer());
         }
         return players;
     }
 
-    public void close() {
-        try {
-            for (PlayerHandler handler : connections) {
-                handler.socket.close();
-            }
-            server.close();
-        } catch (IOException e) {
-            //
-        }
+    void removePlayer(PlayerHandler handler) {
+        connections.remove(handler);
     }
 
 }

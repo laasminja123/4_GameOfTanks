@@ -1,6 +1,8 @@
 package com.accenture.gameoftanks.core;
 
-public class Position {
+import java.io.Serializable;
+
+public class Position implements Serializable {
     public float posX;
     public float posY;
     public float alpha;
@@ -9,7 +11,6 @@ public class Position {
 
 //Create new constructor
     public Position() {
-
     }
 
 }

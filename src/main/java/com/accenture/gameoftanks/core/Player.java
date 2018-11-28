@@ -1,6 +1,8 @@
 package com.accenture.gameoftanks.core;
 
-public class Player {
+import java.io.Serializable;
+
+public class Player implements Serializable {
 
     private String ID;
     private Tank tank;

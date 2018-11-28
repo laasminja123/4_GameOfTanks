@@ -10,12 +10,12 @@ import java.net.Socket;
 
 public class PlayerConnection {
 
-    public static final int TIME_STEP_MSEC = 50;
+    public static final int TIME_STEP_MSEC = 1000;
 
     private Player player;
     public Socket client;
-    private ObjectInputStream streamIn;
-    private ObjectOutputStream streamOut;
+    private ObjectInputStream inputStream;
+    private ObjectOutputStream outputStream;
     private Data data;
     private String host;
     private int port;
@@ -29,8 +29,8 @@ public class PlayerConnection {
     public void init() {
         try {
             client = new Socket(host, port);
-            this.streamIn = new ObjectInputStream(client.getInputStream());
-            this.streamOut = new ObjectOutputStream(client.getOutputStream());
+            outputStream = new ObjectOutputStream(client.getOutputStream());
+            inputStream = new ObjectInputStream(client.getInputStream());
         } catch (java.io.IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to connect server");
@@ -45,7 +45,7 @@ public class PlayerConnection {
                     try {
                         Thread.sleep(TIME_STEP_MSEC);
                     } catch (InterruptedException exc) {
-                        //
+                        exc.printStackTrace();
                     }
                     sendData();
                 }
@@ -59,13 +59,14 @@ public class PlayerConnection {
             public void run() {
                 while (true) {
                     try {
-                        Object object = streamIn.readObject();
+                        Object object = inputStream.readObject();
 
                         if (object instanceof Data) {
                             data = (Data) object;
+                            System.out.println("Player received package from Server...");
                         }
                     } catch (IOException | ClassNotFoundException exc) {
-                        //
+                        exc.printStackTrace();
                     }
                 }
             }
@@ -74,14 +75,26 @@ public class PlayerConnection {
     }
 
     public void sendData() {
-        if (streamIn == null || streamOut == null || data == null) {
+        System.out.println("Player sending data to Server");
+
+        if (inputStream == null || outputStream == null || data == null) {
             return;
         }
         try {
-            streamOut.flush();
-            streamOut.writeObject(this.data);
+            outputStream.flush();
+            outputStream.writeObject(this.data);
         } catch (IOException exc) {
-            //
+            exc.printStackTrace();
+        }
+    }
+
+    public void disconnect() {
+        try {
+            inputStream.close();
+            outputStream.close();
+            client.close();
+        } catch (IOException exc) {
+            exc.printStackTrace();
         }
     }
 

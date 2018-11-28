@@ -52,4 +52,12 @@ public class Level {
         }
 
     }
+
+    public float getWidth() {
+        return rightBoundary - leftBoundary;
+    }
+
+    public float getHeight() {
+        return topBoundary - bottomBoundary;
+    }
 }

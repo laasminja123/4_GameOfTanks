@@ -63,7 +63,7 @@ public class PlayerConnection {
 
                         if (object instanceof Data) {
                             data = (Data) object;
-                            System.out.println("Player received package from Server...");
+                            //System.out.println("Player received package from Server...");
                         }
                     } catch (IOException | ClassNotFoundException exc) {
                         exc.printStackTrace();
@@ -75,7 +75,7 @@ public class PlayerConnection {
     }
 
     public void sendData() {
-        System.out.println("Player sending data to Server");
+        //System.out.println("Player sending data to Server");
 
         if (inputStream == null || outputStream == null || data == null) {
             return;

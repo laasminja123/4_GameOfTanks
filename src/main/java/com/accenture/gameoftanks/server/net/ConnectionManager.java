@@ -1,6 +1,8 @@
 package com.accenture.gameoftanks.server.net;
 
+import com.accenture.gameoftanks.core.Level;
 import com.accenture.gameoftanks.core.Player;
+import com.accenture.gameoftanks.net.Data;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -17,8 +19,11 @@ public class ConnectionManager extends Thread {
     private ServerSocket server;
     private Vector<PlayerHandler> connections;
 
-    public ConnectionManager() {
+    private Level level;
+
+    public ConnectionManager(Level level) {
         this.connections = new Vector<>();
+        this.level = level;
     }
 
     @Override
@@ -76,11 +81,19 @@ public class ConnectionManager extends Thread {
         }
     }
 
+    public Level getLevel() {
+        return level;
+    }
+
     public List<Player> getPlayers() {
         List<Player> players = new LinkedList<>();
 
         for (PlayerHandler handler : connections) {
-            players.add(handler.getData().getPlayer());
+            Data data = handler.getData();
+
+            if (data != null) {
+                players.add(data.getPlayer());
+            }
         }
         return players;
     }

@@ -8,7 +8,7 @@ import java.util.List;
 
 public class DataCore extends Thread {
 
-    private static final int TIME_STEP_MSEC = 50;
+    private static final int TIME_STEP_MSEC = 1000;
     private static float TIME_STEP_FLOAT;
 
     private ConnectionManager connectionManager;
@@ -23,13 +23,14 @@ public class DataCore extends Thread {
 
     @Override
     public void run() {
-        /*
         while (onDemand) {
             try {
                 Thread.sleep(TIME_STEP_MSEC);
             } catch (InterruptedException exc) {
                 //
             }
+
+            System.out.println("Physics recalculated");
 
             // collect positions from all players
             List<Player> players = connectionManager.getPlayers();
@@ -42,6 +43,5 @@ public class DataCore extends Thread {
                 }
             }
         }
-        */
     }
 }

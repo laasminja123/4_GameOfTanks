@@ -25,6 +25,8 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
     private JButton moveRight;
     private JButton moveLeft;
     private JButton moveDown;
+    private JButton shoot;
+    private JButton connect;
 
     private boolean onLeft;
     private boolean onTop;
@@ -108,68 +110,61 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
 //        buttonPanel.setBackground(Color.cyan);
 //        getContentPane().add(buttonPanel);
 
-        moveUp = new JButton();
-        JLabel moveUpText = new JLabel("UP");
-        moveUpText.setSize(40, 15);
-        moveUpText.setLocation(3, 1);
+        moveUp = new JButton("UP");
         moveUp.setSize(85, 40);
         moveUp.setBackground(Color.green);
         moveUp.setLocation(600, 460);
-        moveUp.add(moveUpText);
         getContentPane().add(moveUp);
         moveUp.addMouseListener(this);
 
-        moveRight = new JButton();
-        JLabel moveRightText = new JLabel("RIGHT");
-        moveRightText.setSize(40, 15);
-        moveRightText.setLocation(3, 1);
+        moveRight = new JButton("RIGHT");
         moveRight.setSize(85, 40);
         moveRight.setBackground(Color.green);
         moveRight.setLocation(510, 505);
-        moveRight.add(moveRightText);
         getContentPane().add(moveRight);
         moveRight.addMouseListener(this);
 
-        moveLeft = new JButton();
-        JLabel moveLeftText = new JLabel("LEFT");
-        moveLeftText.setSize(40, 15);
-        moveLeftText.setLocation(3, 1);
+        moveLeft = new JButton("LEFT");
         moveLeft.setSize(85, 40);
         moveLeft.setBackground(Color.green);
         moveLeft.setLocation(690, 505);
-        moveLeft.add(moveLeftText);
         getContentPane().add(moveLeft);
         moveLeft.addMouseListener(this);
 
-        moveDown = new JButton();
-        JLabel moveDownText = new JLabel("DOWN");
-        moveDownText.setSize(40, 15);
-        moveDownText.setLocation(3, 1);
+        moveDown = new JButton("DOWN");
         moveDown.setSize(85, 40);
         moveDown.setBackground(Color.green);
         moveDown.setLocation(600, 550);
-        moveDown.add(moveDownText);
         getContentPane().add(moveDown);
         moveDown.addMouseListener(this);
 
 
-        JButton shootBtn = new JButton();
-        JLabel shotTxt = new JLabel("SHOOT");
-        shotTxt.setSize(40, 15);
-        shotTxt.setLocation(3, 1);
-        shootBtn.setSize(85, 40);
-        shootBtn.setBackground(Color.red);
-        shootBtn.setLocation(600, 505);
-        shootBtn.add(shotTxt);
-        getContentPane().add(shootBtn);
-        shootBtn.addActionListener(new ActionListener() {
+        shoot = new JButton("SHOOT");
+        shoot.setSize(85, 40);
+        shoot.setBackground(Color.red);
+        shoot.setLocation(600, 505);
+        getContentPane().add(shoot);
+        shoot.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 processShootAction();
             }
         });
 
+        connect = new JButton("CONNECT");
+        connect.setSize(130 , 40);
+        connect.setBackground(Color.blue);
+        connect.setLocation(265, 505);
+        getContentPane().add(connect);
+        connect.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                connect();
+            }
+        });
+
         //instance.requestFocusInWindow();
+
 //        JButton portBtn = new JButton();
 //        JLabel portTxt = new JLabel("CONNECT PORT");
 //        portTxt.setSize(40, 15);
@@ -185,14 +180,12 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
 
         nickInput.setSize(100, 40);
         nickInput.setLocation(160, 465);
-//        nickInput.setText("your nick here");
         getContentPane().add(nickInput);
 
         nickText.setText("Your nickname here:");
         nickText.setLocation(10, 465);
         nickText.setSize(250, 40);
         getContentPane().add(nickText);
-
 
         portEdit.setSize(100, 40);
         portEdit.setLocation(160, 545);
@@ -204,7 +197,6 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
         portText.setSize(250, 40);
         getContentPane().add(portText);
 
-
         addressEdit.setSize(100, 40);
         addressEdit.setLocation(160, 505);
         addressEdit.setText("localhost");
@@ -215,21 +207,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
         connectionText.setSize(250, 40);
         getContentPane().add(connectionText);
 
-        JButton connBtn = new JButton();
-        JLabel connTxt = new JLabel("CONNECT !");
-        connTxt.setSize(35, 10);
-        connTxt.setLocation(1, 1);
-        connBtn.setSize(130 , 40);
-        connBtn.setBackground(Color.blue);
-        connBtn.setLocation(265, 505);
-        connBtn.add(connTxt);
-        getContentPane().add(connBtn);
-        connBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                connect();
-            }
-        });
+
     }
 
     public void keyTyped(KeyEvent e) {}

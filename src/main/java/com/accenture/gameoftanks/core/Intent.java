@@ -1,13 +1,16 @@
 package com.accenture.gameoftanks.core;
+
 import java.io.Serializable;
 import java.lang.Math;
+
 public class Intent implements Serializable {
     private boolean onMove;
     private boolean onShot;
     private float moveAngle;
     private float shotAngle;
 
-    public Intent() {}
+    public Intent() {
+    }
 
     //Generate constructor
     public Intent(boolean onMove, boolean onShot, float moveAngle, float shotAngle) {
@@ -53,46 +56,38 @@ public class Intent implements Serializable {
     //Method that computes player intention
     //Method that computes player intention
     public void computeIntent(boolean left, boolean top, boolean right, boolean bottom) {
-        //Angle when player press top and bottom or left and right at the same time
-        if (top && bottom && right == false && left == false || left == true && right == true && top == false && bottom == false) {
-            this.moveAngle = 0;
+        //Angle when player press right
+        if (left == false && top == false && right && bottom == false ) {
+            this.moveAngle = (float) Math.toRadians(0);
         }
         //Angle when player press top right
-        if (top && bottom == false && left == false && right) {
-            this.moveAngle = (float)Math.toRadians(45);
+        if (left == false && top && right && bottom == false) {
+            this.moveAngle = (float) Math.toRadians(45);
         }
         //Angle when player press top
-        if (top && bottom == false && left == false && right == false) {
-            this.moveAngle = (float)Math.toRadians(90);
+        if (left == false && top && right == false && bottom == false ) {
+            this.moveAngle = (float) Math.toRadians(90);
         }
         //Angle when player press top and left
-        if (top && bottom == false && left && right == false) {
-            this.moveAngle = (float)Math.toRadians(135);
+        if (left && top && right == false && bottom == false) {
+            this.moveAngle = (float) Math.toRadians(135);
         }
         //Angle when player press left
-        if (left && bottom == false && top == false && right == false) {
-            this.moveAngle = (float)Math.toRadians(180);
+        if (left && top == false && right == false && bottom == false) {
+            this.moveAngle = (float) Math.toRadians(180);
         }
         //Angle when player press left and bottom
-        if (bottom && top == false && left && right == false) {
-            this.moveAngle = (float)Math.toRadians(220);
+        if (left && top == false && right == false && bottom) {
+            this.moveAngle = (float) Math.toRadians(225);
         }
-
         //Angle when player press bottom
-        if (bottom && top == false && left == false && right == false) {
-            this.moveAngle = (float)Math.toRadians(270);
+        if (left == false && top == false && left == false && bottom) {
+            this.moveAngle = (float) Math.toRadians(270);
         }
         //Angle when player press bottom and right
-        if (bottom && top == false && left == false && right) {
-            this.moveAngle = (float)Math.toRadians(315);
+        if (left == false && top == false && right && bottom) {
+            this.moveAngle = (float) Math.toRadians(315);
         }
-        //Angle when player press right
-        if (right && bottom == false && top == false && left == false) {
-            this.moveAngle = (float)Math.toRadians(360);
-            System.out.println("sdljfd");
-        }
-
-
 
 
     }

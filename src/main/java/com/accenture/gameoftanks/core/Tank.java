@@ -7,10 +7,10 @@ public class Tank implements Serializable {
     private int ID;
     private int startingHp = 100;
     private int currentHp;
-    private boolean live = false;
-    final int thrust = 5000;
-    final int mass = 5000;
-    private float maxSpeed = 10;
+    private boolean isAlive;
+    private final float thrust;
+    private final float mass;
+    private final float maxSpeed;
     final float width;
     final float length;
 
@@ -21,8 +21,15 @@ public class Tank implements Serializable {
         this.width = width;
         this.length = length;
 
+        this.mass = 5000.0f;
+        this.thrust = 5000.0f;
+        this.maxSpeed = 10;
+
+
         this.position = new Position();
         this.intent = new Intent();
+
+        this.isAlive = true;
     }
 
 

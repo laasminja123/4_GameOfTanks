@@ -8,9 +8,9 @@ public class Tank implements Serializable {
     private int startingHp = 100;
     private int currentHp;
     private boolean live = false;
-    private float thrust;
-    private float mass;
-    private float maxSpeed;
+    final int thrust = 5000;
+    final int mass = 5000;
+    private float maxSpeed = 10;
     final float width;
     final float length;
 

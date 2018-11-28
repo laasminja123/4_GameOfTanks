@@ -7,10 +7,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="4_GameOfTanks" />
+        <module name="4_GameOfTanks1" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="4_GameOfTanks" target="7" />
+      <module name="4_GameOfTanks1" target="7" />
     </bytecodeTargetLevel>
   </component>
 </project>

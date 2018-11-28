@@ -2,6 +2,7 @@ package com.accenture.gameoftanks.client.gui;
 
 import com.accenture.gameoftanks.client.net.PlayerConnection;
 import com.accenture.gameoftanks.core.Intent;
+import com.accenture.gameoftanks.core.Level;
 import com.accenture.gameoftanks.core.Player;
 
 import javax.swing.*;
@@ -10,7 +11,7 @@ import java.awt.event.*;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-public class MainFrame extends JFrame implements WindowListener, ActionListener, KeyListener {
+public class MainFrame extends JFrame implements KeyListener, MouseListener {
 
     // GUI
     private JTextField portEdit;
@@ -19,7 +20,11 @@ public class MainFrame extends JFrame implements WindowListener, ActionListener,
     private JLabel nickText;
     private JLabel portText;
     private JLabel connectionText;
-    Player player;
+
+    private JButton moveUp;
+    private JButton moveRight;
+    private JButton moveLeft;
+    private JButton moveDown;
 
     private boolean onLeft;
     private boolean onTop;
@@ -29,16 +34,8 @@ public class MainFrame extends JFrame implements WindowListener, ActionListener,
 
     // Network
     private PlayerConnection playerConnection;
-
-    private enum Actions {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
-        SHOOT,
-        PORT,
-        CONNECT,
-    }
+    private Player player;
+    private Level level;
 
     public MainFrame() {
         initComponents();
@@ -93,9 +90,6 @@ public class MainFrame extends JFrame implements WindowListener, ActionListener,
             }
         });
 
-        //f0.setFocusable(true);
-        //f0.requestFocusInWindow();
-
         getContentPane().setLayout(null);
 
         JLabel text = new JLabel("openGL please here");
@@ -114,53 +108,49 @@ public class MainFrame extends JFrame implements WindowListener, ActionListener,
 //        buttonPanel.setBackground(Color.cyan);
 //        getContentPane().add(buttonPanel);
 
-        JButton movementUp = new JButton();
+        moveUp = new JButton();
         JLabel moveUpText = new JLabel("UP");
         moveUpText.setSize(40, 15);
         moveUpText.setLocation(3, 1);
-        movementUp.setSize(85, 40);
-        movementUp.setBackground(Color.green);
-        movementUp.setLocation(600, 460);
-        movementUp.add(moveUpText);
-        getContentPane().add(movementUp);
-        movementUp.setActionCommand(Actions.UP.name());
-        movementUp.addActionListener(this);
+        moveUp.setSize(85, 40);
+        moveUp.setBackground(Color.green);
+        moveUp.setLocation(600, 460);
+        moveUp.add(moveUpText);
+        getContentPane().add(moveUp);
+        moveUp.addMouseListener(this);
 
-        JButton movementRight = new JButton();
+        moveRight = new JButton();
         JLabel moveRightText = new JLabel("RIGHT");
         moveRightText.setSize(40, 15);
         moveRightText.setLocation(3, 1);
-        movementRight.setSize(85, 40);
-        movementRight.setBackground(Color.green);
-        movementRight.setLocation(510, 505);
-        movementRight.add(moveRightText);
-        getContentPane().add(movementRight);
-        movementRight.setActionCommand(Actions.RIGHT.name());
-        movementRight.addActionListener(this);
+        moveRight.setSize(85, 40);
+        moveRight.setBackground(Color.green);
+        moveRight.setLocation(510, 505);
+        moveRight.add(moveRightText);
+        getContentPane().add(moveRight);
+        moveRight.addMouseListener(this);
 
-        JButton movementLeft = new JButton();
+        moveLeft = new JButton();
         JLabel moveLeftText = new JLabel("LEFT");
         moveLeftText.setSize(40, 15);
         moveLeftText.setLocation(3, 1);
-        movementLeft.setSize(85, 40);
-        movementLeft.setBackground(Color.green);
-        movementLeft.setLocation(690, 505);
-        movementLeft.add(moveLeftText);
-        getContentPane().add(movementLeft);
-        movementLeft.setActionCommand(Actions.LEFT.name());
-        movementLeft.addActionListener(this);
+        moveLeft.setSize(85, 40);
+        moveLeft.setBackground(Color.green);
+        moveLeft.setLocation(690, 505);
+        moveLeft.add(moveLeftText);
+        getContentPane().add(moveLeft);
+        moveLeft.addMouseListener(this);
 
-        JButton movementDown = new JButton();
+        moveDown = new JButton();
         JLabel moveDownText = new JLabel("DOWN");
         moveDownText.setSize(40, 15);
         moveDownText.setLocation(3, 1);
-        movementDown.setSize(85, 40);
-        movementDown.setBackground(Color.green);
-        movementDown.setLocation(600, 550);
-        movementDown.add(moveDownText);
-        getContentPane().add(movementDown);
-        movementDown.setActionCommand(Actions.DOWN.name());
-        movementDown.addActionListener(this);
+        moveDown.setSize(85, 40);
+        moveDown.setBackground(Color.green);
+        moveDown.setLocation(600, 550);
+        moveDown.add(moveDownText);
+        getContentPane().add(moveDown);
+        moveDown.addMouseListener(this);
 
 
         JButton shootBtn = new JButton();
@@ -172,8 +162,12 @@ public class MainFrame extends JFrame implements WindowListener, ActionListener,
         shootBtn.setLocation(600, 505);
         shootBtn.add(shotTxt);
         getContentPane().add(shootBtn);
-        shootBtn.setActionCommand(Actions.SHOOT.name());
-        shootBtn.addActionListener(this);
+        shootBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                processShootAction();
+            }
+        });
 
         //instance.requestFocusInWindow();
 //        JButton portBtn = new JButton();
@@ -230,71 +224,108 @@ public class MainFrame extends JFrame implements WindowListener, ActionListener,
         connBtn.setLocation(265, 505);
         connBtn.add(connTxt);
         getContentPane().add(connBtn);
-        connBtn.setActionCommand(Actions.CONNECT.name());
-        connBtn.addActionListener(this);
+        connBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                connect();
+            }
+        });
     }
 
-    public void windowClosing(WindowEvent e) {}
-    public void windowOpened(WindowEvent e) {}
-    public void windowActivated(WindowEvent e) {}
-    public void windowIconified(WindowEvent e) {}
-    public void windowDeiconified(WindowEvent e) {}
-    public void windowDeactivated(WindowEvent e) {}
-    public void windowClosed(WindowEvent e) {}
     public void keyTyped(KeyEvent e) {}
+
     public void keyPressed(KeyEvent e) {}
+
     public void keyReleased(KeyEvent e) {}
 
-
-
-    public void actionPerformed(ActionEvent evt) {
-        if (evt.getActionCommand().equals(Actions.UP.name())) {
-            System.out.println("Driving UP");
-            updateIntent();
-        } else if (evt.getActionCommand().equals(Actions.DOWN.name())) {
-            System.out.println("Driving Down");
-        } else if (evt.getActionCommand().equals(Actions.RIGHT.name())) {
-            System.out.println("Driving Right");
-        } else if (evt.getActionCommand().equals(Actions.LEFT.name())) {
-            System.out.println("Driving Left");
-        } else if (evt.getActionCommand().equals(Actions.SHOOT.name())) {
-            System.out.println("Im shooting BITCH !");
-        } else if (evt.getActionCommand().equals(Actions.CONNECT.name())) {
-            connect();
-            System.out.println("connection here we go");
-//        } else if (evt.getActionCommand() == Actions.PORT.name()) {
-//            System.out.println("gimme that port");
-        }
+    @Override
+    public void mouseClicked(MouseEvent mouseEvent) {
+        //
     }
+
+    @Override
+    public void mousePressed(MouseEvent mouseEvent) {
+        if (mouseEvent.getSource() == moveLeft) {
+            onLeft = true;
+        } else if (mouseEvent.getSource() == moveUp) {
+            onTop = true;
+        } else if (mouseEvent.getSource() == moveRight) {
+            onRight = true;
+        } else if (mouseEvent.getSource() == moveDown) {
+            onBottom = true;
+        }
+        updateIntent();
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent mouseEvent) {
+        if (mouseEvent.getSource() == moveLeft) {
+            onLeft = false;
+        } else if (mouseEvent.getSource() == moveUp) {
+            onTop = false;
+        } else if (mouseEvent.getSource() == moveRight) {
+            onRight = false;
+        } else if (mouseEvent.getSource() == moveDown) {
+            onBottom = false;
+        }
+        updateIntent();
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent mouseEvent) {}
+
+    @Override
+    public void mouseExited(MouseEvent mouseEvent) {}
 
 
     private void connect() {
-        String address = addressEdit.getText();
-        String nickname = nickInput.getText();
-        int port;
-        if (nickname.trim().isEmpty()){
-            printMessage("Enter Nickname!");
-        } else {
-
-            try {
-                port = Integer.parseInt(portEdit.getText());
-            } catch (NumberFormatException exc) {
-                printMessage("Bad Port Number!");
-                return;
-            }
-
-            if (playerConnection == null) {
-                player = new Player(nickname);
-                playerConnection = new PlayerConnection(address, port, player);
-
-                try {
-                    playerConnection.init();
-                } catch (RuntimeException exc) {
-                    printMessage(exc.getMessage());
-                }
-            }
+        if (playerConnection != null) {
+            printMessage("Already connected!");
+            return;
         }
 
+        String address = addressEdit.getText();
+
+        if (address.trim().isEmpty()) {
+            printMessage("Enter Server IP address!");
+            return;
+        }
+
+        String portS = portEdit.getText();
+
+        if (portS.trim().isEmpty()) {
+            printMessage("Enter Server port!");
+            return;
+        }
+        int port;
+
+        try {
+            port = Integer.parseInt(portEdit.getText());
+        } catch (NumberFormatException exc) {
+            printMessage("Bad Port Number!");
+            return;
+        }
+
+        String nickname = nickInput.getText();
+
+        if (nickname.trim().isEmpty()) {
+            printMessage("Enter Nickname!");
+            return;
+        }
+
+        player = new Player(nickname);
+        level = new Level(0.0f, 100.0f, 100.0f, 0.0f);
+        playerConnection = new PlayerConnection(address, port, player);
+
+        try {
+            playerConnection.init();
+        } catch (RuntimeException exc) {
+            printMessage(exc.getMessage());
+        }
+    }
+
+    private void processShootAction() {
+        // TODO
     }
 
     private void updateIntent() {

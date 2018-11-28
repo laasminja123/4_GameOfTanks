@@ -1,22 +1,28 @@
 package com.accenture.gameoftanks.core;
 
-public class Tank {
+import java.io.Serializable;
+
+public class Tank implements Serializable {
 
     private int ID;
     private int startingHp = 100;
     private int currentHp;
     private boolean live = false;
-    private Position position;
-    private Intent intent;
     private float thrust;
     private float mass;
     private float maxSpeed;
     final float width;
     final float length;
 
-    public Tank(float width, float length) {
+    private Position position;
+    private Intent intent;
+
+    public Tank(float length, float width) {
         this.width = width;
         this.length = length;
+
+        this.position = new Position();
+        this.intent = new Intent();
     }
 
 

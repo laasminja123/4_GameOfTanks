@@ -9,48 +9,60 @@ import java.net.Socket;
 
 public class PlayerHandler extends Thread {
 
+    private ConnectionManager connectionManager;
     public Socket socket;
-    private ObjectInputStream streamIn;
-    private ObjectOutputStream streamOut;
+    private ObjectInputStream inputStream;
+    private ObjectOutputStream outputStream;
     private Data data;
 
-    public PlayerHandler(Socket socket) {
+    public PlayerHandler(ConnectionManager connectionManager, Socket socket) {
+        this.connectionManager = connectionManager;
         this.socket = socket;
 
         try {
-            this.streamIn = new ObjectInputStream(socket.getInputStream());
-            this.streamOut = new ObjectOutputStream(socket.getOutputStream());
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
+            inputStream = new ObjectInputStream(socket.getInputStream());
+        } catch (java.io.IOException exc) {
+            exc.printStackTrace();
         }
-
     }
 
+    @Override
     public void run() {
         // wait for data from client loop
         while (true) {
             try {
-                Object object = streamIn.readObject();
+                Object object = inputStream.readObject();
 
                 if (object instanceof Data) {
-                    this.data = (Data) object;
+                    Data data = (Data) object;
+
+                    if (this.data == null) {
+                        System.out.println("Client \"" + data.getPlayer().getNickname() + "\" connected to server!");
+                    }
+                    this.data = data;
                 }
             } catch (IOException | ClassNotFoundException exc) {
-                //
+                //exc.printStackTrace();
+                connectionManager.removePlayer(this);
+                System.out.println("Client \"" + data.getPlayer().getNickname() + "\" disconnected!");
+                break;
             }
         }
     }
 
     public void sendData() {
         System.out.println("Server sending data to Player");
-        if (streamIn == null || streamOut == null || data == null) {
+
+        if (inputStream == null || outputStream == null || data == null) {
             return;
         }
+
         try {
-            streamOut.flush();
-            streamOut.writeObject(this.data);
+            outputStream.flush();
+            outputStream.writeObject(this.data);
         } catch (IOException exc) {
-            //
+            exc.printStackTrace();
         }
     }
 

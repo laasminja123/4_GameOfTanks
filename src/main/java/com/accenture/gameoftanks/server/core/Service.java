@@ -1,5 +1,6 @@
 package com.accenture.gameoftanks.server.core;
 
+import com.accenture.gameoftanks.core.Level;
 import com.accenture.gameoftanks.server.net.ConnectionManager;
 
 public class Service extends Thread {
@@ -10,7 +11,10 @@ public class Service extends Thread {
 
     @Override
     public void run() {
-        ConnectionManager connectionManager = new ConnectionManager();
+        // create game level
+        Level gameLevel = new Level(0.0f, 100.0f, 100.0f, 0.0f);
+
+        ConnectionManager connectionManager = new ConnectionManager(gameLevel);
         connectionManager.start();
         System.out.println("Connection Manager started!");
 

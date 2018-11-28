@@ -4,6 +4,7 @@ import com.accenture.gameoftanks.client.net.PlayerConnection;
 import com.accenture.gameoftanks.core.Intent;
 import com.accenture.gameoftanks.core.Level;
 import com.accenture.gameoftanks.core.Player;
+import com.jogamp.opengl.awt.GLCanvas;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,6 +13,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 
 public class MainFrame extends JFrame implements KeyListener, MouseListener {
+
+    private static final int RENDERER_TIME_STEP_MSEC = 100;
 
     // GUI
     private JTextField portEdit;
@@ -33,6 +36,10 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
     private boolean onRight;
     private boolean onBottom;
 
+    // GL Viewport
+    private GLCanvas renderArea;
+    private Thread rendererLoop;
+    private boolean onRender;
 
     // Network
     private PlayerConnection playerConnection;
@@ -56,53 +63,15 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
         //JFrame f0 = new JFrame("Games Of Tanks");
         setSize(800, 650);
         setTitle("Game Of Tanks");
-        addKeyListener(new KeyListener() {
-
-            public void keyTyped(KeyEvent e) {
-                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
-                    System.out.println("right"); }
-                if(e.getKeyCode()== KeyEvent.VK_LEFT) {
-                    System.out.println("left"); }
-                if(e.getKeyCode()== KeyEvent.VK_DOWN) {
-                    System.out.println("down"); }
-                if(e.getKeyCode()== KeyEvent.VK_UP) {
-                    System.out.println("up"); }
-            }
-
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
-                    System.out.println("right"); }
-                if(e.getKeyCode()== KeyEvent.VK_LEFT) {
-                    System.out.println("left"); }
-                if(e.getKeyCode()== KeyEvent.VK_DOWN) {
-                    System.out.println("down"); }
-                if(e.getKeyCode()== KeyEvent.VK_UP) {
-                    System.out.println("up"); }
-            }
-
-            public void keyReleased(KeyEvent e) {
-                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
-                    System.out.println("right"); }
-                else if(e.getKeyCode()== KeyEvent.VK_LEFT) {
-                    System.out.println("left"); }
-                else if(e.getKeyCode()== KeyEvent.VK_DOWN) {
-                    System.out.println("down"); }
-                else if(e.getKeyCode()== KeyEvent.VK_UP) {
-                    System.out.println("up"); }
-            }
-        });
 
         getContentPane().setLayout(null);
 
-        JLabel text = new JLabel("openGL please here");
 
-        JPanel openGLhere = new JPanel();
-        openGLhere.add(text);
-        openGLhere.setSize(780, 450);
-        openGLhere.setLocation(10, 0);
-        openGLhere.setVisible(true);
-        openGLhere.setBackground(Color.gray);
-        getContentPane().add(openGLhere, BorderLayout.PAGE_START);
+        renderArea = new GLCanvas();
+        renderArea.addGLEventListener(new Renderer(null, null));
+        renderArea.setSize(780, 450);
+        renderArea.setLocation(10, 0);
+        getContentPane().add(renderArea, BorderLayout.PAGE_START);
 
 //        JPanel buttonPanel = new JPanel();
 //        buttonPanel.setSize(780, 300);
@@ -120,14 +89,14 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
         moveRight = new JButton("RIGHT");
         moveRight.setSize(85, 40);
         moveRight.setBackground(Color.green);
-        moveRight.setLocation(510, 505);
+        moveRight.setLocation(690, 505);
         getContentPane().add(moveRight);
         moveRight.addMouseListener(this);
 
         moveLeft = new JButton("LEFT");
         moveLeft.setSize(85, 40);
         moveLeft.setBackground(Color.green);
-        moveLeft.setLocation(690, 505);
+        moveLeft.setLocation(510, 505);
         getContentPane().add(moveLeft);
         moveLeft.addMouseListener(this);
 
@@ -207,7 +176,41 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
         connectionText.setSize(250, 40);
         getContentPane().add(connectionText);
 
+        addKeyListener(new KeyListener() {
 
+            public void keyTyped(KeyEvent e) {
+                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
+                    System.out.println("right"); }
+                if(e.getKeyCode()== KeyEvent.VK_LEFT) {
+                    System.out.println("left"); }
+                if(e.getKeyCode()== KeyEvent.VK_DOWN) {
+                    System.out.println("down"); }
+                if(e.getKeyCode()== KeyEvent.VK_UP) {
+                    System.out.println("up"); }
+            }
+
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
+                    System.out.println("right"); }
+                if(e.getKeyCode()== KeyEvent.VK_LEFT) {
+                    System.out.println("left"); }
+                if(e.getKeyCode()== KeyEvent.VK_DOWN) {
+                    System.out.println("down"); }
+                if(e.getKeyCode()== KeyEvent.VK_UP) {
+                    System.out.println("up"); }
+            }
+
+            public void keyReleased(KeyEvent e) {
+                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
+                    System.out.println("right"); }
+                else if(e.getKeyCode()== KeyEvent.VK_LEFT) {
+                    System.out.println("left"); }
+                else if(e.getKeyCode()== KeyEvent.VK_DOWN) {
+                    System.out.println("down"); }
+                else if(e.getKeyCode()== KeyEvent.VK_UP) {
+                    System.out.println("up"); }
+            }
+        });
     }
 
     public void keyTyped(KeyEvent e) {}
@@ -291,15 +294,59 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
             return;
         }
 
+        // create data
         player = new Player(nickname);
         level = new Level(0.0f, 100.0f, 100.0f, 0.0f);
+
+        // update renderer
+        Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
+
+        if (renderer != null) {
+            renderer.setLevel(level);
+            renderer.setPlayer(player);
+        }
+        renderArea.reshape(0, 0, 780, 450);
+        renderArea.display();
+
+        // create connection
         playerConnection = new PlayerConnection(address, port, player);
 
         try {
             playerConnection.init();
+            startRendererLoop();
         } catch (RuntimeException exc) {
             printMessage(exc.getMessage());
         }
+    }
+
+    private void startRendererLoop() {
+        if (isRendererAlive()) {
+            return;
+        }
+
+        rendererLoop = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (onRender) {
+                    try {
+                        Thread.sleep(RENDERER_TIME_STEP_MSEC);
+                    } catch (InterruptedException exc) {
+                        //
+                    }
+                    // TEST
+                    //player.getTank().getPosition().posX += 1.0f;
+
+                    renderArea.display();
+                }
+                rendererLoop = null;
+            }
+        });
+        onRender = true;
+        rendererLoop.start();
+    }
+
+    private boolean isRendererAlive() {
+        return rendererLoop != null && rendererLoop.isAlive();
     }
 
     private void processShootAction() {

@@ -8,11 +8,13 @@
         <outputRelativeToContentRoot value="true" />
         <module name="4_GameOfTanks" />
         <module name="4_GameOfTanks1" />
+        <module name="GameOfTanks" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="4_GameOfTanks" target="7" />
       <module name="4_GameOfTanks1" target="7" />
+      <module name="GameOfTanks" target="7" />
     </bytecodeTargetLevel>
   </component>
 </project>

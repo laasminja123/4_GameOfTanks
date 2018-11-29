@@ -11,11 +11,15 @@ import java.net.Socket;
 
 public class PlayerHandler extends Thread {
 
+    public static final int TIME_STEP_MSEC = 40;
+
     private ConnectionManager connectionManager;
     public Socket socket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
-    private Data data;
+    private volatile Data data;
+
+    private volatile boolean onDemand;
 
     public PlayerHandler(ConnectionManager connectionManager, Socket socket) {
         this.connectionManager = connectionManager;
@@ -31,7 +35,25 @@ public class PlayerHandler extends Thread {
 
     @Override
     public void run() {
-        // wait for data from client loop
+        // send data to all clients loop
+        Thread outputThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                onDemand = true;
+
+                while (onDemand) {
+                    try {
+                        Thread.sleep(TIME_STEP_MSEC);
+                    } catch (InterruptedException exc) {
+                        exc.printStackTrace();
+                    }
+                    sendData();
+                }
+            }
+        });
+        outputThread.start();
+
+        // receive packages from client
         while (true) {
             try {
                 Object object = inputStream.readObject();
@@ -40,14 +62,19 @@ public class PlayerHandler extends Thread {
                     Data data = (Data) object;
 
                     if (this.data == null) {
+                        // first data exchange
                         setupPlayer(data);
+                        this.data = data;
+                    } else {
+                        this.data.copyIntent(data);
                     }
-                    this.data = data;
+                    //System.out.println("Value received from Client is: " + data.getPlayer().getTank().getPosition().posX);
                 }
             } catch (IOException | ClassNotFoundException exc) {
                 //exc.printStackTrace();
                 connectionManager.removePlayer(this);
                 System.out.println("Client \"" + data.getPlayer().getNickname() + "\" disconnected!");
+                onDemand = false;
                 break;
             }
         }
@@ -68,7 +95,7 @@ public class PlayerHandler extends Thread {
         position.vy = 0.0f;
     }
 
-    public void sendData() {
+    private void sendData() {
         //System.out.println("Server sending data to Player");
 
         if (inputStream == null || outputStream == null || data == null) {
@@ -76,8 +103,12 @@ public class PlayerHandler extends Thread {
         }
 
         try {
-            outputStream.flush();
-            outputStream.writeObject(this.data);
+            //System.out.println("value on send is: " + data.getValue());
+            //System.out.println("hash is: " + data.hashCode());
+            //System.out.println("Value on send is: " + data.getPlayer().getTank().getPosition().posX);
+            outputStream.reset();
+            outputStream.writeObject(data);
+            //outputStream.flush();
         } catch (IOException exc) {
             exc.printStackTrace();
         }

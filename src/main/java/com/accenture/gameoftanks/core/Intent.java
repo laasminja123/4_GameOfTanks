@@ -4,10 +4,10 @@ import java.io.Serializable;
 import java.lang.Math;
 
 public class Intent implements Serializable {
-    private boolean onMove;
-    private boolean onShot;
-    private float moveAngle;
-    private float shotAngle;
+    private volatile boolean onMove;
+    private volatile boolean onShot;
+    private volatile float moveAngle;
+    private volatile float shotAngle;
 
     public Intent() {
     }
@@ -89,7 +89,14 @@ public class Intent implements Serializable {
             this.moveAngle = (float) Math.toRadians(315);
         }
 
+        onMove = (left || right || top || bottom);
+    }
 
+    void copy(Intent intent) {
+        this.onMove = intent.onMove;
+        this.moveAngle = intent.moveAngle;
+        this.onShot = intent.onShot;
+        this.shotAngle = intent.shotAngle;
     }
 
 

@@ -10,13 +10,13 @@ import java.net.Socket;
 
 public class PlayerConnection {
 
-    public static final int TIME_STEP_MSEC = 1000;
+    public static final int TIME_STEP_MSEC = 40;
 
     private Player player;
     public Socket client;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
-    private Data data;
+    private volatile Data data;
     private String host;
     private int port;
 
@@ -37,6 +37,9 @@ public class PlayerConnection {
         }
         this.data = new Data(player);
 
+        // TEST
+        //sendData();
+
         // send data to server loop
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -54,7 +57,7 @@ public class PlayerConnection {
         thread.start();
 
         // create data receiving loop
-        Thread thread2 = new Thread(new Runnable() {
+        Thread receiveLoop = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
@@ -62,8 +65,9 @@ public class PlayerConnection {
                         Object object = inputStream.readObject();
 
                         if (object instanceof Data) {
-                            data = (Data) object;
-                            //System.out.println("Player received package from Server...");
+                            Data data = (Data) object;
+                            //System.out.println("Value received from server is: " + data.getPlayer().getTank().getPosition().posX);
+                            PlayerConnection.this.data.copyPosition(data);
                         }
                     } catch (IOException | ClassNotFoundException exc) {
                         exc.printStackTrace();
@@ -71,7 +75,7 @@ public class PlayerConnection {
                 }
             }
         });
-        thread2.start();
+        receiveLoop.start();
     }
 
     public void sendData() {
@@ -81,8 +85,9 @@ public class PlayerConnection {
             return;
         }
         try {
-            outputStream.flush();
-            outputStream.writeObject(this.data);
+            outputStream.reset();
+            outputStream.writeObject(data);
+            //outputStream.flush();
         } catch (IOException exc) {
             exc.printStackTrace();
         }

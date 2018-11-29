@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Player implements Serializable {
 
-    private String ID;
+    private int id;
     private Tank tank;
     private final String nickname;
 
@@ -13,8 +13,8 @@ public class Player implements Serializable {
         this.tank = new Tank(5.0f, 3.0f);
     }
 
-    public String getID() {
-        return ID;
+    public int getId() {
+        return id;
     }
 
     public Tank getTank() {
@@ -23,5 +23,17 @@ public class Player implements Serializable {
 
     public String getNickname() {
         return nickname;
+    }
+
+    public void copy(Player player) {
+        this.tank.copy(player.tank);
+    }
+
+    public void copyPosition(Player player) {
+        this.tank.copyPosition(player.tank);
+    }
+
+    public void copyIntent(Player player) {
+        this.tank.copyIntent(player.tank);
     }
 }

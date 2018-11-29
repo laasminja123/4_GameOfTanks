@@ -42,15 +42,12 @@ public class Physics {
             thrust = tank.getThrust();
         }
 
-        /*
         position.posX += step * position.vx;
         position.vx += (step / tank.getMass()) * thrust * cos(intent.getMoveAngle());
 
         position.posY += step * position.vy;
         position.vy += (step / tank.getMass()) * thrust * sin(intent.getMoveAngle());
-        */
 
-        position.posX += 5.0f;
-        System.out.println("Position updated");
+        System.out.println("OnMove is: " + intent.isOnMove());
     }
 }

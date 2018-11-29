@@ -12,9 +12,9 @@ import java.awt.event.*;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-public class MainFrame extends JFrame implements KeyListener, MouseListener {
+public class MainFrame extends JFrame implements KeyListener, MouseListener, MouseMotionListener {
 
-    private static final int RENDERER_TIME_STEP_MSEC = 100;
+    private static final int RENDERER_TIME_STEP_MSEC = 40;
 
     // GUI
     private JTextField portEdit;
@@ -24,12 +24,25 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
     private JLabel portText;
     private JLabel connectionText;
 
+    private JPanel base;
+    private JPanel emptyspace;
+    private JPanel bottom;
+    private JPanel bottomfirst;
+    private JPanel bottomsecond;
+    private JPanel rightfirst;
+    private JPanel rightsecond;
+    private JPanel rightthird;
+    private JPanel leftfirst;
+    private JPanel leftsecond;
+    private JPanel leftthird;
+
     private JButton moveUp;
     private JButton moveRight;
     private JButton moveLeft;
     private JButton moveDown;
     private JButton shoot;
     private JButton connect;
+    private JButton disconnect;
 
     private boolean onLeft;
     private boolean onTop;
@@ -46,8 +59,14 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
     private Player player;
     private Level level;
 
+    // mouse motion processing
+    private int [] mousePos1;
+    private int [] mousePos2;
+
     public MainFrame() {
+        this.setFocusable(true);
         initComponents();
+        setupGLMouseHandler();
     }
 
     private void initComponents() {
@@ -61,70 +80,84 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
         connectionText = new JLabel();
 
         //JFrame f0 = new JFrame("Games Of Tanks");
-        setSize(800, 650);
+        setSize(1100, 650);
         setTitle("Game Of Tanks");
 
-        getContentPane().setLayout(null);
+        //getContentPane.requestFocusInWindow();   // must try this to check about key listeneres !!!
 
+        getContentPane().setLayout(new BorderLayout());
 
+        // OPEN GL panel
         renderArea = new GLCanvas();
         renderArea.addGLEventListener(new Renderer(null, null));
-        renderArea.setSize(780, 450);
-        renderArea.setLocation(10, 0);
-        getContentPane().add(renderArea, BorderLayout.PAGE_START);
+        renderArea.setSize(1780, 1450);
+//        renderArea.setFocusable(true);
+        renderArea.addKeyListener(new KeyListener() {
 
-//        JPanel buttonPanel = new JPanel();
-//        buttonPanel.setSize(780, 300);
-//        buttonPanel.setLocation(10, 360);
-//        buttonPanel.setBackground(Color.cyan);
-//        getContentPane().add(buttonPanel);
-
-        moveUp = new JButton("UP");
-        moveUp.setSize(85, 40);
-        moveUp.setBackground(Color.green);
-        moveUp.setLocation(600, 460);
-        getContentPane().add(moveUp);
-        moveUp.addMouseListener(this);
-
-        moveRight = new JButton("RIGHT");
-        moveRight.setSize(85, 40);
-        moveRight.setBackground(Color.green);
-        moveRight.setLocation(690, 505);
-        getContentPane().add(moveRight);
-        moveRight.addMouseListener(this);
-
-        moveLeft = new JButton("LEFT");
-        moveLeft.setSize(85, 40);
-        moveLeft.setBackground(Color.green);
-        moveLeft.setLocation(510, 505);
-        getContentPane().add(moveLeft);
-        moveLeft.addMouseListener(this);
-
-        moveDown = new JButton("DOWN");
-        moveDown.setSize(85, 40);
-        moveDown.setBackground(Color.green);
-        moveDown.setLocation(600, 550);
-        getContentPane().add(moveDown);
-        moveDown.addMouseListener(this);
-
-
-        shoot = new JButton("SHOOT");
-        shoot.setSize(85, 40);
-        shoot.setBackground(Color.red);
-        shoot.setLocation(600, 505);
-        getContentPane().add(shoot);
-        shoot.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                processShootAction();
+            public void keyTyped(KeyEvent e) {
             }
+
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()== KeyEvent.VK_D) {
+                    onRight = true;
+                } else if(e.getKeyCode()== KeyEvent.VK_A) {
+                    onLeft = true;
+                } else if(e.getKeyCode()== KeyEvent.VK_S) {
+                    onBottom = true;
+                } else if(e.getKeyCode()== KeyEvent.VK_W) {
+                    onTop = true;
+                }
+                updateIntent();
+            }
+
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_D) {
+                    onRight = false;
+                } else if (e.getKeyCode() == KeyEvent.VK_A) {
+                    onLeft = false;
+                } else if (e.getKeyCode() == KeyEvent.VK_S) {
+                    onBottom = false;
+                } else if (e.getKeyCode() == KeyEvent.VK_W) {
+                    onTop = false;
+                }
+                updateIntent();
+            }
+
         });
 
-        connect = new JButton("CONNECT");
-        connect.setSize(130 , 40);
-        connect.setBackground(Color.blue);
-        connect.setLocation(265, 505);
-        getContentPane().add(connect);
+        //base layout
+        getContentPane().add(base = new JPanel(), BorderLayout.CENTER);
+        getContentPane().add(bottom = new JPanel(), BorderLayout.SOUTH);
+        bottom.setPreferredSize(new Dimension(200, 100));
+        base.add(renderArea);
+
+
+        bottom.setLayout(new GridLayout(1 , 2, 100, 0));
+        bottom.add(bottomfirst = new JPanel());
+        bottom.add(bottomsecond = new JPanel());
+
+        bottomsecond.setLayout(new GridLayout(1, 3, 5,0));
+        bottomfirst.setLayout(new GridLayout(1, 3, 5,0));
+
+
+        //bottom left panel with connection info buttons & text messages
+        bottomfirst.add(leftfirst = new JPanel());
+        bottomfirst.add(leftsecond = new JPanel());
+        bottomfirst.add(leftthird = new JPanel());
+
+        leftfirst.setLayout(new GridLayout(3,1,0,0));
+        leftfirst.add(nickText = new JLabel("Your nickname here:"));
+        leftfirst.add(connectionText = new JLabel("Enter SERVER address:"));
+        leftfirst.add(portText = new JLabel("Enter SERVER port:"));
+
+        leftsecond.setLayout(new GridLayout(3,1,0,5));
+        leftsecond.add(nickInput = new JTextField());
+        leftsecond.add(addressEdit = new JTextField("localhost"));
+        leftsecond.add(portEdit = new JTextField("9999"));
+
+        leftthird.setLayout(new GridLayout(3,1,0,5));
+        leftthird.add(connect = new JButton("CONNECT"));
+        leftthird.add(disconnect = new JButton("DISCONNECT"));
         connect.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -132,85 +165,67 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
             }
         });
 
-        //instance.requestFocusInWindow();
-
-//        JButton portBtn = new JButton();
-//        JLabel portTxt = new JLabel("CONNECT PORT");
-//        portTxt.setSize(40, 15);
-//        portTxt.setLocation(3, 1);
-//        portBtn.setSize(65 , 30);
-//        portBtn.setBackground(Color.blue);
-//        portBtn.setLocation(320, 495);
-//        portBtn.add(portTxt);
-//        getContentPane().add(portBtn);
-//        portBtn.setActionCommand(Actions.PORT.name());
-//        portBtn.addActionListener(this);
+        //TODO disconnect script
 
 
-        nickInput.setSize(100, 40);
-        nickInput.setLocation(160, 465);
-        getContentPane().add(nickInput);
+        // bottom right panel with control buttons
+        bottomsecond.add(rightfirst = new JPanel());
+        bottomsecond.add(rightsecond = new JPanel());
+        bottomsecond.add(rightthird = new JPanel());
 
-        nickText.setText("Your nickname here:");
-        nickText.setLocation(10, 465);
-        nickText.setSize(250, 40);
-        getContentPane().add(nickText);
+        emptyspace = new JPanel();
+        rightfirst.setLayout(new GridLayout(3,1,0,5));
+        rightfirst.add(emptyspace);
+        rightfirst.add(moveLeft = new JButton("LEFT"));
+        moveLeft.addMouseListener(this);
 
-        portEdit.setSize(100, 40);
-        portEdit.setLocation(160, 545);
-        portEdit.setText("9999");
-        getContentPane().add(portEdit);
-
-        portText.setText("Enter SERVER port:");
-        portText.setLocation(10, 545);
-        portText.setSize(250, 40);
-        getContentPane().add(portText);
-
-        addressEdit.setSize(100, 40);
-        addressEdit.setLocation(160, 505);
-        addressEdit.setText("localhost");
-        getContentPane().add(addressEdit);
-
-        connectionText.setText("Enter SERVER adress:");
-        connectionText.setLocation(8, 505);
-        connectionText.setSize(250, 40);
-        getContentPane().add(connectionText);
-
-        addKeyListener(new KeyListener() {
-
-            public void keyTyped(KeyEvent e) {
-                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
-                    System.out.println("right"); }
-                if(e.getKeyCode()== KeyEvent.VK_LEFT) {
-                    System.out.println("left"); }
-                if(e.getKeyCode()== KeyEvent.VK_DOWN) {
-                    System.out.println("down"); }
-                if(e.getKeyCode()== KeyEvent.VK_UP) {
-                    System.out.println("up"); }
-            }
-
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
-                    System.out.println("right"); }
-                if(e.getKeyCode()== KeyEvent.VK_LEFT) {
-                    System.out.println("left"); }
-                if(e.getKeyCode()== KeyEvent.VK_DOWN) {
-                    System.out.println("down"); }
-                if(e.getKeyCode()== KeyEvent.VK_UP) {
-                    System.out.println("up"); }
-            }
-
-            public void keyReleased(KeyEvent e) {
-                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
-                    System.out.println("right"); }
-                else if(e.getKeyCode()== KeyEvent.VK_LEFT) {
-                    System.out.println("left"); }
-                else if(e.getKeyCode()== KeyEvent.VK_DOWN) {
-                    System.out.println("down"); }
-                else if(e.getKeyCode()== KeyEvent.VK_UP) {
-                    System.out.println("up"); }
+        rightsecond.setLayout(new GridLayout(3, 1, 0, 5));
+        rightsecond.add(moveUp = new JButton("UP"));
+        rightsecond.add(shoot = new JButton("SHOOT"));
+        rightsecond.add(moveDown = new JButton("DOWN"));
+        moveUp.addMouseListener(this);
+        moveDown.addMouseListener(this);
+        shoot.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                processShootAction();
             }
         });
+
+        emptyspace = new JPanel();
+        rightthird.setLayout(new GridLayout(3,1,0,5));
+        rightthird.add(emptyspace);
+        rightthird.add(moveRight = new JButton("RIGHT"));
+        moveRight.addMouseListener(this);
+
+        // button colors
+        shoot.setBackground(Color.decode("#e91640"));
+        moveLeft.setBackground(Color.decode("#80e916"));
+        moveRight.setBackground(Color.decode("#80e916"));
+        moveUp.setBackground(Color.decode("#80e916"));
+        moveDown.setBackground(Color.decode("#80e916"));
+        connect.setBackground(Color.decode("#164be9"));
+        disconnect.setBackground(Color.decode("#164be9"));
+
+    }
+
+    private void setupGLMouseHandler() {
+        renderArea.addMouseListener(this);
+        renderArea.addMouseMotionListener(this);
+        renderArea.addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent event) {
+                int notches = event.getWheelRotation();
+
+                if (notches < 0) {
+                    updateRendererScale(1);
+                } else {
+                    updateRendererScale(2);
+                }
+            }
+        });
+        mousePos1 = new int[2];
+        mousePos2 = new int[2];
     }
 
     public void keyTyped(KeyEvent e) {}
@@ -225,15 +240,18 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
     }
 
     @Override
-    public void mousePressed(MouseEvent mouseEvent) {
-        if (mouseEvent.getSource() == moveLeft) {
+    public void mousePressed(MouseEvent event) {
+        if (event.getSource() == moveLeft) {
             onLeft = true;
-        } else if (mouseEvent.getSource() == moveUp) {
+        } else if (event.getSource() == moveUp) {
             onTop = true;
-        } else if (mouseEvent.getSource() == moveRight) {
+        } else if (event.getSource() == moveRight) {
             onRight = true;
-        } else if (mouseEvent.getSource() == moveDown) {
+        } else if (event.getSource() == moveDown) {
             onBottom = true;
+        } else if (event.getSource() == renderArea) {
+            mousePos1[0] = event.getX();
+            mousePos1[1] = event.getY();
         }
         updateIntent();
     }
@@ -248,6 +266,8 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
             onRight = false;
         } else if (mouseEvent.getSource() == moveDown) {
             onBottom = false;
+        } else if (mouseEvent.getSource() == renderArea) {
+            // todo
         }
         updateIntent();
     }
@@ -257,6 +277,42 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
 
     @Override
     public void mouseExited(MouseEvent mouseEvent) {}
+
+    @Override
+    public void mouseDragged(MouseEvent event) {
+        mousePos2[0] = event.getX();
+        mousePos2[1] = event.getY();
+        updateRendererPosition();
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent mouseEvent) {
+
+    }
+
+    private void updateRendererPosition() {
+        Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
+        int dx = (mousePos2[0] - mousePos1[0]) / 5;
+        int dy = -(mousePos2[1] - mousePos1[1]) / 5;
+
+        if (renderer != null) {
+            renderer.setPosition(dx, dy);
+        }
+    }
+
+    private void updateRendererScale(int action) {
+        // action 1: up
+        // action 2: down
+        Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
+
+        if (renderer != null) {
+            if (action == 1) {
+                renderer.scaleIn();
+            } else if (action == 2) {
+                renderer.scaleOut();
+            }
+        }
+    }
 
 
     private void connect() {
@@ -305,7 +361,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
             renderer.setLevel(level);
             renderer.setPlayer(player);
         }
-        renderArea.reshape(0, 0, 780, 450);
+        renderArea.reshape(0, 0, renderArea.getWidth(), renderArea.getHeight());
         renderArea.display();
 
         // create connection
@@ -359,7 +415,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener {
         }
 
         Intent intent = player.getTank().getIntent();
-        intent.computeIntent(onLeft, onTop, onRight, onBottom);
+        intent.computeIntent(onLeft, onRight, onTop, onBottom);
     }
 
     private void printMessage(String message) {

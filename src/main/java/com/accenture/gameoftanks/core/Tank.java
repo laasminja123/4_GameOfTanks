@@ -71,10 +71,20 @@ public class Tank implements Serializable {
         return length;
     }
 
-    public void isAlive(boolean live) {
-                if (!live) {
-                    return;
-        }
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    void copy(Tank tank) {
+        this.position.copy(tank.position);
+    }
+
+    void copyPosition(Tank tank) {
+        this.position.copy(tank.position);
+    }
+
+    void copyIntent(Tank tank) {
+        this.intent.copy(tank.intent);
     }
 }
 

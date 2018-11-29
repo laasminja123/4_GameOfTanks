@@ -14,7 +14,6 @@ import java.util.Vector;
 public class ConnectionManager extends Thread {
 
     public static final int PORT = 9999;
-    public static final int TIME_STEP_MSEC = 1000;
 
     private ServerSocket server;
     private Vector<PlayerHandler> connections;
@@ -29,7 +28,7 @@ public class ConnectionManager extends Thread {
     @Override
     public void run() {
         //listen to new connections loop
-        Thread thread = new Thread(new Runnable() {
+        Thread mainLoop = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -52,30 +51,10 @@ public class ConnectionManager extends Thread {
                 }
             }
         });
-        thread.start();
-
-        // send data to all clients loop
-        Thread thread2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        Thread.sleep(TIME_STEP_MSEC);
-                    } catch (InterruptedException exc) {
-                        exc.printStackTrace();
-                    }
-
-                    for (PlayerHandler handler: connections) {
-                        handler.sendData();
-                    }
-                }
-            }
-        });
-        thread2.start();
+        mainLoop.start();
 
         try {
-            thread.join();
-            thread2.join();
+            mainLoop.join();
         } catch (InterruptedException exc) {
             exc.printStackTrace();
         }

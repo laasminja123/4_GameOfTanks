@@ -1,11 +1,16 @@
 package com.accenture.gameoftanks.core;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class Level {
     //Level boundaries
     public float leftBoundary;
     public float rightBoundary;
     public float topBoundary;
     public float bottomBoundary;
+
+    private List<String> textures;
 
     //Generate constructor
     public Level(float leftBoundary, float rightBoundary, float topBoundary, float bottomBoundary) {
@@ -19,6 +24,7 @@ public class Level {
             this.topBoundary = topBoundary;
             this.bottomBoundary = bottomBoundary;
         }
+        readTextures();
     }
 
     //Doesn't allow tank to ride behind the level boundaries
@@ -59,5 +65,28 @@ public class Level {
 
     public float getHeight() {
         return topBoundary - bottomBoundary;
+    }
+
+    private void readTextures() {
+        // STUB
+        textures = new LinkedList<>();
+        textures.add("battleGround01.bmp");
+        textures.add("tank01.bmp");
+    }
+
+    public List<String> getTextures() {
+        return textures;
+    }
+
+    public int getTextureID(String textureName) {
+        int id = 0;
+
+        for (String name: textures) {
+            if (name.equals(textureName)) {
+                return id;
+            }
+            id++;
+        }
+        return id;
     }
 }

@@ -11,6 +11,7 @@ import static java.lang.Math.*;
 public class Physics {
 
     // arguments for colision: Position
+    private static final float ANGLE_INCREMENT = .02f;
 
     public void computeColision() {
         float origin1X = 0.0f;
@@ -34,20 +35,38 @@ public class Physics {
     }
 
     public static void computeMotion(Tank tank, float step) {
-        Position position = tank.getPosition();
+        Position pos = tank.getPosition();
         Intent intent = tank.getIntent();
+
+        float velocity = (float) sqrt(pos.vx * pos.vx + pos.vy * pos.vy);
         float thrust = 0.0f;
 
-        if (intent.isOnMove()) {
+        if (intent.onForward) {
             thrust = tank.getThrust();
+        } else if (intent.onBackWard) {
+            thrust = -tank.getThrust();
         }
 
-        position.posX += step * position.vx;
-        position.vx += (step / tank.getMass()) * thrust * cos(intent.getMoveAngle());
+        if (intent.onTurnLeft) {
+            pos.alpha += ANGLE_INCREMENT;
+        } else if (intent.onTurnRight) {
+            pos.alpha -= ANGLE_INCREMENT;
+        }
 
-        position.posY += step * position.vy;
-        position.vy += (step / tank.getMass()) * thrust * sin(intent.getMoveAngle());
+        // recalculate velocity components
+        if (velocity != 0.0f) {
+            pos.vx = velocity * (float) cos(pos.alpha);
+            pos.vy = velocity * (float) sin(pos.alpha);
+        }
 
-        System.out.println("OnMove is: " + intent.isOnMove());
+        pos.posX += step * pos.vx;
+        pos.vx += (step / tank.getMass()) * thrust * cos(pos.alpha);
+
+        pos.posY += step * pos.vy;
+        pos.vy += (step / tank.getMass()) * thrust * sin(pos.alpha);
+    }
+
+    private static float computeThust(Tank tank) {
+        return 0.0f;
     }
 }

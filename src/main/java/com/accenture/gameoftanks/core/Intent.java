@@ -4,58 +4,17 @@ import java.io.Serializable;
 import java.lang.Math;
 
 public class Intent implements Serializable {
-    private volatile boolean onMove;
-    private volatile boolean onShot;
-    private volatile float moveAngle;
-    private volatile float shotAngle;
+    public volatile boolean onForward;
+    public volatile boolean onBackWard;
+    public volatile boolean onTurnLeft;
+    public volatile boolean onTurnRight;
 
-    public Intent() {
-    }
-
-    //Generate constructor
-    public Intent(boolean onMove, boolean onShot, float moveAngle, float shotAngle) {
-        this.onMove = onMove;
-        this.onShot = onShot;
-        this.moveAngle = moveAngle;
-        this.shotAngle = shotAngle;
-    }
-
-    //Generate getters and setters
-    public boolean isOnMove() {
-        return onMove;
-    }
-
-    public void setOnMove(boolean onMove) {
-        this.onMove = onMove;
-    }
-
-    public boolean isOnShot() {
-        return onShot;
-    }
-
-    public void setOnShot(boolean onShot) {
-        this.onShot = onShot;
-    }
-
-    public double getMoveAngle() {
-        return moveAngle;
-    }
-
-    public void setMoveAngle(float moveAngle) {
-        this.moveAngle = moveAngle;
-    }
-
-    public float getShotAngle() {
-        return shotAngle;
-    }
-
-    public void setShotAngle(float shotAngle) {
-        this.shotAngle = shotAngle;
-    }
+    public Intent() {}
 
     //Method that computes player intention
     //Method that computes player intention
-    public void computeIntent(boolean left, boolean top, boolean right, boolean bottom) {
+    public void computeIntent(boolean onTurnLeft, boolean onTurnRight, boolean onForward, boolean onBackWard) {
+        /*
         //Angle when player press right
         if (left == false && top == false && right && bottom == false ) {
             this.moveAngle = (float) Math.toRadians(0);
@@ -88,16 +47,18 @@ public class Intent implements Serializable {
         if (left == false && top == false && right && bottom) {
             this.moveAngle = (float) Math.toRadians(315);
         }
+        */
 
-        onMove = (left || right || top || bottom);
+        this.onForward   = onForward;
+        this.onBackWard  = onBackWard;
+        this.onTurnLeft  = onTurnLeft;
+        this.onTurnRight = onTurnRight;
     }
 
     void copy(Intent intent) {
-        this.onMove = intent.onMove;
-        this.moveAngle = intent.moveAngle;
-        this.onShot = intent.onShot;
-        this.shotAngle = intent.shotAngle;
+        this.onForward   = intent.onForward;
+        this.onBackWard  = intent.onBackWard;
+        this.onTurnLeft  = intent.onTurnLeft;
+        this.onTurnRight = intent.onTurnRight;
     }
-
-
 }

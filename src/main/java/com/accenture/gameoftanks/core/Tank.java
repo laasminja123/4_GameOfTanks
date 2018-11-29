@@ -22,8 +22,8 @@ public class Tank implements Serializable {
         this.length = length;
 
         this.mass = 5000.0f;
-        this.thrust = 5000.0f;
-        this.maxSpeed = 10;
+        this.thrust = 10000.0f;
+        this.maxSpeed = 8;
 
 
         this.position = new Position();

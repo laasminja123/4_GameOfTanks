@@ -1,50 +1,69 @@
 package com.accenture.gameoftanks.server.core;
 
-import com.accenture.gameoftanks.core.Intent;
-import com.accenture.gameoftanks.core.Position;
-import com.accenture.gameoftanks.core.Tank;
-
-import java.util.List;
+import com.accenture.gameoftanks.core.*;
+import com.accenture.gameoftanks.core.primitives.Edge;
+import com.accenture.gameoftanks.core.primitives.Vertex;
 
 import static java.lang.Math.*;
+import static com.accenture.gameoftanks.core.MATH.*;
 
 public class Physics {
 
-    // arguments for colision: Position
+    // arguments for collision: Position
     private static final float ANGLE_INCREMENT = .02f;
 
-    public void computeColision() {
-        float origin1X = 0.0f;
-        float origin1Y = 0.0f;
+    /**
+     *
+     * @param entity1 moving entity
+     * @param entity2 passive entity
+     * @param step: integration time step
+     */
+    public void computeCollision(Entity entity1, Entity entity2, float step) {
+        Vertex [] topology1 = entity1.getTopology();
+        Position pos1 = entity1.getPosition();
+        transform2d(pos1, topology1);
 
-        float origin2X = 0.0f;
-        float origin2Y = 0.0f;
+        Vertex [] topology2 = entity2.getTopology();
+        Position pos2 = entity2.getPosition();
+        transform2d(pos2, topology2);
 
-        float size1X = 1.0f;
-        float size2X = 1.0f;
+        Edge edge = new Edge(null, null);
+        Vertex v0 = new Vertex(0.0f, 0.0f);
+        Edge motionLine = new Edge(v0, null);
 
-        float size1Y = 1.0f;
-        float size2Y = 1.0f;
+        for (Vertex v: topology1) {
+            for (int i = 0; i < topology2.length; i++) {
+                // create edge
+                if (i < topology2.length - 1) {
+                    edge.v1 = topology2[i];
+                    edge.v2 = topology2[i + 1];
+                } else {
+                    edge.v1 = topology2[i];
+                    edge.v2 = topology2[0];
+                }
 
-        // TODO
-        /*
-        if (Math.abs(origin1X - origin1Y) < (size1X / 2.0f + size2X / 2.0f)) {
-            if (origin1X)
+                // compute motion line
+                v0.xt = v.xt - pos1.vx * step;
+                v0.yt = v.yt - pos1.vy * step;
+                motionLine.v2 = v;
+
+                // check intersection
+                //
+            }
         }
-        */
     }
 
-    public static void computeMotion(Tank tank, float step) {
-        Position pos = tank.getPosition();
-        Intent intent = tank.getIntent();
+    public static void computeMotion(Vehicle vehicle, float step) {
+        Position pos = vehicle.getPosition();
+        Intent intent = vehicle.getIntent();
 
         float velocity = (float) sqrt(pos.vx * pos.vx + pos.vy * pos.vy);
         float thrust = 0.0f;
 
         if (intent.onForward) {
-            thrust = tank.getThrust();
+            thrust = vehicle.getThrust();
         } else if (intent.onBackWard) {
-            thrust = -tank.getThrust();
+            thrust = -vehicle.getThrust();
         }
 
         if (intent.onTurnLeft) {
@@ -59,11 +78,12 @@ public class Physics {
             pos.vy = velocity * (float) sin(pos.alpha);
         }
 
+        float mass = vehicle.getMass();
         pos.posX += step * pos.vx;
-        pos.vx += (step / tank.getMass()) * thrust * cos(pos.alpha);
+        pos.vx += (step / mass) * thrust * cos(pos.alpha);
 
         pos.posY += step * pos.vy;
-        pos.vy += (step / tank.getMass()) * thrust * sin(pos.alpha);
+        pos.vy += (step / mass) * thrust * sin(pos.alpha);
     }
 
     private static float computeThust(Tank tank) {

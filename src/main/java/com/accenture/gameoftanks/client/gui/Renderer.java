@@ -78,44 +78,45 @@ public class Renderer  implements GLEventListener {
         gl.glBegin(GL2.GL_QUADS);
         {
             gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
-            gl.glVertex3f(level.leftBoundary, level.bottomBoundary, 0.0f);
+            gl.glVertex2f(level.leftBoundary, level.bottomBoundary);
 
             gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
-            gl.glVertex3f(level.rightBoundary, level.bottomBoundary, 0.0f);
+            gl.glVertex2f(level.rightBoundary, level.bottomBoundary);
 
             gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
-            gl.glVertex3f(level.rightBoundary, level.topBoundary, 0.0f);
+            gl.glVertex2f(level.rightBoundary, level.topBoundary);
 
             gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
-            gl.glVertex3f(level.leftBoundary, level.topBoundary, 0.0f);
+            gl.glVertex2f(level.leftBoundary, level.topBoundary);
         }
         gl.glEnd();
 
-        // draw tank
-        Tank tank = player.getTank();
-        Vertex [] vertices = computeTankPosition(tank);
-        id = level.getTextureID("tank01.bmp");
-        texture = usedTextures.get(id);
-        texture.enable(gl);
-        texture.bind(gl);
+        // draw vehicle
+        Vehicle vehicle = player.getVehicle();
+        Vertex [] vertices = transformVehiclePosition(vehicle);
 
-        //gl.glColor3f(0.0f, 1.0f, 1.0f);
-        gl.glBegin(GL2.GL_QUADS);
-        {
-            gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
-            gl.glVertex3f(vertices[0].x, vertices[0].y, vertices[0].z);
+        if (vehicle instanceof Tank) {
+            id = level.getTextureID("tank01.bmp");
+            texture = usedTextures.get(id);
+            texture.enable(gl);
+            texture.bind(gl);
 
-            gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
-            gl.glVertex3f(vertices[1].x, vertices[1].y, vertices[1].z);
+            gl.glBegin(GL2.GL_QUADS);
+            {
+                gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
+                gl.glVertex2f(vertices[0].xt, vertices[0].yt);
 
-            gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
-            gl.glVertex3f(vertices[2].x, vertices[2].y, vertices[2].z);
+                gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
+                gl.glVertex2f(vertices[1].xt, vertices[1].yt);
 
-            gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
-            gl.glVertex3f(vertices[3].x, vertices[3].y, vertices[3].z);
+                gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
+                gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+
+                gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
+                gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+            }
+            gl.glEnd();
         }
-        gl.glEnd();
-        //System.out.println("Position in renderer is: " + position.posX);
     }
 
     private float[][] getDefaultTextureCoordinates() {
@@ -134,34 +135,13 @@ public class Renderer  implements GLEventListener {
         return coords;
     }
 
-    private Vertex [] computeTankPosition(Tank tank) {
-        Position position = tank.getPosition();
-        float length = tank.getLength();
-        float width  = tank.getWidth();
+    private Vertex [] transformVehiclePosition(Vehicle vehicle) {
+        Position position = vehicle.getPosition();
+        Vertex [] topology = vehicle.getTopology();
 
-        // create new vertices in coordinate zero position
-        Vertex v1 = new Vertex(-length / 2.0f, -width / 2.0f);
-        Vertex v2 = new Vertex( length / 2.0f, -width / 2.0f);
-        Vertex v3 = new Vertex( length / 2.0f,  width / 2.0f);
-        Vertex v4 = new Vertex(-length / 2.0f,  width / 2.0f);
-
-        // rotate vertices
-        MATH.rotate2d(position.alpha, v1, v2, v3, v4);
-
-        // translate vertices in actual position
-        v1.x += position.posX;
-        v1.y += position.posY;
-
-        v2.x += position.posX;
-        v2.y += position.posY;
-
-        v3.x += position.posX;
-        v3.y += position.posY;
-
-        v4.x += position.posX;
-        v4.y += position.posY;
-
-        return new Vertex[] {v1, v2, v3, v4};
+        // transform vertices
+        MATH.transform2d(position, topology);
+        return topology;
     }
 
     public void init(GLAutoDrawable gLDrawable) {

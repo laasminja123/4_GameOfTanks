@@ -1,90 +1,47 @@
 package com.accenture.gameoftanks.core;
 
+import com.accenture.gameoftanks.core.primitives.Shape;
+
 import java.io.Serializable;
 
-public class Tank implements Serializable {
+public class Tank extends Vehicle implements Serializable {
 
-    private int ID;
-    private int startingHp = 100;
-    private int currentHp;
-    private boolean isAlive;
-    private final float thrust;
-    private final float mass;
-    private final float maxSpeed;
-    final float width;
     final float length;
+    final float width;
 
-    private Position position;
-    private Intent intent;
 
-    public Tank(float length, float width) {
+    public Tank(int id, float length, float width) {
+        super(id, 5000.0f, 10000.0f, 8, 100);
+        Shape topology = new Shape(createTopology(length, width));
+        setTopology(topology);
+
         this.width = width;
         this.length = length;
-
-        this.mass = 5000.0f;
-        this.thrust = 10000.0f;
-        this.maxSpeed = 8;
-
-
-        this.position = new Position();
-        this.intent = new Intent();
-
-        this.isAlive = true;
     }
 
+    private float [] createTopology(float length, float width) {
+        float [] vertices = new float[8];
 
-    public float getThrust() {
-        return thrust;
-    }
+        vertices[0] = -length / 2.0f;
+        vertices[1] = -width / 2.0f;
 
-    public float getMass() {
-        return mass;
-    }
+        vertices[2] = -length / 2.0f;
+        vertices[3] =  width / 2.0f;
 
-    public float getMaxSpeed() {
-        return maxSpeed;
-    }
+        vertices[4] =  length / 2.0f;
+        vertices[5] =  width / 2.0f;
 
-    public Position getPosition() {
-        return position;
-
-    }
-
-    public Intent getIntent() {
-        return intent;
-    }
-
-    public int getID() {
-        return ID;
-    }
-
-    public int getCurrentHp() {
-                return currentHp;
-
-    }
-
-    public float getWidth() {
-        return width;
+        vertices[6] =  length / 2.0f;
+        vertices[7] = -width / 2.0f;
+        return vertices;
     }
 
     public float getLength() {
         return length;
     }
 
-    public boolean isAlive() {
-        return isAlive;
-    }
-
-    void copy(Tank tank) {
-        this.position.copy(tank.position);
-    }
-
-    void copyPosition(Tank tank) {
-        this.position.copy(tank.position);
-    }
-
-    void copyIntent(Tank tank) {
-        this.intent.copy(tank.intent);
+    public float getWidth() {
+        return width;
     }
 }
 

@@ -2,6 +2,7 @@ package com.accenture.gameoftanks.server.core;
 
 import com.accenture.gameoftanks.core.Player;
 import com.accenture.gameoftanks.core.Tank;
+import com.accenture.gameoftanks.core.Vehicle;
 import com.accenture.gameoftanks.server.net.ConnectionManager;
 
 import java.util.List;
@@ -34,10 +35,10 @@ public class DataCore extends Thread {
             List<Player> players = connectionManager.getPlayers();
 
             for (Player player: players) {
-                Tank tank = player.getTank();
+                Vehicle vehicle = player.getVehicle();
 
-                if (tank != null) {
-                    Physics.computeMotion(tank, TIME_STEP_FLOAT);
+                if (vehicle != null) {
+                    Physics.computeMotion(vehicle, TIME_STEP_FLOAT);
                 }
             }
         }

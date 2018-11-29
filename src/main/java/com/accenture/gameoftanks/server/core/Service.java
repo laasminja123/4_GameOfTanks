@@ -14,7 +14,10 @@ public class Service extends Thread {
         // create game level
         Level gameLevel = new Level(0.0f, 100.0f, 100.0f, 0.0f);
 
-        ConnectionManager connectionManager = new ConnectionManager(gameLevel);
+        DatabaseManager databaseManager = new DatabaseManager();
+        databaseManager.start();
+
+        ConnectionManager connectionManager = new ConnectionManager(gameLevel, databaseManager);
         connectionManager.start();
         System.out.println("Connection Manager started!");
 

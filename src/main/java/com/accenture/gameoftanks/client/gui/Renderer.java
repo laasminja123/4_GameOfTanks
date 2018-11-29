@@ -14,9 +14,31 @@ public class Renderer  implements GLEventListener {
     private Level level;
     private Player player;
 
+    private int posX;
+    private int posY;
+
+    private float scale;
+    private float scaleFactor;
+
     public Renderer(Level level, Player player) {
         this.level = level;
         this.player = player;
+
+        scale = 1.0f;
+        scaleFactor = 1.1f;
+    }
+
+    void setPosition(int x, int y) {
+        posX = x;
+        posY = y;
+    }
+
+    void scaleIn() {
+        scale *= scaleFactor;
+    }
+
+    void scaleOut() {
+        scale /= scaleFactor;
     }
 
     public void display(GLAutoDrawable gLDrawable) {
@@ -29,8 +51,11 @@ public class Renderer  implements GLEventListener {
             return;
         }
 
-        gl.glTranslatef(-level.getWidth() / 2.0f, -level.getHeight() / 2.0f, 0.0f);
+        //gl.glTranslatef(-level.getWidth() / 2.0f, -level.getHeight() / 2.0f, 0.0f);
+        gl.glTranslatef(posX, posY, 0.0f);
         //gl.glTranslatef(-5.0f, 0.0f, 0.0f);
+
+        gl.glScalef(scale, scale, scale);
 
         // draw level boundaries
         gl.glColor3f(1.0f, 1.0f, 1.0f);

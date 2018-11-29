@@ -35,7 +35,7 @@ public class PlayerHandler extends Thread {
 
     @Override
     public void run() {
-        // send data to all clients loop
+        // send data to  client loop
         Thread outputThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -81,6 +81,14 @@ public class PlayerHandler extends Thread {
     }
 
     private void setupPlayer(Data data) {
+
+        if (connectionManager.playerExists(data.getPlayer())) {
+            connectionManager.removePlayer(this);
+            System.out.println("Client \"" + data.getPlayer().getNickname() + "\" disconnected!");
+            onDemand = false;
+            return;
+        }
+        connectionManager.addPlayerToDatabase(data.getPlayer());
         System.out.println("Client \"" + data.getPlayer().getNickname() + "\" connected to server!");
         Level level = connectionManager.getLevel();
 

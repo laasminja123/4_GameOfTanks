@@ -25,16 +25,16 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
     private JLabel connectionText;
 
     private JPanel base;
-    private JPanel center;
+    private JPanel emptyspace;
     private JPanel bottom;
     private JPanel bottomfirst;
     private JPanel bottomsecond;
-    private JPanel bottomrightfirst;
-    private JPanel bottomrightsecond;
-    private JPanel bottomrightthird;
-    private JPanel bottomleftfirst;
-    private JPanel bottomleftsecond;
-    private JPanel bottomleftthird;
+    private JPanel rightfirst;
+    private JPanel rightsecond;
+    private JPanel rightthird;
+    private JPanel leftfirst;
+    private JPanel leftsecond;
+    private JPanel leftthird;
 
     private JButton moveUp;
     private JButton moveRight;
@@ -80,7 +80,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         connectionText = new JLabel();
 
         //JFrame f0 = new JFrame("Games Of Tanks");
-        setSize(800, 650);
+        setSize(1100, 650);
         setTitle("Game Of Tanks");
 
         //getContentPane.requestFocusInWindow();   // must try this to check about key listeneres !!!
@@ -91,38 +91,73 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         renderArea = new GLCanvas();
         renderArea.addGLEventListener(new Renderer(null, null));
         renderArea.setSize(1780, 1450);
+//        renderArea.setFocusable(true);
+        renderArea.addKeyListener(new KeyListener() {
 
-        //base layout next --->
+            public void keyTyped(KeyEvent e) {
+            }
+
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()== KeyEvent.VK_D) {
+                    onRight = true;
+                } else if(e.getKeyCode()== KeyEvent.VK_A) {
+                    onLeft = true;
+                } else if(e.getKeyCode()== KeyEvent.VK_S) {
+                    onBottom = true;
+                } else if(e.getKeyCode()== KeyEvent.VK_W) {
+                    onTop = true;
+                }
+                updateIntent();
+            }
+
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_D) {
+                    onRight = false;
+                } else if (e.getKeyCode() == KeyEvent.VK_A) {
+                    onLeft = false;
+                } else if (e.getKeyCode() == KeyEvent.VK_S) {
+                    onBottom = false;
+                } else if (e.getKeyCode() == KeyEvent.VK_W) {
+                    onTop = false;
+                }
+                updateIntent();
+            }
+
+        });
+
+        //base layout
         getContentPane().add(base = new JPanel(), BorderLayout.CENTER);
         getContentPane().add(bottom = new JPanel(), BorderLayout.SOUTH);
-        bottom.setPreferredSize(new Dimension(200, 200));
+        bottom.setPreferredSize(new Dimension(200, 100));
         base.add(renderArea);
 
 
-        bottom.setLayout(new GridLayout(1 , 2, 0, 0));
+        bottom.setLayout(new GridLayout(1 , 2, 100, 0));
         bottom.add(bottomfirst = new JPanel());
         bottom.add(bottomsecond = new JPanel());
 
-        bottomsecond.setLayout(new GridLayout(1, 3, 0,0));
-        bottomfirst.setLayout(new GridLayout(1, 3, 0,0));
+        bottomsecond.setLayout(new GridLayout(1, 3, 5,0));
+        bottomfirst.setLayout(new GridLayout(1, 3, 5,0));
 
-        bottomfirst.add(bottomleftfirst = new JPanel());
-        bottomfirst.add(bottomleftsecond = new JPanel());
-        bottomfirst.add(bottomleftthird = new JPanel());
 
-        bottomleftfirst.setLayout(new GridLayout(3,1,0,0));
-        bottomleftfirst.add(nickText = new JLabel("Your nickname here:"));
-        bottomleftfirst.add(connectionText = new JLabel("Enter SERVER adres:"));
-        bottomleftfirst.add(portText = new JLabel("Enter SERVER port:"));
+        //bottom left panel with connection info buttons & text messages
+        bottomfirst.add(leftfirst = new JPanel());
+        bottomfirst.add(leftsecond = new JPanel());
+        bottomfirst.add(leftthird = new JPanel());
 
-        bottomleftsecond.setLayout(new GridLayout(3,1,0,0));
-        bottomleftsecond.add(nickInput = new JTextField());
-        bottomleftsecond.add(addressEdit = new JTextField("localhost"));
-        bottomleftsecond.add(portEdit = new JTextField("9999"));
+        leftfirst.setLayout(new GridLayout(3,1,0,0));
+        leftfirst.add(nickText = new JLabel("Your nickname here:"));
+        leftfirst.add(connectionText = new JLabel("Enter SERVER address:"));
+        leftfirst.add(portText = new JLabel("Enter SERVER port:"));
 
-        bottomleftthird.setLayout(new GridLayout(3,1,0,0));
-        bottomleftthird.add(connect = new JButton("CONNECT"));
-        bottomleftthird.add(disconnect = new JButton("DISCONNECT"));
+        leftsecond.setLayout(new GridLayout(3,1,0,5));
+        leftsecond.add(nickInput = new JTextField());
+        leftsecond.add(addressEdit = new JTextField("localhost"));
+        leftsecond.add(portEdit = new JTextField("9999"));
+
+        leftthird.setLayout(new GridLayout(3,1,0,5));
+        leftthird.add(connect = new JButton("CONNECT"));
+        leftthird.add(disconnect = new JButton("DISCONNECT"));
         connect.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -132,18 +167,22 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
         //TODO disconnect script
 
-        bottomsecond.add(bottomrightfirst = new JPanel());
-        bottomsecond.add(bottomrightsecond = new JPanel());
-        bottomsecond.add(bottomrightthird = new JPanel());
 
-        bottomrightfirst.setLayout(new BorderLayout());
-        bottomrightfirst.add(moveLeft = new JButton("LEFT"), BorderLayout.CENTER);
+        // bottom right panel with control buttons
+        bottomsecond.add(rightfirst = new JPanel());
+        bottomsecond.add(rightsecond = new JPanel());
+        bottomsecond.add(rightthird = new JPanel());
+
+        emptyspace = new JPanel();
+        rightfirst.setLayout(new GridLayout(3,1,0,5));
+        rightfirst.add(emptyspace);
+        rightfirst.add(moveLeft = new JButton("LEFT"));
         moveLeft.addMouseListener(this);
 
-        bottomrightsecond.setLayout(new GridLayout(3, 1, 0, 0));
-        bottomrightsecond.add(moveUp = new JButton("UP"));
-        bottomrightsecond.add(shoot = new JButton("SHOOT"));
-        bottomrightsecond.add(moveDown = new JButton("DOWN"));
+        rightsecond.setLayout(new GridLayout(3, 1, 0, 5));
+        rightsecond.add(moveUp = new JButton("UP"));
+        rightsecond.add(shoot = new JButton("SHOOT"));
+        rightsecond.add(moveDown = new JButton("DOWN"));
         moveUp.addMouseListener(this);
         moveDown.addMouseListener(this);
         shoot.addActionListener(new ActionListener() {
@@ -153,46 +192,21 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
             }
         });
 
-        bottomrightthird.setLayout(new BorderLayout());
-        bottomrightthird.add(moveRight = new JButton("RIGHT"), BorderLayout.CENTER);
+        emptyspace = new JPanel();
+        rightthird.setLayout(new GridLayout(3,1,0,5));
+        rightthird.add(emptyspace);
+        rightthird.add(moveRight = new JButton("RIGHT"));
         moveRight.addMouseListener(this);
 
+        // button colors
+        shoot.setBackground(Color.decode("#e91640"));
+        moveLeft.setBackground(Color.decode("#80e916"));
+        moveRight.setBackground(Color.decode("#80e916"));
+        moveUp.setBackground(Color.decode("#80e916"));
+        moveDown.setBackground(Color.decode("#80e916"));
+        connect.setBackground(Color.decode("#164be9"));
+        disconnect.setBackground(Color.decode("#164be9"));
 
-        getContentPane().addKeyListener(new KeyListener() {
-
-            public void keyTyped(KeyEvent e) {
-                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
-                    System.out.println("right"); }
-                if(e.getKeyCode()== KeyEvent.VK_LEFT) {
-                    System.out.println("left"); }
-                if(e.getKeyCode()== KeyEvent.VK_DOWN) {
-                    System.out.println("down"); }
-                if(e.getKeyCode()== KeyEvent.VK_UP) {
-                    System.out.println("up"); }
-            }
-
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
-                    System.out.println("right"); }
-                if(e.getKeyCode()== KeyEvent.VK_LEFT) {
-                    System.out.println("left"); }
-                if(e.getKeyCode()== KeyEvent.VK_DOWN) {
-                    System.out.println("down"); }
-                if(e.getKeyCode()== KeyEvent.VK_UP) {
-                    System.out.println("up"); }
-            }
-
-            public void keyReleased(KeyEvent e) {
-                if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
-                    System.out.println("right"); }
-                else if(e.getKeyCode()== KeyEvent.VK_LEFT) {
-                    System.out.println("left"); }
-                else if(e.getKeyCode()== KeyEvent.VK_DOWN) {
-                    System.out.println("down"); }
-                else if(e.getKeyCode()== KeyEvent.VK_UP) {
-                    System.out.println("up"); }
-            }
-        });
     }
 
     private void setupGLMouseHandler() {
@@ -401,10 +415,11 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         }
 
         Intent intent = player.getTank().getIntent();
-        intent.computeIntent(onLeft, onTop, onRight, onBottom);
+        intent.computeIntent(onLeft, onRight, onTop, onBottom);
     }
 
     private void printMessage(String message) {
         JOptionPane.showMessageDialog(null, message);
     }
+
 }

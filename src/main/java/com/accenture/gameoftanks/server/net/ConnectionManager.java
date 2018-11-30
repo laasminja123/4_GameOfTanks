@@ -68,6 +68,10 @@ public class ConnectionManager extends Thread {
         return level;
     }
 
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+
     public List<Player> getPlayers() {
         List<Player> players = new LinkedList<>();
 
@@ -82,8 +86,11 @@ public class ConnectionManager extends Thread {
     }
 
     void removePlayer(PlayerHandler handler) {
+        if (databaseManager != null) {
+            // TODO save players information to the permanent database
+            // TODO call database manager method which informs it about player disconnection
+        }
         connections.remove(handler);
-        // TODO call database manager method which informs it about player disconnection
     }
 
     public boolean playerExists(Player player) {
@@ -94,14 +101,6 @@ public class ConnectionManager extends Thread {
             }
         }
         return false;
-    }
-
-//    public boolean playerExists(Player player) {
-//        return databaseManager.playerExists(player);
-//    }
-
-    public void addPlayerToDatabase(Player player) {
-        databaseManager.addPlayer(player);
     }
 
 }

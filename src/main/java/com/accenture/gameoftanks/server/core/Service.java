@@ -18,7 +18,9 @@ public class Service extends Thread {
         // create game level
         Level gameLevel = new Level(0.0f, 100.0f, 100.0f, 0.0f);
 
-        createDatabaseManager();
+        // TODO When testing will no longer be necessary, method should be uncommented
+        databaseManager = null;
+//        createDatabaseManager();
 
         ConnectionManager connectionManager = new ConnectionManager(gameLevel, databaseManager);
         connectionManager.start();

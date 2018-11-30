@@ -88,7 +88,6 @@ public class PlayerHandler extends Thread {
             onDemand = false;
             return;
         }
-        connectionManager.addPlayerToDatabase(data.getPlayer());
         System.out.println("Client \"" + data.getPlayer().getNickname() + "\" connected to server!");
         Level level = connectionManager.getLevel();
 

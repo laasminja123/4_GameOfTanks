@@ -80,7 +80,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         connectionText = new JLabel();
 
         //JFrame f0 = new JFrame("Games Of Tanks");
-        setSize(1100, 650);
+        setSize(1100, 850);
         setTitle("Game Of Tanks");
 
         //getContentPane.requestFocusInWindow();   // must try this to check about key listeneres !!!
@@ -165,8 +165,12 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
             }
         });
 
-        //TODO disconnect script
-
+        disconnect.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                playerConnection.disconnect();
+            }
+        });
 
         // bottom right panel with control buttons
         bottomsecond.add(rightfirst = new JPanel());
@@ -176,13 +180,13 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         emptyspace = new JPanel();
         rightfirst.setLayout(new GridLayout(3,1,0,5));
         rightfirst.add(emptyspace);
-        rightfirst.add(moveLeft = new JButton("LEFT"));
+        rightfirst.add(moveLeft = new JButton("TURN LEFT"));
         moveLeft.addMouseListener(this);
 
         rightsecond.setLayout(new GridLayout(3, 1, 0, 5));
-        rightsecond.add(moveUp = new JButton("UP"));
+        rightsecond.add(moveUp = new JButton("FORWARD"));
         rightsecond.add(shoot = new JButton("SHOOT"));
-        rightsecond.add(moveDown = new JButton("DOWN"));
+        rightsecond.add(moveDown = new JButton("BACKWARD"));
         moveUp.addMouseListener(this);
         moveDown.addMouseListener(this);
         shoot.addActionListener(new ActionListener() {
@@ -195,7 +199,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         emptyspace = new JPanel();
         rightthird.setLayout(new GridLayout(3,1,0,5));
         rightthird.add(emptyspace);
-        rightthird.add(moveRight = new JButton("RIGHT"));
+        rightthird.add(moveRight = new JButton("TURN RIGHT"));
         moveRight.addMouseListener(this);
 
         // button colors
@@ -414,7 +418,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
             return;
         }
 
-        Intent intent = player.getTank().getIntent();
+        Intent intent = player.getVehicle().getIntent();
         intent.computeIntent(onLeft, onRight, onTop, onBottom);
     }
 

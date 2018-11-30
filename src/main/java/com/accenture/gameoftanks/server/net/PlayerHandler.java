@@ -95,7 +95,7 @@ public class PlayerHandler extends Thread {
         float posX = 0.5f * (level.leftBoundary + level.rightBoundary);
         float posY = 0.5f * (level.bottomBoundary + level.topBoundary);
 
-        Position position = data.getPlayer().getTank().getPosition();
+        Position position = data.getPlayer().getVehicle().getPosition();
         position.posX = posX;
         position.posY = posY;
         position.alpha = 0.0f;

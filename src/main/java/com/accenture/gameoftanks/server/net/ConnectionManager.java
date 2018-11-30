@@ -87,7 +87,7 @@ public class ConnectionManager extends Thread {
 
     void removePlayer(PlayerHandler handler) {
         if (databaseManager != null) {
-            // TODO save players information to the permanent database
+            databaseManager.AddOrUpdatePlayer(handler.getData().getPlayer());
             // TODO call database manager method which informs it about player disconnection
         }
         connections.remove(handler);

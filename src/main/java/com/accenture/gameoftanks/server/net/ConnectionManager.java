@@ -87,8 +87,18 @@ public class ConnectionManager extends Thread {
     }
 
     public boolean playerExists(Player player) {
-        return databaseManager.playerExists(player);
+        for (PlayerHandler handler : connections) {
+            Data data = handler.getData();
+            if (data.getPlayer().getNickname().equals(player.getNickname())) {
+                return true;
+            }
+        }
+        return false;
     }
+
+//    public boolean playerExists(Player player) {
+//        return databaseManager.playerExists(player);
+//    }
 
     public void addPlayerToDatabase(Player player) {
         databaseManager.addPlayer(player);

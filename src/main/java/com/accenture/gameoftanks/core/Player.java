@@ -8,6 +8,10 @@ public class Player implements Serializable {
     private Vehicle vehicle;
     private final String nickname;
 
+    private int deaths;
+    private int kills;
+    private int shoots;
+
     public Player(String nickname) {
         this.nickname = nickname;
         this.vehicle = new Tank(0, 5.0f, 3.0f);
@@ -35,5 +39,17 @@ public class Player implements Serializable {
 
     public void copyIntent(Player player) {
         this.vehicle.copyIntent(player.vehicle);
+    }
+
+    public int getDeaths() {
+        return deaths;
+    }
+
+    public int getKills() {
+        return kills;
+    }
+
+    public int getShoots() {
+        return shoots;
     }
 }

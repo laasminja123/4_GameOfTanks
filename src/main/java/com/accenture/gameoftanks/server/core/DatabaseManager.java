@@ -4,21 +4,19 @@ import com.accenture.gameoftanks.core.Player;
 
 import java.sql.*;
 
-public class DatabaseManager extends Thread {
+public class DatabaseManager {
 
     private String dbAddress = "jdbc:mysql://localhost/?useSSL=false";
-    private String userName = "root";
-    private String password = "abcd1234";
+//    private String userName = "root";
+//    private String password = "abcd1234";
     private Connection con;
     private Statement statement;
     private PermanentDatabaseTable permanentTable;
     private TemporaryDatabaseTable temporaryTable;
 
-    //TODO add userName and password to the constructor so that the user is required to type them
-
-    public DatabaseManager() {
+    public DatabaseManager(String username, String password) {
         try {
-            con = DriverManager.getConnection(dbAddress, userName, password);
+            con = DriverManager.getConnection(dbAddress, username, password);
             statement = con.createStatement();
             statement.executeUpdate("CREATE DATABASE IF NOT EXISTS GoT_Statistics;");
             con.setCatalog("GoT_Statistics");
@@ -31,11 +29,6 @@ public class DatabaseManager extends Thread {
         } catch (SQLException e) {
             System.out.println("Exception in DatabaseManager class constructor");
         }
-    }
-
-    @Override
-    public void run() {
-        super.run();
     }
 
     public void createTables() {

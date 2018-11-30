@@ -8,7 +8,7 @@ public class LevelTest {
 
     @Test
     public void computeColision() {
-        Tank tank = new Tank(1, 1);
+        Tank tank = new Tank(1, 1, 1);
         Position position = tank.getPosition();
         Level level = new Level(0, 10, 10, 0);
         float delta = 1.e-7f;

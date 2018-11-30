@@ -96,8 +96,9 @@ public class ConnectionManager extends Thread {
     public boolean playerExists(Player player) {
         for (PlayerHandler handler : connections) {
             Data data = handler.getData();
-            if (data.getPlayer().getNickname().equals(player.getNickname())) {
-                return true;
+
+            if (data != null) {
+                return data.getPlayer().getNickname().equals(player.getNickname());
             }
         }
         return false;

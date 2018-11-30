@@ -91,8 +91,8 @@ public class PlayerHandler extends Thread {
         System.out.println("Client \"" + data.getPlayer().getNickname() + "\" connected to server!");
         Level level = connectionManager.getLevel();
 
-        float posX = 0.5f * (level.leftBoundary + level.rightBoundary);
-        float posY = 0.5f * (level.bottomBoundary + level.topBoundary);
+        float posX = 10.0f;
+        float posY = 10.0f;
 
         Position position = data.getPlayer().getVehicle().getPosition();
         position.posX = posX;

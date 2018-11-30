@@ -67,27 +67,28 @@ public class Renderer  implements GLEventListener {
 
         gl.glScalef(scale, scale, scale);
 
-        // draw level boundaries
+        // draw level background
         float[][] uvCoords = getDefaultTextureCoordinates();
         int id = level.getTextureID("battleGround01.bmp");
         Texture texture = usedTextures.get(id);
         texture.enable(gl);
         texture.bind(gl);
+        float [] extents = level.getExtents();
 
         //gl.glColor3f(1.0f, 1.0f, 1.0f);
         gl.glBegin(GL2.GL_QUADS);
         {
             gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
-            gl.glVertex2f(level.leftBoundary, level.bottomBoundary);
+            gl.glVertex2f(extents[0], extents[2]);
 
             gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
-            gl.glVertex2f(level.rightBoundary, level.bottomBoundary);
+            gl.glVertex2f(extents[1], extents[2]);
 
             gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
-            gl.glVertex2f(level.rightBoundary, level.topBoundary);
+            gl.glVertex2f(extents[1], extents[3]);
 
             gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
-            gl.glVertex2f(level.leftBoundary, level.topBoundary);
+            gl.glVertex2f(extents[0], extents[3]);
         }
         gl.glEnd();
 
@@ -163,8 +164,9 @@ public class Renderer  implements GLEventListener {
         gl.glLoadIdentity();
 
         if (level != null) {
+            float [] extents = level.getExtents();
             float offset = 5.0f;
-            float extent = Math.max(level.getWidth(), level.getHeight());
+            float extent = Math.max(extents[1] - extents[0], extents[3] - extents[2]);
             float w = extent * ratio;
             float h = extent;
             gl.glOrtho(-w / 2.0f - offset, w / 2.0f + offset,

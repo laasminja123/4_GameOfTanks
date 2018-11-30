@@ -7,10 +7,12 @@ import com.accenture.gameoftanks.core.primitives.Vertex;
 import static java.lang.Math.*;
 import static com.accenture.gameoftanks.core.MATH.*;
 
-public class Physics {
+class Physics {
 
     // arguments for collision: Position
     private static final float ANGLE_INCREMENT = .02f;
+    private static final float EPSYLON = 1.0e-2f;
+
 
     /**
      *
@@ -18,7 +20,7 @@ public class Physics {
      * @param entity2 passive entity
      * @param step: integration time step
      */
-    public void computeCollision(Entity entity1, Entity entity2, float step) {
+    static void computeCollision(Entity entity1, Entity entity2, float step) {
         Vertex [] topology1 = entity1.getTopology();
         Position pos1 = entity1.getPosition();
         transform2d(pos1, topology1);
@@ -30,6 +32,8 @@ public class Physics {
         Edge edge = new Edge(null, null);
         Vertex v0 = new Vertex(0.0f, 0.0f);
         Edge motionLine = new Edge(v0, null);
+
+        float d;
 
         for (Vertex v: topology1) {
             for (int i = 0; i < topology2.length; i++) {
@@ -48,14 +52,45 @@ public class Physics {
                 motionLine.v2 = v;
 
                 // check intersection
-                //
+                if ((d = intersects(motionLine, edge)) > 0.0f) {  // collision detected
+                    // create back translation vector
+                    float [] unitDir = new float[2];
+                    normalize(unitDir, motionLine);
+                    reverse(unitDir);
+
+                    float [] normal = new float[2];
+                    getNormal(normal, edge);
+
+                    float cosA = dot(unitDir, normal);
+                    d /= cosA;  // translation magnitude
+                    scale(d + EPSYLON, unitDir);
+
+                    // translate positions
+                    pos1.posX += unitDir[0];
+                    pos1.posY += unitDir[1];
+
+                    // recompute speed components
+                    float [] biNormal = new float[2];
+                    normalize(biNormal, edge);
+
+                    float V2abs = dot(pos1.vx, pos1.vy, biNormal[0], biNormal[1]);
+                    scale(V2abs, biNormal);  // now biNormal is new velocity vector
+
+                    pos1.vx = biNormal[0];
+                    pos1.vy = biNormal[1];
+
+                    System.out.println("Collision detected");
+                }
             }
         }
     }
 
-    public static void computeMotion(Vehicle vehicle, float step) {
+    static void computeMotion(Vehicle vehicle, float step) {
         Position pos = vehicle.getPosition();
         Intent intent = vehicle.getIntent();
+        float mass = vehicle.getMass();
+
+        float frictionK = 3.0f; // TODO implement it for vehicle
 
         float velocity = (float) sqrt(pos.vx * pos.vx + pos.vy * pos.vy);
         float thrust = 0.0f;
@@ -72,18 +107,39 @@ public class Physics {
             pos.alpha -= ANGLE_INCREMENT;
         }
 
-        // recalculate velocity components
+        // compute transverse force
+        float transverseForceMag = 0.0f;
+        float angle = 0.0f;
+
         if (velocity != 0.0f) {
-            pos.vx = velocity * (float) cos(pos.alpha);
-            pos.vy = velocity * (float) sin(pos.alpha);
+            // velocity normalized vector
+            float [] vDir = new float[2];
+            normalize(vDir, pos.vx, pos.vy);
+
+            // direction normalized vector
+            float [] dir = new float[2];
+            dir[0] = (float) cos(pos.alpha);
+            dir[1] = (float) sin(pos.alpha);
+
+            float direction = cross2D(vDir, dir);
+            float phi = (float) acos(dot(vDir, dir));
+
+            System.out.println("direction is : " + direction);
+
+            transverseForceMag = mass * frictionK * (float) sin(phi);
+            angle = (direction > 0.0f) ? pos.alpha + (float) PI / 2.0f : pos.alpha - (float) PI / 2.0f;
         }
 
-        float mass = vehicle.getMass();
         pos.posX += step * pos.vx;
-        pos.vx += (step / mass) * thrust * cos(pos.alpha);
+        float forceX = (thrust * (float) cos(pos.alpha) + transverseForceMag * (float) cos(angle));
+        pos.vx += (step / mass) * forceX;
 
         pos.posY += step * pos.vy;
-        pos.vy += (step / mass) * thrust * sin(pos.alpha);
+        float forceY = (thrust * (float) sin(pos.alpha) + transverseForceMag * (float) sin(angle));
+        pos.vy += (step / mass) * forceY;
+
+        //System.out.println("X is : " + pos.posX);
+        //System.out.println("Y is : " + pos.posY);
     }
 
     private static float computeThust(Tank tank) {

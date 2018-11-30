@@ -1,10 +1,9 @@
 package com.accenture.gameoftanks.server.core;
 
-import com.accenture.gameoftanks.core.Player;
-import com.accenture.gameoftanks.core.Tank;
-import com.accenture.gameoftanks.core.Vehicle;
+import com.accenture.gameoftanks.core.*;
 import com.accenture.gameoftanks.server.net.ConnectionManager;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class DataCore extends Thread {
@@ -31,15 +30,36 @@ public class DataCore extends Thread {
                 //
             }
 
-            // collect positions from all players
+            Level level = connectionManager.getLevel();
+
+            if (level == null) {
+                continue;
+            }
+
+            // collect vehicles from all players --------------------------------------------------
             List<Player> players = connectionManager.getPlayers();
+            List<Vehicle> vehicles = new LinkedList<>();
 
             for (Player player: players) {
                 Vehicle vehicle = player.getVehicle();
 
                 if (vehicle != null) {
-                    Physics.computeMotion(vehicle, TIME_STEP_FLOAT);
+                    vehicles.add(vehicle);
                 }
+            }
+
+            // compute collisions with level static objects ---------------------------------------
+            List<Entity> levelContent = level.getContent();
+
+            for (Vehicle vehicle: vehicles) {
+                for (Entity entity: levelContent) {
+                    Physics.computeCollision(vehicle, entity, TIME_STEP_FLOAT);
+                }
+            }
+
+            // compute motion ---------------------------------------------------------------------
+            for (Vehicle vehicle: vehicles) {
+                Physics.computeMotion(vehicle, TIME_STEP_FLOAT);
             }
         }
     }

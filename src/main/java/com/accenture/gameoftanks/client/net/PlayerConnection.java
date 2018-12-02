@@ -1,6 +1,5 @@
 package com.accenture.gameoftanks.client.net;
 
-import com.accenture.gameoftanks.core.Player;
 import com.accenture.gameoftanks.net.Data;
 
 import java.io.IOException;
@@ -10,20 +9,21 @@ import java.net.Socket;
 
 public class PlayerConnection {
 
-    public static final int TIME_STEP_MSEC = 40;
+    private static final int TIME_STEP_MSEC = 40;
 
-    private Player player;
-    public Socket client;
+    private Socket client;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
     private volatile Data data;
     private String host;
     private int port;
 
-    public PlayerConnection(String host, int port, Player player) {
+    private boolean onDemand;
+
+    public PlayerConnection(String host, int port, Data data) {
         this.host = host;
         this.port = port;
-        this.player = player;
+        this.data = data;
     }
 
     public void init() {
@@ -35,16 +35,13 @@ public class PlayerConnection {
             e.printStackTrace();
             throw new RuntimeException("Failed to connect server");
         }
-        this.data = new Data(player);
-
-        // TEST
-        //sendData();
+        onDemand = true;
 
         // send data to server loop
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
+                while (onDemand) {
                     try {
                         Thread.sleep(TIME_STEP_MSEC);
                     } catch (InterruptedException exc) {
@@ -60,13 +57,12 @@ public class PlayerConnection {
         Thread receiveLoop = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
+                while (onDemand) {
                     try {
                         Object object = inputStream.readObject();
 
                         if (object instanceof Data) {
                             Data data = (Data) object;
-                            //System.out.println("Value received from server is: " + data.getPlayer().getTank().getPosition().posX);
                             PlayerConnection.this.data.copyPosition(data);
                         }
                     } catch (IOException | ClassNotFoundException exc) {
@@ -78,16 +74,14 @@ public class PlayerConnection {
         receiveLoop.start();
     }
 
-    public void sendData() {
-        //System.out.println("Player sending data to Server");
-
+    private void sendData() {
         if (inputStream == null || outputStream == null || data == null) {
             return;
         }
+
         try {
             outputStream.reset();
             outputStream.writeObject(data);
-            //outputStream.flush();
         } catch (IOException exc) {
             exc.printStackTrace();
         }
@@ -100,6 +94,8 @@ public class PlayerConnection {
             client.close();
         } catch (IOException exc) {
             exc.printStackTrace();
+        } finally {
+            onDemand = false;
         }
     }
 

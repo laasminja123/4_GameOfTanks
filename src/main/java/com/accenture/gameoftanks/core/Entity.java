@@ -9,16 +9,16 @@ public class Entity implements Serializable {
 
     private final boolean isStatic;
     private final float mass;
-    private boolean isAlive;
+    private final float momentOfInertia;
 
     private Shape topology;
     Position position;
     Intent intent;
 
-    Entity(boolean isStatic, float mass) {
+    Entity(boolean isStatic, float mass, float momentOfInertia) {
         this.isStatic = isStatic;
         this.mass = mass;
-        this.isAlive = true;
+        this.momentOfInertia = momentOfInertia;
 
         this.position = new Position();
         this.intent = new Intent();
@@ -32,8 +32,8 @@ public class Entity implements Serializable {
         return mass;
     }
 
-    public boolean isAlive() {
-        return isAlive;
+    public float getMomentOfInertia() {
+        return momentOfInertia;
     }
 
     public Vertex [] getTopology() {

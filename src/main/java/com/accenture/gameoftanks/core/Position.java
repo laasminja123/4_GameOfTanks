@@ -5,9 +5,10 @@ import java.io.Serializable;
 public class Position implements Serializable {
     public volatile float posX;
     public volatile float posY;
-    public volatile float alpha;
-    public volatile float vx;
-    public volatile float vy;
+    public volatile float vx;  // velocity x component
+    public volatile float vy;  // velocity y component
+    public volatile float alpha;  // rotation angle in radians relative to X axis (counter-clockwise is positive)
+    public volatile float omega;  // angular velocity in 1/s
 
 //Create new constructor
     public Position() {}
@@ -15,8 +16,9 @@ public class Position implements Serializable {
     void copy(Position position) {
         this.posX = position.posX;
         this.posY = position.posY;
-        this.alpha = position.alpha;
         this.vx = position.vx;
         this.vy = position.vy;
+        this.alpha = position.alpha;
+        this.omega = position.omega;
     }
 }

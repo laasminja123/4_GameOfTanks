@@ -15,21 +15,45 @@ import java.util.Vector;
 public class ConnectionManager extends Thread {
 
     public static final int PORT = 9999;
+    private final int TIME_STEP_MSEC = 40;
 
     private ServerSocket server;
     private Vector<PlayerHandler> connections;
     private DatabaseManager databaseManager;
 
     private Level level;
+    private Data data;
+
+    private volatile boolean onDemand;
 
     public ConnectionManager(Level level, DatabaseManager databaseManager) {
         this.connections = new Vector<>();
         this.level = level;
+        this.data = new Data();
         this.databaseManager = databaseManager;
     }
 
     @Override
     public void run() {
+
+        // send data to  client loop
+        Thread outputThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                onDemand = true;
+
+                while (onDemand) {
+                    try {
+                        Thread.sleep(TIME_STEP_MSEC);
+                    } catch (InterruptedException exc) {
+                        exc.printStackTrace();
+                    }
+                    sendData();
+                }
+            }
+        });
+        outputThread.start();
+
         //listen to new connections loop
         Thread mainLoop = new Thread(new Runnable() {
             @Override
@@ -38,7 +62,7 @@ public class ConnectionManager extends Thread {
                     server = new ServerSocket(PORT);
                     System.out.println("Server Socket created!");
 
-                    while (true) {
+                    while (onDemand) {
                         try {
                             Socket socket = server.accept();
                             System.out.println("Player connected");
@@ -58,9 +82,29 @@ public class ConnectionManager extends Thread {
         mainLoop.start();
 
         try {
+            outputThread.join();
             mainLoop.join();
         } catch (InterruptedException exc) {
             exc.printStackTrace();
+            onDemand = false;
+        }
+    }
+
+    private void sendData() {
+        data.clear();
+
+        // compose Data object with all current players
+        for (PlayerHandler handler: connections) {
+            Player player = handler.getPlayer();
+
+            if (player != null) {
+                data.addPlayer(player);
+            }
+        }
+
+        // send data to all players
+        for (PlayerHandler handler: connections) {
+            handler.sendData(data);
         }
     }
 
@@ -76,10 +120,10 @@ public class ConnectionManager extends Thread {
         List<Player> players = new LinkedList<>();
 
         for (PlayerHandler handler : connections) {
-            Data data = handler.getData();
+            Player player = handler.getPlayer();
 
-            if (data != null) {
-                players.add(data.getPlayer());
+            if (player != null) {
+                players.add(player);
             }
         }
         return players;
@@ -87,18 +131,18 @@ public class ConnectionManager extends Thread {
 
     void removePlayer(PlayerHandler handler) {
         if (databaseManager != null) {
-            databaseManager.AddOrUpdatePlayer(handler.getData().getPlayer());
+            databaseManager.AddOrUpdatePlayer(handler.getPlayer());
             // TODO call database manager method which informs it about player disconnection
         }
         connections.remove(handler);
     }
 
-    public boolean playerExists(Player player) {
+    boolean playerExists(Player newPlayer) {
         for (PlayerHandler handler : connections) {
-            Data data = handler.getData();
+            Player existingPlayer = handler.getPlayer();
 
-            if (data != null) {
-                return data.getPlayer().getNickname().equals(player.getNickname());
+            if (existingPlayer != null && newPlayer != null) {
+                return existingPlayer.getNickname().equals(newPlayer.getNickname());
             }
         }
         return false;

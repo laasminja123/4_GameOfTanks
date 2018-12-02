@@ -14,5 +14,8 @@ public class Vertex implements Serializable {
     public Vertex(float x, float y) {
         this.x = x;
         this.y = y;
+
+        this.xt = x;
+        this.yt = y;
     }
 }

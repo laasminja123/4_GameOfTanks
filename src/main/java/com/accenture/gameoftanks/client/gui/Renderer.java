@@ -2,6 +2,7 @@ package com.accenture.gameoftanks.client.gui;
 
 import com.accenture.gameoftanks.core.*;
 import com.accenture.gameoftanks.core.primitives.Vertex;
+import com.accenture.gameoftanks.net.Data;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -15,7 +16,8 @@ import java.util.List;
 public class Renderer  implements GLEventListener {
 
     private Level level;
-    private Player player;
+    private Data data;
+    private String clientName;
 
     private int posX;
     private int posY;
@@ -27,10 +29,7 @@ public class Renderer  implements GLEventListener {
     private boolean needToReloadTextures;
     private int [] textures;
 
-    public Renderer(Level level, Player player) {
-        this.level = level;
-        this.player = player;
-
+    Renderer() {
         scale = 1.0f;
         scaleFactor = 1.1f;
 
@@ -57,13 +56,12 @@ public class Renderer  implements GLEventListener {
         gl.glLoadIdentity();
         loadTextures(gl);
 
-        if (level == null || player == null) {
+        if (level == null || data == null || clientName == null) {
             return;
         }
 
         //gl.glTranslatef(-level.getWidth() / 2.0f, -level.getHeight() / 2.0f, 0.0f);
         gl.glTranslatef(posX, posY, 0.0f);
-        //gl.glTranslatef(-5.0f, 0.0f, 0.0f);
 
         gl.glScalef(scale, scale, scale);
 
@@ -92,31 +90,34 @@ public class Renderer  implements GLEventListener {
         }
         gl.glEnd();
 
-        // draw vehicle
-        Vehicle vehicle = player.getVehicle();
-        Vertex [] vertices = transformVehiclePosition(vehicle);
+        // draw vehicles
+        List<Vehicle> vehicles = data.getVehicles();
 
-        if (vehicle instanceof Tank) {
-            id = level.getTextureID("tank01.bmp");
-            texture = usedTextures.get(id);
-            texture.enable(gl);
-            texture.bind(gl);
+        for (Vehicle vehicle: vehicles) {
+            Vertex[] vertices = transformVehiclePosition(vehicle);
 
-            gl.glBegin(GL2.GL_QUADS);
-            {
-                gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
-                gl.glVertex2f(vertices[0].xt, vertices[0].yt);
+            if (vehicle instanceof Tank) {
+                id = level.getTextureID("tank01.bmp");
+                texture = usedTextures.get(id);
+                texture.enable(gl);
+                texture.bind(gl);
 
-                gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
-                gl.glVertex2f(vertices[1].xt, vertices[1].yt);
+                gl.glBegin(GL2.GL_QUADS);
+                {
+                    gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
+                    gl.glVertex2f(vertices[0].xt, vertices[0].yt);
 
-                gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
-                gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+                    gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
+                    gl.glVertex2f(vertices[1].xt, vertices[1].yt);
 
-                gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
-                gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                    gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
+                    gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+
+                    gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
+                    gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                }
+                gl.glEnd();
             }
-            gl.glEnd();
         }
     }
 
@@ -176,21 +177,23 @@ public class Renderer  implements GLEventListener {
         gl.glMatrixMode(GL2.GL_MODELVIEW);
     }
 
-    public void dispose(GLAutoDrawable arg0) {
-        //
-    }
+    public void dispose(GLAutoDrawable arg0) {}
 
-    public void setLevel(Level level) {
+    void setupGameData(Level level, Data data, String clientName) {
         this.level = level;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
+        this.data = data;
+        this.clientName = clientName;
         needToReloadTextures = true;
     }
 
+    void removeGameData() {
+        this.level = null;
+        this.data = null;
+        this.clientName = null;
+    }
+
     private void loadTextures(GL2 gl) {
-        if (level == null || player == null) {
+        if (level == null || data == null || clientName == null) {
             return;
         }
 

@@ -1,6 +1,6 @@
 package com.accenture.gameoftanks.server.net;
 
-import com.accenture.gameoftanks.core.Level;
+import com.accenture.gameoftanks.core.Player;
 import com.accenture.gameoftanks.core.Position;
 import com.accenture.gameoftanks.net.Data;
 
@@ -11,17 +11,13 @@ import java.net.Socket;
 
 public class PlayerHandler extends Thread {
 
-    public static final int TIME_STEP_MSEC = 40;
-
     private ConnectionManager connectionManager;
-    public Socket socket;
+    private Socket socket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
-    private volatile Data data;
+    private Player player;
 
-    private volatile boolean onDemand;
-
-    public PlayerHandler(ConnectionManager connectionManager, Socket socket) {
+    PlayerHandler(ConnectionManager connectionManager, Socket socket) {
         this.connectionManager = connectionManager;
         this.socket = socket;
 
@@ -35,24 +31,6 @@ public class PlayerHandler extends Thread {
 
     @Override
     public void run() {
-        // send data to  client loop
-        Thread outputThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                onDemand = true;
-
-                while (onDemand) {
-                    try {
-                        Thread.sleep(TIME_STEP_MSEC);
-                    } catch (InterruptedException exc) {
-                        exc.printStackTrace();
-                    }
-                    sendData();
-                }
-            }
-        });
-        outputThread.start();
-
         // receive packages from client
         while (true) {
             try {
@@ -61,40 +39,39 @@ public class PlayerHandler extends Thread {
                 if (object instanceof Data) {
                     Data data = (Data) object;
 
-                    if (this.data == null) {
-                        // first data exchange
-                        setupPlayer(data);
-                        this.data = data;
+                    if (player == null) {
+                        // first data transfer
+                        Player newPlayer = data.getPlayer();
+
+                        if (newPlayer != null) {
+                            setupPlayer(newPlayer);
+                            player = newPlayer;
+                        }
                     } else {
-                        this.data.copyIntent(data);
+                        player.copyIntent(data.getPlayer(player.getNickname()));
                     }
-                    //System.out.println("Value received from Client is: " + data.getPlayer().getTank().getPosition().posX);
                 }
             } catch (IOException | ClassNotFoundException exc) {
-                //exc.printStackTrace();
-                connectionManager.removePlayer(this);
-                System.out.println("Client \"" + data.getPlayer().getNickname() + "\" disconnected!");
-                onDemand = false;
+                closeConnection();
                 break;
             }
         }
     }
 
-    private void setupPlayer(Data data) {
+    private void setupPlayer(Player player) {
+        System.out.println("On Player setup...: " + player.getNickname());
 
-        if (connectionManager.playerExists(data.getPlayer())) {
-            connectionManager.removePlayer(this);
-            System.out.println("Client \"" + data.getPlayer().getNickname() + "\" disconnected!");
-            onDemand = false;
+        if (connectionManager.playerExists(player)) {
+            System.out.println("Player " + player.getNickname() + " exists");
+            closeConnection();
             return;
         }
-        System.out.println("Client \"" + data.getPlayer().getNickname() + "\" connected to server!");
-        Level level = connectionManager.getLevel();
+        System.out.println("Client \"" + player.getNickname() + "\" connected to server!");
 
         float posX = 10.0f;
         float posY = 10.0f;
 
-        Position position = data.getPlayer().getVehicle().getPosition();
+        Position position = player.getVehicle().getPosition();
         position.posX = posX;
         position.posY = posY;
         position.alpha = 0.0f;
@@ -102,27 +79,36 @@ public class PlayerHandler extends Thread {
         position.vy = 0.0f;
     }
 
-    private void sendData() {
-        //System.out.println("Server sending data to Player");
-
+    void sendData(Data data) {
         if (inputStream == null || outputStream == null || data == null) {
             return;
         }
 
         try {
-            //System.out.println("value on send is: " + data.getValue());
-            //System.out.println("hash is: " + data.hashCode());
-            //System.out.println("Value on send is: " + data.getPlayer().getTank().getPosition().posX);
             outputStream.reset();
             outputStream.writeObject(data);
-            //outputStream.flush();
         } catch (IOException exc) {
             exc.printStackTrace();
         }
     }
 
-    public Data getData() {
-        return this.data;
+    Player getPlayer() {
+        return this.player;
     }
 
+    private void closeConnection() {
+        connectionManager.removePlayer(this);
+
+        if (player != null) {
+            System.out.println("Client \"" + player.getNickname() + "\" disconnected!");
+        }
+
+        try {
+            outputStream.close();
+            inputStream.close();
+            socket.close();
+        } catch (IOException exc) {
+            exc.printStackTrace();
+        }
+    }
 }

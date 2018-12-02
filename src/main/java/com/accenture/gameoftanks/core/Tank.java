@@ -6,12 +6,11 @@ import java.io.Serializable;
 
 public class Tank extends Vehicle implements Serializable {
 
-    final float length;
-    final float width;
-
+    private final float length;
+    private final float width;
 
     public Tank(int id, float length, float width) {
-        super(id, 5000.0f, 10000.0f, 8, 100);
+        super(id, 5000.0f, 5000.0f, 10000.0f, 8, 2000.0f, 1.3f, 100);
         Shape topology = new Shape(createTopology(length, width));
         setTopology(topology);
 

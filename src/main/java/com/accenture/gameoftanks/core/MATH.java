@@ -9,6 +9,7 @@ public class MATH {
 
     private MATH(){}
 
+    /*
     public static void rotate2d(float angle, Vertex... vertices) {
         for (Vertex vertex: vertices) {
             float x2 = (float) (vertex.x * cos(angle) + vertex.y * -sin(angle));
@@ -17,6 +18,7 @@ public class MATH {
             vertex.yt = y2;
         }
     }
+    */
 
     public static void transform2d(Position position, Vertex... vertices) {
         for (Vertex vertex: vertices) {
@@ -27,6 +29,7 @@ public class MATH {
         }
     }
 
+    /*
     public static void getNormal(float [] normal, Vertex v1, Vertex v2) {
         normal[0] = -(v2.yt - v1.yt);
         normal[1] = v2.xt - v1.xt;
@@ -36,6 +39,7 @@ public class MATH {
         normal[0] /= mag;
         normal[1] /= mag;
     }
+    */
 
     public static void getNormal(float [] normal, Edge edge) {
         normal[0] = -(edge.v2.yt - edge.v1.yt);
@@ -47,6 +51,7 @@ public class MATH {
         normal[1] /= mag;
     }
 
+    /*
     public static void normalize(float [] direction, Edge edge) {
         float dx = edge.v2.xt - edge.v1.xt;
         float dy = edge.v2.yt - edge.v1.yt;
@@ -55,6 +60,7 @@ public class MATH {
         direction[0] = dx / mag;
         direction[1] = dy / mag;
     }
+    */
 
     public static void normalize(float [] direction, float vx, float vy) {
         float mag = (float) sqrt(vx * vx + vy * vy);
@@ -63,14 +69,28 @@ public class MATH {
         direction[1] = vy / mag;
     }
 
+    /*
     public static void reverse(float [] vector) {
         vector[0] *= -1.0f;
         vector[1] *= -1.0f;
     }
+    */
 
     public static void scale(float factor, float [] vector) {
         vector[0] *= factor;
         vector[1] *= factor;
+    }
+
+    public static void rotate(float angle, float [] vector) {
+        float x2 = (float) (vector[0] * cos(angle) + vector[1] * -sin(angle));
+        float y2 = (float) (vector[0] * sin(angle) + vector[1] *  cos(angle));
+        vector[0] = x2;
+        vector[1] = y2;
+    }
+
+    public static void add(float [] v1, float [] v2) {
+        v1[0] += v2[0];
+        v1[1] += v2[1];
     }
 
     /**
@@ -131,8 +151,8 @@ public class MATH {
         return v1[0] * v2.xt + v1[1] * v2.yt;
     }
 
-    public static float dot(float v1x, float v1y, float v2x, float v2y) {
-        return v1x * v2x + v1y * v2y;
+    public static float dot(float [] v1, float v2x, float v2y) {
+        return v1[0] * v2x + v1[1] * v2y;
     }
 
     /**

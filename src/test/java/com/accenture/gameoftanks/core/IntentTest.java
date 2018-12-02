@@ -2,8 +2,6 @@ package com.accenture.gameoftanks.core;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 
 public class IntentTest {
 
@@ -14,7 +12,7 @@ public class IntentTest {
         Intent intent = new Intent();
         float delta = 1.e-7f;
 
-        intent.computeIntent(false, false, true, false);
+        intent.update(false, false, true, false);
 
         /*
 
@@ -25,7 +23,7 @@ public class IntentTest {
         angle = (float) Math.toRadians(angleDeg);
 
 
-        intent.computeIntent(false, true, true, false);
+        intent.update(false, true, true, false);
 
         if (intent.getMoveAngle() < (angle - delta) || intent.getMoveAngle() > (angle + delta)) {
             assertEquals("Incorrect angle value for right button", angle, intent.getMoveAngle(), delta);
@@ -34,7 +32,7 @@ public class IntentTest {
         angle = (float) Math.toRadians(angleDeg);
 
 
-        intent.computeIntent(false, true, false, false);
+        intent.update(false, true, false, false);
 
         if (intent.getMoveAngle() < (angle - delta) || intent.getMoveAngle() > (angle + delta)) {
             assertEquals("Incorrect angle value for right button", angle, intent.getMoveAngle(), delta);
@@ -43,7 +41,7 @@ public class IntentTest {
         angle = (float) Math.toRadians(angleDeg);
 
 
-        intent.computeIntent(true, true, false, false);
+        intent.update(true, true, false, false);
 
         if (intent.getMoveAngle() < (angle - delta) || intent.getMoveAngle() > (angle + delta)) {
             assertEquals("Incorrect angle value for right button", angle, intent.getMoveAngle(), delta);
@@ -52,7 +50,7 @@ public class IntentTest {
         angle = (float) Math.toRadians(angleDeg);
 
 
-        intent.computeIntent(true, false, false, false);
+        intent.update(true, false, false, false);
 
         if (intent.getMoveAngle() < (angle - delta) || intent.getMoveAngle() > (angle + delta)) {
             assertEquals("Incorrect angle value for right button", angle, intent.getMoveAngle(), delta);
@@ -61,7 +59,7 @@ public class IntentTest {
         angle = (float) Math.toRadians(angleDeg);
 
 
-        intent.computeIntent(true, false, false, true);
+        intent.update(true, false, false, true);
 
         if (intent.getMoveAngle() < (angle - delta) || intent.getMoveAngle() > (angle + delta)) {
             assertEquals("Incorrect angle value for right button", angle, intent.getMoveAngle(), delta);
@@ -70,7 +68,7 @@ public class IntentTest {
         angleDeg += 45;
         angle = (float) Math.toRadians(angleDeg);
 
-        intent.computeIntent(false, false, false, true);
+        intent.update(false, false, false, true);
         if (intent.getMoveAngle() < (angle - delta) || intent.getMoveAngle() > (angle + delta)) {
             assertEquals("Incorrect angle value for right button", angle, intent.getMoveAngle(), delta);
         }
@@ -78,7 +76,7 @@ public class IntentTest {
         angleDeg += 45;
         angle = (float) Math.toRadians(angleDeg);
 
-        intent.computeIntent(false, false, true, true);
+        intent.update(false, false, true, true);
         if (intent.getMoveAngle() < (angle - delta) || intent.getMoveAngle() > (angle + delta)) {
             assertEquals("Incorrect angle value for right button", angle, intent.getMoveAngle(), delta);
         }

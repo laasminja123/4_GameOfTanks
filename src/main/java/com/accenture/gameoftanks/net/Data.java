@@ -1,29 +1,70 @@
 package com.accenture.gameoftanks.net;
 
 import com.accenture.gameoftanks.core.Player;
+import com.accenture.gameoftanks.core.Vehicle;
 
 import java.io.Serializable;
+import java.util.*;
 
 public class Data implements Serializable {
-    private Player player;
+    private Map<String, Player> players;
+
+    public Data() {
+        players = new HashMap<>();
+    }
 
     public Data(Player player) {
-        this.player = player;
+        this();
+        players.put(player.getNickname(), player);
+    }
+
+    public void clear() {
+        players.clear();
     }
 
     public Player getPlayer() {
-        return player;
+        List<String> playerNames = new LinkedList<>(players.keySet());
+
+        if (!playerNames.isEmpty()) {
+            return players.get(playerNames.get(0));
+        }
+        return null;
     }
 
-    public void copy(Data data) {
-        this.player.copy(data.player);
+    public Player getPlayer(String nickName) {
+        if (nickName == null) {
+            return null;
+        }
+        return (players.containsKey(nickName)) ? players.get(nickName) : null;
+    }
+
+    public void addPlayer(Player player) {
+        players.put(player.getNickname(), player);
+    }
+
+    private Set<String> getPlayerNames() {
+        return players.keySet();
     }
 
     public void copyPosition(Data data) {
-        this.player.copyPosition(data.player);
+        Set<String> playerNames = data.getPlayerNames();
+
+        for (String name: playerNames) {
+            if (players.containsKey(name)) {
+                players.get(name).copyPosition(data.getPlayer(name));
+            } else {
+                players.put(name, data.getPlayer(name));
+            }
+        }
     }
 
-    public void copyIntent(Data data) {
-        this.player.copyIntent(data.player);
+    public List<Vehicle> getVehicles() {
+        List<Vehicle> vehicles = new LinkedList<>();
+        Set<String> playerNames = players.keySet();
+
+        for (String name: playerNames) {
+            vehicles.add(players.get(name).getVehicle());
+        }
+        return vehicles;
     }
 }

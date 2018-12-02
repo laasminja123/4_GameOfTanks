@@ -4,6 +4,7 @@ import com.accenture.gameoftanks.client.net.PlayerConnection;
 import com.accenture.gameoftanks.core.Intent;
 import com.accenture.gameoftanks.core.Level;
 import com.accenture.gameoftanks.core.Player;
+import com.accenture.gameoftanks.net.Data;
 import com.jogamp.opengl.awt.GLCanvas;
 
 import javax.swing.*;
@@ -56,8 +57,9 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
     // Network
     private PlayerConnection playerConnection;
-    private Player player;
+    private Data playerData;
     private Level level;
+    private String nickName;
 
     // mouse motion processing
     private int [] mousePos1;
@@ -89,7 +91,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
         // OPEN GL panel
         renderArea = new GLCanvas();
-        renderArea.addGLEventListener(new Renderer(null, null));
+        renderArea.addGLEventListener(new Renderer());
         renderArea.setSize(1780, 1450);
 //        renderArea.setFocusable(true);
         renderArea.addKeyListener(new KeyListener() {
@@ -151,7 +153,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         leftfirst.add(portText = new JLabel("Enter SERVER port:"));
 
         leftsecond.setLayout(new GridLayout(3,1,0,5));
-        leftsecond.add(nickInput = new JTextField());
+        leftsecond.add(nickInput = new JTextField("Player"));
         leftsecond.add(addressEdit = new JTextField("localhost"));
         leftsecond.add(portEdit = new JTextField("9999"));
 
@@ -169,6 +171,13 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 playerConnection.disconnect();
+
+                // update renderer
+                Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
+
+                if (renderer != null) {
+                    renderer.removeGameData();
+                }
             }
         });
 
@@ -347,29 +356,29 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
             return;
         }
 
-        String nickname = nickInput.getText();
+        nickName = nickInput.getText();
 
-        if (nickname.trim().isEmpty()) {
+        if (nickName.trim().isEmpty()) {
             printMessage("Enter Nickname!");
             return;
         }
 
         // create data
-        player = new Player(nickname);
+        Player player = new Player(nickName);
+        playerData = new Data(player);
         level = new Level(0.0f, 100.0f, 100.0f, 0.0f);
 
         // update renderer
         Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
 
         if (renderer != null) {
-            renderer.setLevel(level);
-            renderer.setPlayer(player);
+            renderer.setupGameData(level, playerData, nickName);
         }
         renderArea.reshape(0, 0, renderArea.getWidth(), renderArea.getHeight());
         renderArea.display();
 
         // create connection
-        playerConnection = new PlayerConnection(address, port, player);
+        playerConnection = new PlayerConnection(address, port, playerData);
 
         try {
             playerConnection.init();
@@ -393,9 +402,6 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
                     } catch (InterruptedException exc) {
                         //
                     }
-                    // TEST
-                    //player.getTank().getPosition().posX += 1.0f;
-
                     renderArea.display();
                 }
                 rendererLoop = null;
@@ -414,12 +420,12 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
     }
 
     private void updateIntent() {
-        if (player == null) {
-            return;
-        }
+        Player player = playerData.getPlayer(nickName);
 
-        Intent intent = player.getVehicle().getIntent();
-        intent.computeIntent(onLeft, onRight, onTop, onBottom);
+        if (player != null) {
+            Intent intent = player.getVehicle().getIntent();
+            intent.update(onLeft, onRight, onTop, onBottom);
+        }
     }
 
     private void printMessage(String message) {

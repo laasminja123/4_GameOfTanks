@@ -15,7 +15,7 @@ public class DataCore extends Thread {
 
     private boolean onDemand;
 
-    public DataCore(ConnectionManager connectionManager) {
+    DataCore(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
         TIME_STEP_FLOAT = (float) TIME_STEP_MSEC / (float) 1000;
         onDemand = true;
@@ -53,7 +53,19 @@ public class DataCore extends Thread {
 
             for (Vehicle vehicle: vehicles) {
                 for (Entity entity: levelContent) {
-                    Physics.computeCollision(vehicle, entity, TIME_STEP_FLOAT);
+                    Physics.computeCollision(vehicle, entity);
+                }
+            }
+
+            // compute collisions with other movable objects --------------------------------------
+            int numVehicles = vehicles.size();
+
+            for (int i = 0; i < numVehicles - 1; i++) {
+                Vehicle activeVehicle = vehicles.get(i);
+
+                for (int j = i + 1; j < numVehicles; j++) {
+                    Vehicle passiveVehicle = vehicles.get(j);
+                    Physics.computeCollision(activeVehicle, passiveVehicle);
                 }
             }
 

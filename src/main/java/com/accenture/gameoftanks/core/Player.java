@@ -29,16 +29,16 @@ public class Player implements Serializable {
         return nickname;
     }
 
-    public void copy(Player player) {
-        this.vehicle.copy(player.vehicle);
-    }
-
     public void copyPosition(Player player) {
-        this.vehicle.copyPosition(player.vehicle);
+        if (player != null) {
+            this.vehicle.copyPosition(player.vehicle);
+        }
     }
 
     public void copyIntent(Player player) {
-        this.vehicle.copyIntent(player.vehicle);
+        if (player != null) {
+            this.vehicle.copyIntent(player.vehicle);
+        }
     }
 
     public int getDeaths() {

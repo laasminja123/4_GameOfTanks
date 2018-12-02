@@ -24,6 +24,8 @@ public class ConnectionManager extends Thread {
     private Level level;
     private Data data;
 
+    private int vehicleId;
+
     private volatile boolean onDemand;
 
     public ConnectionManager(Level level, DatabaseManager databaseManager) {
@@ -31,6 +33,7 @@ public class ConnectionManager extends Thread {
         this.level = level;
         this.data = new Data();
         this.databaseManager = databaseManager;
+        this.vehicleId = 1;
     }
 
     @Override
@@ -66,9 +69,10 @@ public class ConnectionManager extends Thread {
                         try {
                             Socket socket = server.accept();
                             System.out.println("Player connected");
-                            PlayerHandler playerHandler = new PlayerHandler(ConnectionManager.this, socket);
+                            PlayerHandler playerHandler = new PlayerHandler(ConnectionManager.this, socket, vehicleId++);
                             connections.add(playerHandler);
                             playerHandler.start();
+                            System.out.println("Connections pull size is: " + connections.size());
                             // TODO call database method which informs it about player connection
                         } catch (IOException exc) {
                             exc.printStackTrace();
@@ -135,6 +139,7 @@ public class ConnectionManager extends Thread {
             // TODO call database manager method which informs it about player disconnection
         }
         connections.remove(handler);
+        System.out.println("Connections pull size is: " + connections.size());
     }
 
     boolean playerExists(Player newPlayer) {

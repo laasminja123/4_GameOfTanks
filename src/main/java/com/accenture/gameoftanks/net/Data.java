@@ -58,6 +58,21 @@ public class Data implements Serializable {
         }
     }
 
+    // removes disconnected players
+    public void cleanUp(Data data) {
+        Set<String> thisNames = players.keySet();
+
+        if (thisNames.size() == 1) {
+            return;
+        }
+
+        for (String name: thisNames) {
+            if (!data.players.containsKey(name)) {
+                players.remove(name);
+            }
+        }
+    }
+
     public List<Vehicle> getVehicles() {
         List<Vehicle> vehicles = new LinkedList<>();
         Set<String> playerNames = players.keySet();
@@ -66,5 +81,9 @@ public class Data implements Serializable {
             vehicles.add(players.get(name).getVehicle());
         }
         return vehicles;
+    }
+
+    public int getVehicleId(String playerName) {
+        return (players.containsKey(playerName)) ? players.get(playerName).getVehicle().getID() : -1;
     }
 }

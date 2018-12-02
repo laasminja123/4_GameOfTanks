@@ -93,39 +93,10 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         renderArea = new GLCanvas();
         renderArea.addGLEventListener(new Renderer());
         renderArea.setSize(1780, 1450);
-//        renderArea.setFocusable(true);
-        renderArea.addKeyListener(new KeyListener() {
 
-            public void keyTyped(KeyEvent e) {
-            }
-
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()== KeyEvent.VK_D) {
-                    onRight = true;
-                } else if(e.getKeyCode()== KeyEvent.VK_A) {
-                    onLeft = true;
-                } else if(e.getKeyCode()== KeyEvent.VK_S) {
-                    onBottom = true;
-                } else if(e.getKeyCode()== KeyEvent.VK_W) {
-                    onTop = true;
-                }
-                updateIntent();
-            }
-
-            public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_D) {
-                    onRight = false;
-                } else if (e.getKeyCode() == KeyEvent.VK_A) {
-                    onLeft = false;
-                } else if (e.getKeyCode() == KeyEvent.VK_S) {
-                    onBottom = false;
-                } else if (e.getKeyCode() == KeyEvent.VK_W) {
-                    onTop = false;
-                }
-                updateIntent();
-            }
-
-        });
+        this.addKeyListener(new KeyProcessor());
+        setFocusable(true);
+        //setFocusTraversalKeysEnabled(false);
 
         //base layout
         getContentPane().add(base = new JPanel(), BorderLayout.CENTER);
@@ -154,12 +125,17 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
         leftsecond.setLayout(new GridLayout(3,1,0,5));
         leftsecond.add(nickInput = new JTextField("Player"));
+        nickInput.addKeyListener(new KeyProcessor());
         leftsecond.add(addressEdit = new JTextField("localhost"));
+        addressEdit.addKeyListener(new KeyProcessor());
         leftsecond.add(portEdit = new JTextField("9999"));
+        portEdit.addKeyListener(new KeyProcessor());
 
         leftthird.setLayout(new GridLayout(3,1,0,5));
         leftthird.add(connect = new JButton("CONNECT"));
+        connect.addKeyListener(new KeyProcessor());
         leftthird.add(disconnect = new JButton("DISCONNECT"));
+        disconnect.setEnabled(false);
         connect.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -178,6 +154,9 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
                 if (renderer != null) {
                     renderer.removeGameData();
                 }
+
+                connect.setEnabled(true);
+                disconnect.setEnabled(false);
             }
         });
 
@@ -190,13 +169,18 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         rightfirst.setLayout(new GridLayout(3,1,0,5));
         rightfirst.add(emptyspace);
         rightfirst.add(moveLeft = new JButton("TURN LEFT"));
+        moveLeft.addKeyListener(new KeyProcessor());
         moveLeft.addMouseListener(this);
 
         rightsecond.setLayout(new GridLayout(3, 1, 0, 5));
         rightsecond.add(moveUp = new JButton("FORWARD"));
+        moveUp.addKeyListener(new KeyProcessor());
         rightsecond.add(shoot = new JButton("SHOOT"));
+        shoot.addKeyListener(new KeyProcessor());
         rightsecond.add(moveDown = new JButton("BACKWARD"));
+        moveDown.addKeyListener(new KeyProcessor());
         moveUp.addMouseListener(this);
+        moveUp.addKeyListener(new KeyProcessor());
         moveDown.addMouseListener(this);
         shoot.addActionListener(new ActionListener() {
             @Override
@@ -209,6 +193,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         rightthird.setLayout(new GridLayout(3,1,0,5));
         rightthird.add(emptyspace);
         rightthird.add(moveRight = new JButton("TURN RIGHT"));
+        moveRight.addKeyListener(new KeyProcessor());
         moveRight.addMouseListener(this);
 
         // button colors
@@ -279,8 +264,6 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
             onRight = false;
         } else if (mouseEvent.getSource() == moveDown) {
             onBottom = false;
-        } else if (mouseEvent.getSource() == renderArea) {
-            // todo
         }
         updateIntent();
     }
@@ -295,23 +278,18 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
     public void mouseDragged(MouseEvent event) {
         mousePos2[0] = event.getX();
         mousePos2[1] = event.getY();
-        updateRendererPosition();
+
+        Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
+        renderer.processMouseDrag(mousePos2[0] - mousePos1[0],
+                mousePos2[1] - mousePos1[1]);
+
+        mousePos1[0] = event.getX();
+        mousePos1[1] = event.getY();
+        renderArea.display();
     }
 
     @Override
-    public void mouseMoved(MouseEvent mouseEvent) {
-
-    }
-
-    private void updateRendererPosition() {
-        Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
-        int dx = (mousePos2[0] - mousePos1[0]) / 5;
-        int dy = -(mousePos2[1] - mousePos1[1]) / 5;
-
-        if (renderer != null) {
-            renderer.setPosition(dx, dy);
-        }
-    }
+    public void mouseMoved(MouseEvent mouseEvent) {}
 
     private void updateRendererScale(int action) {
         // action 1: up
@@ -329,11 +307,6 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
 
     private void connect() {
-        if (playerConnection != null) {
-            printMessage("Already connected!");
-            return;
-        }
-
         String address = addressEdit.getText();
 
         if (address.trim().isEmpty()) {
@@ -366,7 +339,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         // create data
         Player player = new Player(nickName);
         playerData = new Data(player);
-        level = new Level(0.0f, 100.0f, 100.0f, 0.0f);
+        level = new Level();
 
         // update renderer
         Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
@@ -382,7 +355,10 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
         try {
             playerConnection.init();
+            connect.setEnabled(false);
+            disconnect.setEnabled(true);
             startRendererLoop();
+            this.requestFocus();
         } catch (RuntimeException exc) {
             printMessage(exc.getMessage());
         }
@@ -420,6 +396,9 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
     }
 
     private void updateIntent() {
+        if (playerData == null) {
+            return;
+        }
         Player player = playerData.getPlayer(nickName);
 
         if (player != null) {
@@ -430,6 +409,48 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
     private void printMessage(String message) {
         JOptionPane.showMessageDialog(null, message);
+    }
+
+    private class KeyProcessor implements KeyListener {
+        public void keyTyped(KeyEvent e) {}
+
+        public void keyPressed(KeyEvent e) {
+            if(e.getKeyCode()== KeyEvent.VK_D) {
+                onRight = true;
+                System.out.println("Key pressed: D");
+            } else if(e.getKeyCode()== KeyEvent.VK_A) {
+                onLeft = true;
+                System.out.println("Key pressed: A");
+            } else if(e.getKeyCode()== KeyEvent.VK_S) {
+                onBottom = true;
+                System.out.println("Key pressed: S");
+            } else if(e.getKeyCode()== KeyEvent.VK_W) {
+                onTop = true;
+                System.out.println("Key pressed: W");
+            } else {
+                return;
+            }
+            updateIntent();
+        }
+
+        public void keyReleased(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_D) {
+                onRight = false;
+                System.out.println("Key released: D");
+            } else if (e.getKeyCode() == KeyEvent.VK_A) {
+                onLeft = false;
+                System.out.println("Key released: A");
+            } else if (e.getKeyCode() == KeyEvent.VK_S) {
+                onBottom = false;
+                System.out.println("Key released: S");
+            } else if (e.getKeyCode() == KeyEvent.VK_W) {
+                onTop = false;
+                System.out.println("Key released: W");
+            } else {
+                return;
+            }
+            updateIntent();
+        }
     }
 
 }

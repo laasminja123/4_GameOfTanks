@@ -33,6 +33,7 @@ public class PlayerConnection {
             inputStream = new ObjectInputStream(client.getInputStream());
         } catch (java.io.IOException e) {
             e.printStackTrace();
+            disconnect();
             throw new RuntimeException("Failed to connect server");
         }
         onDemand = true;
@@ -64,9 +65,11 @@ public class PlayerConnection {
                         if (object instanceof Data) {
                             Data data = (Data) object;
                             PlayerConnection.this.data.copyPosition(data);
+                            //PlayerConnection.this.data.cleanUp(data);
                         }
                     } catch (IOException | ClassNotFoundException exc) {
                         exc.printStackTrace();
+                        disconnect();
                     }
                 }
             }
@@ -99,4 +102,7 @@ public class PlayerConnection {
         }
     }
 
+    public boolean isAlive() {
+        return onDemand;
+    }
 }

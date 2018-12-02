@@ -9,8 +9,8 @@ public class Tank extends Vehicle implements Serializable {
     private final float length;
     private final float width;
 
-    public Tank(int id, float length, float width) {
-        super(id, 5000.0f, 5000.0f, 10000.0f, 8, 2000.0f, 1.3f, 100);
+    Tank(float length, float width) {
+        super(5000.0f, 5000.0f, 10000.0f, 8, 2000.0f, 1.3f, 100);
         Shape topology = new Shape(createTopology(length, width));
         setTopology(topology);
 

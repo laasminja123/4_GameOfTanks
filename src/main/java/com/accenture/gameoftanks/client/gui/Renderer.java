@@ -19,8 +19,9 @@ public class Renderer  implements GLEventListener {
     private Data data;
     private String clientName;
 
-    private int posX;
-    private int posY;
+    private float posX;
+    private float posY;
+    private float translationSensitivity;
 
     private float scale;
     private float scaleFactor;
@@ -29,16 +30,14 @@ public class Renderer  implements GLEventListener {
     private boolean needToReloadTextures;
     private int [] textures;
 
+    private boolean onRender;
+
     Renderer() {
         scale = 1.0f;
+        translationSensitivity = .2f;
         scaleFactor = 1.1f;
 
         usedTextures = new LinkedList<>();
-    }
-
-    void setPosition(int x, int y) {
-        posX = x;
-        posY = y;
     }
 
     void scaleIn() {
@@ -50,6 +49,11 @@ public class Renderer  implements GLEventListener {
     }
 
     public void display(GLAutoDrawable gLDrawable) {
+        if (onRender) {
+            return;
+        }
+        onRender = true;
+
         final GL2 gl = gLDrawable.getGL().getGL2();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
@@ -57,14 +61,20 @@ public class Renderer  implements GLEventListener {
         loadTextures(gl);
 
         if (level == null || data == null || clientName == null) {
+            onRender = false;
             return;
         }
 
-        //gl.glTranslatef(-level.getWidth() / 2.0f, -level.getHeight() / 2.0f, 0.0f);
-        gl.glTranslatef(posX, posY, 0.0f);
+        gl.glTranslatef(-posX, -posY, 0.0f);
 
         gl.glScalef(scale, scale, scale);
 
+        drawLevel(gl);
+        drawVehicles(gl);
+        onRender = false;
+    }
+
+    private void drawLevel(GL2 gl) {
         // draw level background
         float[][] uvCoords = getDefaultTextureCoordinates();
         int id = level.getTextureID("battleGround01.bmp");
@@ -73,7 +83,7 @@ public class Renderer  implements GLEventListener {
         texture.bind(gl);
         float [] extents = level.getExtents();
 
-        //gl.glColor3f(1.0f, 1.0f, 1.0f);
+        gl.glColor3f(1.0f, 1.0f, 1.0f);
         gl.glBegin(GL2.GL_QUADS);
         {
             gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
@@ -89,18 +99,27 @@ public class Renderer  implements GLEventListener {
             gl.glVertex2f(extents[0], extents[3]);
         }
         gl.glEnd();
+    }
 
-        // draw vehicles
+    private void drawVehicles(GL2 gl) {
         List<Vehicle> vehicles = data.getVehicles();
+        int vehicleId = data.getVehicleId(clientName);
+        float[][] uvCoords = getDefaultTextureCoordinates();
 
         for (Vehicle vehicle: vehicles) {
             Vertex[] vertices = transformVehiclePosition(vehicle);
 
             if (vehicle instanceof Tank) {
-                id = level.getTextureID("tank01.bmp");
-                texture = usedTextures.get(id);
+                int id = level.getTextureID("tank01.bmp");
+                Texture texture = usedTextures.get(id);
                 texture.enable(gl);
                 texture.bind(gl);
+
+                if (vehicle.getID() == vehicleId) {
+                    gl.glColor3f(1.0f, 0.0f, 0.0f);
+                } else {
+                    gl.glColor3f(1.0f, 1.0f, 1.0f);
+                }
 
                 gl.glBegin(GL2.GL_QUADS);
                 {
@@ -190,6 +209,11 @@ public class Renderer  implements GLEventListener {
         this.level = null;
         this.data = null;
         this.clientName = null;
+    }
+
+    void processMouseDrag(int dx, int dy) {
+        posX -= dx * translationSensitivity;
+        posY += dy * translationSensitivity;
     }
 
     private void loadTextures(GL2 gl) {

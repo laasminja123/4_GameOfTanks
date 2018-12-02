@@ -14,7 +14,7 @@ public class Player implements Serializable {
 
     public Player(String nickname) {
         this.nickname = nickname;
-        this.vehicle = new Tank(0, 5.0f, 3.0f);
+        this.vehicle = new Tank(5.0f, 3.0f);
     }
 
     public int getId() {

@@ -17,9 +17,12 @@ public class PlayerHandler extends Thread {
     private ObjectOutputStream outputStream;
     private Player player;
 
-    PlayerHandler(ConnectionManager connectionManager, Socket socket) {
+    private int vehicleId;
+
+    PlayerHandler(ConnectionManager connectionManager, Socket socket, int vehicleId) {
         this.connectionManager = connectionManager;
         this.socket = socket;
+        this.vehicleId = vehicleId;
 
         try {
             outputStream = new ObjectOutputStream(socket.getOutputStream());
@@ -59,10 +62,8 @@ public class PlayerHandler extends Thread {
     }
 
     private void setupPlayer(Player player) {
-        System.out.println("On Player setup...: " + player.getNickname());
-
         if (connectionManager.playerExists(player)) {
-            System.out.println("Player " + player.getNickname() + " exists");
+            System.out.println("Player " + player.getNickname() + " already exists");
             closeConnection();
             return;
         }
@@ -77,6 +78,8 @@ public class PlayerHandler extends Thread {
         position.alpha = 0.0f;
         position.vx = 0.0f;
         position.vy = 0.0f;
+
+        player.getVehicle().setId(vehicleId);
     }
 
     void sendData(Data data) {

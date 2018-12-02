@@ -16,8 +16,7 @@ public class Vehicle extends Entity implements Serializable {
     private final float torqueXY;
     private final float maxOmega;
 
-    Vehicle(int id,
-            float mass,
+    Vehicle(float mass,
             float momentOfInertia,
             float thrust,
             float maxSpeed,
@@ -25,13 +24,17 @@ public class Vehicle extends Entity implements Serializable {
             float maxOmega,
             int startingHp) {
         super(false, mass, momentOfInertia);
-        this.id = id;
+        this.id = -1;
         this.thrust = thrust;
         this.maxSpeed = maxSpeed;
         this.torqueXY = torqueXY;
         this.maxOmega = maxOmega;
         this.startingHp = startingHp;
         this.currentHp = startingHp;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getID() {
@@ -63,6 +66,7 @@ public class Vehicle extends Entity implements Serializable {
     }
 
     void copyPosition(Vehicle vehicle) {
+        this.id = vehicle.id;
         this.position.copy(vehicle.position);
     }
 

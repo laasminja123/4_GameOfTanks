@@ -49,6 +49,9 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
     private boolean onTop;
     private boolean onRight;
     private boolean onBottom;
+    private boolean onShoot;
+    private boolean onAdjustShootingAngle;
+    private float shootingAngle;
 
     // GL Viewport
     private GLCanvas renderArea;
@@ -93,6 +96,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         renderArea = new GLCanvas();
         renderArea.addGLEventListener(new Renderer());
         renderArea.setSize(1780, 1450);
+        renderArea.addKeyListener(new KeyProcessor());
 
         this.addKeyListener(new KeyProcessor());
         setFocusable(true);
@@ -250,46 +254,63 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         } else if (event.getSource() == renderArea) {
             mousePos1[0] = event.getX();
             mousePos1[1] = event.getY();
+
+            if (SwingUtilities.isLeftMouseButton(event)) {
+                onAdjustShootingAngle = true;
+            }
         }
         updateIntent();
     }
 
     @Override
-    public void mouseReleased(MouseEvent mouseEvent) {
-        if (mouseEvent.getSource() == moveLeft) {
+    public void mouseReleased(MouseEvent event) {
+        if (event.getSource() == moveLeft) {
             onLeft = false;
-        } else if (mouseEvent.getSource() == moveUp) {
+        } else if (event.getSource() == moveUp) {
             onTop = false;
-        } else if (mouseEvent.getSource() == moveRight) {
+        } else if (event.getSource() == moveRight) {
             onRight = false;
-        } else if (mouseEvent.getSource() == moveDown) {
+        } else if (event.getSource() == moveDown) {
             onBottom = false;
+        } else if (event.getSource() == renderArea) {
+            if (SwingUtilities.isLeftMouseButton(event)) {
+                onAdjustShootingAngle = false;
+            }
+            Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
+            renderer.dragLine(renderArea.getWidth(), renderArea.getHeight(), event.getX(), event.getY(), false);
+            renderArea.display();
         }
         updateIntent();
     }
 
     @Override
-    public void mouseEntered(MouseEvent mouseEvent) {}
+    public void mouseEntered(MouseEvent event) {}
 
     @Override
-    public void mouseExited(MouseEvent mouseEvent) {}
+    public void mouseExited(MouseEvent event) {}
 
     @Override
     public void mouseDragged(MouseEvent event) {
-        mousePos2[0] = event.getX();
-        mousePos2[1] = event.getY();
+        if (event.getSource() == renderArea) {
+            mousePos2[0] = event.getX();
+            mousePos2[1] = event.getY();
+            Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
 
-        Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
-        renderer.processMouseDrag(mousePos2[0] - mousePos1[0],
-                mousePos2[1] - mousePos1[1]);
+            if (SwingUtilities.isRightMouseButton(event)) {
+                renderer.processMouseDrag(mousePos2[0] - mousePos1[0],
+                        mousePos2[1] - mousePos1[1]);
 
-        mousePos1[0] = event.getX();
-        mousePos1[1] = event.getY();
-        renderArea.display();
+                mousePos1[0] = event.getX();
+                mousePos1[1] = event.getY();
+            } else {
+                renderer.dragLine(renderArea.getWidth(), renderArea.getHeight(), mousePos2[0], mousePos2[1], true);
+            }
+            renderArea.display();
+        }
     }
 
     @Override
-    public void mouseMoved(MouseEvent mouseEvent) {}
+    public void mouseMoved(MouseEvent event) {}
 
     private void updateRendererScale(int action) {
         // action 1: up
@@ -372,11 +393,17 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         rendererLoop = new Thread(new Runnable() {
             @Override
             public void run() {
+                Renderer renderer = (Renderer) renderArea.getGLEventListener(0);
+
                 while (onRender) {
                     try {
                         Thread.sleep(RENDERER_TIME_STEP_MSEC);
                     } catch (InterruptedException exc) {
                         //
+                    }
+
+                    if (onAdjustShootingAngle) {
+                        shootingAngle = renderer.getShootingAngle();
                     }
                     renderArea.display();
                 }
@@ -403,7 +430,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
         if (player != null) {
             Intent intent = player.getVehicle().getIntent();
-            intent.update(onLeft, onRight, onTop, onBottom);
+            intent.update(onLeft, onRight, onTop, onBottom, onShoot, onAdjustShootingAngle, shootingAngle);
         }
     }
 
@@ -415,18 +442,16 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         public void keyTyped(KeyEvent e) {}
 
         public void keyPressed(KeyEvent e) {
-            if(e.getKeyCode()== KeyEvent.VK_D) {
+            if (e.getKeyCode()== KeyEvent.VK_F) {
                 onRight = true;
-                System.out.println("Key pressed: D");
-            } else if(e.getKeyCode()== KeyEvent.VK_A) {
+            } else if (e.getKeyCode()== KeyEvent.VK_S) {
                 onLeft = true;
-                System.out.println("Key pressed: A");
-            } else if(e.getKeyCode()== KeyEvent.VK_S) {
+            } else if (e.getKeyCode()== KeyEvent.VK_D) {
                 onBottom = true;
-                System.out.println("Key pressed: S");
-            } else if(e.getKeyCode()== KeyEvent.VK_W) {
+            } else if (e.getKeyCode()== KeyEvent.VK_E) {
                 onTop = true;
-                System.out.println("Key pressed: W");
+            } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                onShoot = true;
             } else {
                 return;
             }
@@ -434,18 +459,16 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         }
 
         public void keyReleased(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_D) {
+            if (e.getKeyCode() == KeyEvent.VK_F) {
                 onRight = false;
-                System.out.println("Key released: D");
-            } else if (e.getKeyCode() == KeyEvent.VK_A) {
-                onLeft = false;
-                System.out.println("Key released: A");
             } else if (e.getKeyCode() == KeyEvent.VK_S) {
+                onLeft = false;
+            } else if (e.getKeyCode() == KeyEvent.VK_D) {
                 onBottom = false;
-                System.out.println("Key released: S");
-            } else if (e.getKeyCode() == KeyEvent.VK_W) {
+            } else if (e.getKeyCode() == KeyEvent.VK_E) {
                 onTop = false;
-                System.out.println("Key released: W");
+            } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                onShoot = false;
             } else {
                 return;
             }

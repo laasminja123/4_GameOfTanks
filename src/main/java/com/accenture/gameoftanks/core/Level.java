@@ -68,6 +68,8 @@ public class Level {
         textures = new LinkedList<>();
         textures.add("battleGround01.bmp");
         textures.add("tank01.bmp");
+        textures.add("tank-turret01.bmp");
+        textures.add("tank-gun01.bmp");
     }
 
     public List<String> getTextures() {

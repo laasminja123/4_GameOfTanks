@@ -29,6 +29,27 @@ public class MATH {
         }
     }
 
+    /**
+     * @param posX  mass center position X
+     * @param posY  mass center position Y
+     * @param offset  displacement from center in longitudinal direction
+     * @param alpha  parent body rotation angle
+     * @param angle  this body relative rotation angle
+     * @param vertices set with vertices
+     */
+    public static void transform2d(float posX, float posY, float offset, float alpha, float angle, Vertex [] vertices) {
+        float [] displacement = new float[] {offset, 0.0f};
+        rotate(alpha, displacement);
+        float phi = alpha + angle;
+
+        for (Vertex vertex: vertices) {
+            float x2 = (float) (vertex.x * cos(phi) + vertex.y * -sin(phi));
+            float y2 = (float) (vertex.x * sin(phi) + vertex.y *  cos(phi));
+            vertex.xt = posX + displacement[0] + x2;
+            vertex.yt = posY + displacement[1] + y2;
+        }
+    }
+
     /*
     public static void getNormal(float [] normal, Vertex v1, Vertex v2) {
         normal[0] = -(v2.yt - v1.yt);

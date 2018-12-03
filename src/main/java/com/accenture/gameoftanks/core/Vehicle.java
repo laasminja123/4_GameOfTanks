@@ -2,7 +2,7 @@ package com.accenture.gameoftanks.core;
 
 import java.io.Serializable;
 
-public class Vehicle extends Entity implements Serializable {
+public abstract class Vehicle extends Entity implements Serializable {
 
     private int id;
     private int startingHp;
@@ -32,6 +32,10 @@ public class Vehicle extends Entity implements Serializable {
         this.startingHp = startingHp;
         this.currentHp = startingHp;
     }
+
+    public abstract float getShootingAngle();
+
+    public abstract void incrementShootDirection(float angle);
 
     public void setId(int id) {
         this.id = id;

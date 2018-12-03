@@ -6,6 +6,7 @@ import com.accenture.gameoftanks.net.Data;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
+import javafx.geometry.Pos;
 
 import javax.swing.*;
 import java.io.File;
@@ -22,6 +23,16 @@ public class Renderer  implements GLEventListener {
     private float posX;
     private float posY;
     private float translationSensitivity;
+
+    private float clientVehiclePosX;
+    private float clientVehiclePosY;
+
+    private float viewPortSizeX;
+    private float viewPortSizeY;
+
+    private float aimPosX;
+    private float aimPosY;
+    private boolean onDrag;
 
     private float scale;
     private float scaleFactor;
@@ -115,11 +126,79 @@ public class Renderer  implements GLEventListener {
                 texture.enable(gl);
                 texture.bind(gl);
 
+                // handle client's vehicle
                 if (vehicle.getID() == vehicleId) {
-                    gl.glColor3f(1.0f, 0.0f, 0.0f);
+                    // drag line
+                    if (onDrag) {
+                        gl.glColor3f(1.0f, 1.0f, 1.0f);
+                        Position position = vehicle.getPosition();
+                        clientVehiclePosX = position.posX;
+                        clientVehiclePosY = position.posY;
+                        gl.glBegin(GL2.GL_LINES);
+                        {
+                            gl.glVertex2f(position.posX, position.posY);
+                            gl.glVertex2f(aimPosX, aimPosY);
+                        }
+                        gl.glEnd();
+                    }
+                    //gl.glColor3f(1.0f, 0.0f, 0.0f);
+                    gl.glColor3f(1.0f, 1.0f, 1.0f);
                 } else {
                     gl.glColor3f(1.0f, 1.0f, 1.0f);
                 }
+
+                // draw body
+                gl.glBegin(GL2.GL_QUADS);
+                {
+                    gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
+                    gl.glVertex2f(vertices[0].xt, vertices[0].yt);
+
+                    gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
+                    gl.glVertex2f(vertices[1].xt, vertices[1].yt);
+
+                    gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
+                    gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+
+                    gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
+                    gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                }
+                gl.glEnd();
+
+                // draw turret
+                id = level.getTextureID("tank-turret01.bmp");
+                texture = usedTextures.get(id);
+                texture.enable(gl);
+                texture.bind(gl);
+                Turret turret = ((Tank) vehicle).getTurret();
+                vertices = turret.getTurretTopology();
+                Position pos = vehicle.getPosition();
+                float offset = turret.getOffset();
+                float angle =  turret.getAngle();
+                transformPosition(pos.posX, pos.posY, offset, pos.alpha, angle, vertices);
+
+                gl.glBegin(GL2.GL_QUADS);
+                {
+                    gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
+                    gl.glVertex2f(vertices[0].xt, vertices[0].yt);
+
+                    gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
+                    gl.glVertex2f(vertices[1].xt, vertices[1].yt);
+
+                    gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
+                    gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+
+                    gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
+                    gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                }
+                gl.glEnd();
+
+                // draw gun
+                id = level.getTextureID("tank-gun01.bmp");
+                texture = usedTextures.get(id);
+                texture.enable(gl);
+                texture.bind(gl);
+                vertices = turret.getGunTopology();
+                transformPosition(pos.posX, pos.posY, offset + turret.getLength() / 2.0f, pos.alpha, angle, vertices);
 
                 gl.glBegin(GL2.GL_QUADS);
                 {
@@ -165,6 +244,20 @@ public class Renderer  implements GLEventListener {
         return topology;
     }
 
+    /**
+     * @param posX  mass center position X
+     * @param posY  mass center position Y
+     * @param offset  displacement from center in longitudinal direction
+     * @param alpha  parent body rotation angle
+     * @param angle  this body relative rotation angle
+     * @param topology set with vertices
+     * @return transformed topology
+     */
+    private Vertex [] transformPosition(float posX, float posY, float offset, float alpha, float angle, Vertex [] topology) {
+        MATH.transform2d(posX, posY, offset, alpha, angle, topology);
+        return topology;
+    }
+
     public void init(GLAutoDrawable gLDrawable) {
         final GL2 gl = gLDrawable.getGL().getGL2();
         gl.glShadeModel(GL2.GL_SMOOTH);
@@ -185,12 +278,11 @@ public class Renderer  implements GLEventListener {
 
         if (level != null) {
             float [] extents = level.getExtents();
-            float offset = 5.0f;
-            float extent = Math.max(extents[1] - extents[0], extents[3] - extents[2]);
-            float w = extent * ratio;
-            float h = extent;
-            gl.glOrtho(-w / 2.0f - offset, w / 2.0f + offset,
-                    -h / 2.0f - offset, h / 2.0f + offset, -100.0f, 100.0f);
+            viewPortSizeY = Math.max(extents[1] - extents[0], extents[3] - extents[2]);
+            viewPortSizeX = viewPortSizeY * ratio;
+
+            gl.glOrtho(-viewPortSizeX / 2.0f, viewPortSizeX / 2.0f,
+                    -viewPortSizeY / 2.0f, viewPortSizeY / 2.0f, -100.0f, 100.0f);
         }
 
         gl.glMatrixMode(GL2.GL_MODELVIEW);
@@ -214,6 +306,32 @@ public class Renderer  implements GLEventListener {
     void processMouseDrag(int dx, int dy) {
         posX -= dx * translationSensitivity;
         posY += dy * translationSensitivity;
+    }
+
+    void dragLine(float width, float height, int x, int y, boolean onDrag) {
+        aimPosX = x;
+        aimPosY = y;
+        transformToWorldCs(width, height, x, y);
+        this.onDrag = onDrag;
+    }
+
+    float getShootingAngle() {
+        return (float) Math.atan2(aimPosY - clientVehiclePosY, aimPosX - clientVehiclePosX);
+    }
+
+    private void transformToWorldCs(float width, float height, float mx1, float my1) {
+        float [] p1 = new float[2];
+
+        // horizontal physical bounds
+        p1[0] = (mx1 / width) * viewPortSizeX - viewPortSizeX / 2 + posX;
+        p1[0] /= scale;
+
+        // vertical physical bounds
+        p1[1] = (-my1 / height) * viewPortSizeY + viewPortSizeY / 2 + posY;
+        p1[1] /= scale;
+
+        aimPosX = p1[0];
+        aimPosY = p1[1];
     }
 
     private void loadTextures(GL2 gl) {

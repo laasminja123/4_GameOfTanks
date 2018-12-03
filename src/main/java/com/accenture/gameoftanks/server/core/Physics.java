@@ -147,7 +147,7 @@ class Physics {
         float torqueXY = vehicle.getTorqueXY();
         float maxOmega = vehicle.getMaxOmega();
 
-        float tFrictionK = 3.0f; // TODO implement it for vehicle
+        float tFrictionK = 4.0f; // TODO implement it for vehicle
 
         float velocity = (float) sqrt(pos.vx * pos.vx + pos.vy * pos.vy);
         float thrust = computeThrust(vehicle, velocity);

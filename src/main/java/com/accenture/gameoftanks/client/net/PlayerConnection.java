@@ -65,10 +65,10 @@ public class PlayerConnection {
                         if (object instanceof Data) {
                             Data data = (Data) object;
                             PlayerConnection.this.data.copyPosition(data);
-                            //PlayerConnection.this.data.cleanUp(data);
+                            PlayerConnection.this.data.cleanUp(data);
                         }
                     } catch (IOException | ClassNotFoundException exc) {
-                        exc.printStackTrace();
+                        //exc.printStackTrace();
                         disconnect();
                     }
                 }
@@ -86,7 +86,7 @@ public class PlayerConnection {
             outputStream.reset();
             outputStream.writeObject(data);
         } catch (IOException exc) {
-            exc.printStackTrace();
+            //exc.printStackTrace();
         }
     }
 

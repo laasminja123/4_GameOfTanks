@@ -58,13 +58,8 @@ public class DataCore extends Thread {
             }
 
             // compute collisions with other movable objects --------------------------------------
-            int numVehicles = vehicles.size();
-
-            for (int i = 0; i < numVehicles - 1; i++) {
-                Vehicle activeVehicle = vehicles.get(i);
-
-                for (int j = i + 1; j < numVehicles; j++) {
-                    Vehicle passiveVehicle = vehicles.get(j);
+            for (Vehicle activeVehicle: vehicles) {
+                for (Vehicle passiveVehicle: vehicles) {
                     Physics.computeCollision(activeVehicle, passiveVehicle);
                 }
             }

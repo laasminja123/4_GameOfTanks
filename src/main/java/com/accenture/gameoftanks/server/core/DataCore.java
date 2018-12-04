@@ -68,6 +68,11 @@ public class DataCore extends Thread {
             for (Vehicle vehicle: vehicles) {
                 Physics.computeMotion(vehicle, TIME_STEP_FLOAT);
             }
+
+            // rotate guns ------------------------------------------------------------------------
+            for (Vehicle vehicle: vehicles) {
+                Physics.adjustGunDirection(vehicle);
+            }
         }
     }
 }

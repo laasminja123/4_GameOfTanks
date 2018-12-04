@@ -6,7 +6,6 @@ import com.accenture.gameoftanks.net.Data;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
-import javafx.geometry.Pos;
 
 import javax.swing.*;
 import java.io.File;
@@ -126,18 +125,43 @@ public class Renderer  implements GLEventListener {
                 texture.enable(gl);
                 texture.bind(gl);
 
+                Turret turret = ((Tank) vehicle).getTurret();
+                float offset = turret.getOffset();
+                float angle =  turret.getAngle();
+
                 // handle client's vehicle
                 if (vehicle.getID() == vehicleId) {
                     // drag line
                     if (onDrag) {
-                        gl.glColor3f(1.0f, 1.0f, 1.0f);
                         Position position = vehicle.getPosition();
                         clientVehiclePosX = position.posX;
                         clientVehiclePosY = position.posY;
+
+                        // compute current shooting direction
+                        float [] displacement1 = new float[] {offset, 0.0f};
+                        MATH.rotate(position.alpha, displacement1);
+
+                        float [] displacement2 = new float[] {20.0f, 0.0f};
+                        MATH.rotate(position.alpha + angle, displacement2);
+
+                        gl.glColor3f(1.0f, 1.0f, 1.0f);
                         gl.glBegin(GL2.GL_LINES);
                         {
-                            gl.glVertex2f(position.posX, position.posY);
+                            // aiming line
+                            gl.glVertex2f(clientVehiclePosX + displacement1[0],
+                                    clientVehiclePosY + displacement1[1]);
                             gl.glVertex2f(aimPosX, aimPosY);
+                        }
+                        gl.glEnd();
+
+                        gl.glColor3f(1.0f, 0.0f, 0.0f);
+                        gl.glBegin(GL2.GL_LINES);
+                        {
+                            // current fire line
+                            gl.glVertex2f(clientVehiclePosX + displacement1[0],
+                                    clientVehiclePosY + displacement1[1]);
+                            gl.glVertex2f(clientVehiclePosX + displacement1[0] + displacement2[0],
+                                    clientVehiclePosY + displacement1[1] + displacement2[1]);
                         }
                         gl.glEnd();
                     }
@@ -169,12 +193,9 @@ public class Renderer  implements GLEventListener {
                 texture = usedTextures.get(id);
                 texture.enable(gl);
                 texture.bind(gl);
-                Turret turret = ((Tank) vehicle).getTurret();
                 vertices = turret.getTurretTopology();
                 Position pos = vehicle.getPosition();
-                float offset = turret.getOffset();
-                float angle =  turret.getAngle();
-                transformPosition(pos.posX, pos.posY, offset, pos.alpha, angle, vertices);
+                MATH.transform2d(pos.posX, pos.posY, offset, pos.alpha, angle, vertices);
 
                 gl.glBegin(GL2.GL_QUADS);
                 {
@@ -198,7 +219,7 @@ public class Renderer  implements GLEventListener {
                 texture.enable(gl);
                 texture.bind(gl);
                 vertices = turret.getGunTopology();
-                transformPosition(pos.posX, pos.posY, offset + turret.getLength() / 2.0f, pos.alpha, angle, vertices);
+                MATH.transform2d(pos.posX, pos.posY, offset, pos.alpha, angle, vertices);
 
                 gl.glBegin(GL2.GL_QUADS);
                 {
@@ -241,20 +262,6 @@ public class Renderer  implements GLEventListener {
 
         // transform vertices
         MATH.transform2d(position, topology);
-        return topology;
-    }
-
-    /**
-     * @param posX  mass center position X
-     * @param posY  mass center position Y
-     * @param offset  displacement from center in longitudinal direction
-     * @param alpha  parent body rotation angle
-     * @param angle  this body relative rotation angle
-     * @param topology set with vertices
-     * @return transformed topology
-     */
-    private Vertex [] transformPosition(float posX, float posY, float offset, float alpha, float angle, Vertex [] topology) {
-        MATH.transform2d(posX, posY, offset, alpha, angle, topology);
         return topology;
     }
 

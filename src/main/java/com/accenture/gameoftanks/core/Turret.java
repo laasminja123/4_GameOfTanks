@@ -52,10 +52,10 @@ public class Turret implements Serializable {
         vertices[0] =  0.0f;
         vertices[1] = -width / 2.0f;
 
-        vertices[2] =  length / 2.0f;
+        vertices[2] =  length;
         vertices[3] = -width / 2.0f;
 
-        vertices[4] =  length / 2.0f;
+        vertices[4] =  length;
         vertices[5] =  width / 2.0f;
 
         vertices[6] =  0.0f;
@@ -83,7 +83,15 @@ public class Turret implements Serializable {
         return gunWidth;
     }
 
-    void incrementTurretDirection(float delta) {
+    void setAngle(float angle) {
+        this.angle = angle;
+    }
+
+    public float getAngle() {
+        return angle;
+    }
+
+    void incrementTurretAngle(float delta) {
         angle += delta;
 
         if (angle > 2.0f * Math.PI) {
@@ -91,10 +99,6 @@ public class Turret implements Serializable {
         } else if (angle < -2.0f * Math.PI) {
             angle += 2.0f * Math.PI;
         }
-    }
-
-    public float getAngle() {
-        return angle;
     }
 
     public Vertex[] getTurretTopology() {

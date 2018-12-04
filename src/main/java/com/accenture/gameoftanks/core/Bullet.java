@@ -2,30 +2,30 @@ package com.accenture.gameoftanks.core;
 
 public class Bullet {
 
-    final float MASS;
-    final float POWER;
-    final float VELOCITY;
+    private final float mass;
+    private final float power;
+    private final float velocity;
 
     private float posX;
     private float posY;
-    private int angle;
+    private float angle;
 
     public Bullet(float mass, float power, float velocity) {
-        MASS = mass;
-        POWER = power;
-        VELOCITY = velocity;
+        this.mass = mass;
+        this.power = power;
+        this.velocity = velocity;
     }
 
-    public float getMASS() {
-        return MASS;
+    public float getMass() {
+        return mass;
     }
 
-    public float getPOWER() {
-        return POWER;
+    public float getPower() {
+        return power;
     }
 
-    public float getVELOCITY() {
-        return VELOCITY;
+    public float getVelocity() {
+        return velocity;
     }
 
     public float getPosX() {
@@ -36,10 +36,7 @@ public class Bullet {
         return posY;
     }
 
-    public int getAngle() {
+    public float getAngle() {
         return angle;
     }
-
-
-
 }

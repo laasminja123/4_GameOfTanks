@@ -224,4 +224,34 @@ class Physics {
         }
         return thrust;
     }
+
+    static void adjustGunDirection(Vehicle vehicle) {
+        Position pos = vehicle.getPosition();
+        Intent intent = vehicle.getIntent();
+        float angleIncrement = .025f;
+
+        if (intent.onAdjustShootingAngle) {
+            float [] direction = new float[2];
+            direction[0] = (float) cos(pos.alpha);
+            direction[1] = (float) sin(pos.alpha);
+
+            float gunAngle = vehicle.getShootingAngle();
+            rotate(gunAngle, direction);  // now direction stores absolute gun angle
+
+            // compute requested gun direction
+            float [] yaw = new float[2];
+            yaw[0] = (float) cos(intent.shootingAngle);
+            yaw[1] = (float) sin(intent.shootingAngle);
+
+            float cosA = dot(yaw, direction);
+            float delta = (float) acos(cosA);
+
+            if (1 + cosA > EPSILON) {  // gun NOT directed opposite to requested fire line
+                angleIncrement = min(angleIncrement, abs(delta));
+                float side = cross2D(direction, yaw);
+                angleIncrement *= signum(side);
+            }
+            vehicle.incrementShootingAngle(angleIncrement);
+        }
+    }
 }

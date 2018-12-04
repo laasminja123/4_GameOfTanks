@@ -33,9 +33,11 @@ public abstract class Vehicle extends Entity implements Serializable {
         this.currentHp = startingHp;
     }
 
+    public abstract void setShootingAngle(float angle);
+
     public abstract float getShootingAngle();
 
-    public abstract void incrementShootDirection(float angle);
+    public abstract void incrementShootingAngle(float angle);
 
     public void setId(int id) {
         this.id = id;
@@ -71,6 +73,7 @@ public abstract class Vehicle extends Entity implements Serializable {
 
     void copyPosition(Vehicle vehicle) {
         this.id = vehicle.id;
+        this.setShootingAngle(vehicle.getShootingAngle());
         this.position.copy(vehicle.position);
     }
 

@@ -12,7 +12,7 @@ public class IntentTest {
         Intent intent = new Intent();
         float delta = 1.e-7f;
 
-        intent.update(false, false, true, false, true);
+        intent.update(false, false, true, false, true, false, 0.0f);
 
         /*
 

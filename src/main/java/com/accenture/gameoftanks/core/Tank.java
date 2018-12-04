@@ -19,7 +19,7 @@ public class Tank extends Vehicle implements Serializable {
         this.width = width;
         this.length = length;
 
-        this.turret = new Turret(2.0f, 1.5f, .8f, 4.0f, .15f);
+        this.turret = new Turret(2.0f, 1.5f, .8f, 3.2f, .18f);
     }
 
     private float [] createTopology(float length, float width) {
@@ -48,8 +48,13 @@ public class Tank extends Vehicle implements Serializable {
     }
 
     @Override
-    public void incrementShootDirection(float delta) {
-        this.turret.incrementTurretDirection(delta);
+    public void setShootingAngle(float angle) {
+        this.turret.setAngle(angle);
+    }
+
+    @Override
+    public void incrementShootingAngle(float delta) {
+        this.turret.incrementTurretAngle(delta);
     }
 
     @Override

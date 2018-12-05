@@ -13,6 +13,7 @@ public class DataCore extends Thread {
 
     private ConnectionManager connectionManager;
 
+    private List<Player> players;
     private List<Bullet> bullets;
 
     private boolean onDemand;
@@ -41,7 +42,7 @@ public class DataCore extends Thread {
             List<Entity> levelContent = level.getContent();
 
             // collect vehicles from all players --------------------------------------------------
-            List<Player> players = connectionManager.getPlayers();
+            players = connectionManager.getPlayers();
             List<Vehicle> vehicles = new LinkedList<>();
 
             for (Player player: players) {
@@ -98,5 +99,16 @@ public class DataCore extends Thread {
 
     void consumeBullet(Bullet bullet) {
         bullets.remove(bullet);
+    }
+
+    Player getPlayer(int vehicleId) {
+        if (players != null) {
+            for (Player player: players) {
+                if (player.getVehicle().getId() == vehicleId) {
+                    return player;
+                }
+            }
+        }
+        return null;
     }
 }

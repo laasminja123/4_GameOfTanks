@@ -145,6 +145,12 @@ class Physics {
     static void computeMotion(Vehicle vehicle, float step) {
         Position pos = vehicle.getPosition();
         Intent intent = vehicle.getIntent();
+
+        if (!vehicle.isAlive()) {
+            pos.vx = 0.0f;
+            pos.vy = 0.0f;
+            return;
+        }
         float mass = vehicle.getMass();
         float momentOfInertia = vehicle.getMomentOfInertia();
         float torqueXY = vehicle.getTorqueXY();
@@ -278,10 +284,21 @@ class Physics {
                 bullet.posX = position.posX;
                 bullet.posY = position.posY;
                 vehicle.resetShootingDelay();
+
+                // add stats to the player
+                Player attacker = core.getPlayer(vehicle.getId());
+
+                if (attacker != null) {
+                    attacker.incrementShoots();
+                }
+
+                // add this bullet to event list
                 core.createBullet(bullet);
             } else {
                 vehicle.incrementShootingDelay(step);
             }
+        } else {
+            vehicle.incrementShootingDelay(step);
         }
     }
 
@@ -341,7 +358,24 @@ class Physics {
                 if (intersects(fireLine, edge) > 0.0f) {
                     // collision detected
                     if (entity instanceof Vehicle) {
-                        ((Vehicle) entity).decreaseCurrentHp((int) bullet.getPower());
+                        Vehicle vehicle = (Vehicle) entity;
+                        vehicle.decreaseCurrentHp((int) bullet.getPower());
+
+                        // add scores to attacker player
+                        Player attacker = core.getPlayer(bullet.getVehicleId());
+
+                        if (attacker != null) {
+                            attacker.incrementHits();
+
+                            if (!vehicle.isAlive()) {
+                                Player target = core.getPlayer(vehicle.getId());
+
+                                if (target != null) {
+                                    attacker.incrementKills();
+                                    target.incrementDeaths();
+                                }
+                            }
+                        }
                     }
                     bullet.isConsumed = true;
                     core.consumeBullet(bullet);

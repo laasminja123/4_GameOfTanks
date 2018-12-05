@@ -37,6 +37,7 @@ public abstract class Vehicle extends Entity implements Serializable {
         this.startingHp = startingHp;
         this.currentHp = startingHp;
         this.shootDelayMsec = shootDelayMsec;
+        currentDelayMsec = 0;
     }
 
     public abstract void setShootingAngle(float angle);

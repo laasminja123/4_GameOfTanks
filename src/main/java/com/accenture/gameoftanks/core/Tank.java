@@ -58,11 +58,6 @@ public class Tank extends Vehicle implements Serializable {
     }
 
     @Override
-    public void resetShootingDelay() {
-        currentDelayMsec = shootDelayMsec;
-    }
-
-    @Override
     public float getShootingAngle() {
         return turret.getAngle();
     }
@@ -82,6 +77,11 @@ public class Tank extends Vehicle implements Serializable {
     }
 
     @Override
+    public void resetShootingDelay() {
+        currentDelayMsec = shootDelayMsec;
+    }
+
+    @Override
     public int getCurrentDelayMsec() {
         return currentDelayMsec;
     }
@@ -98,7 +98,7 @@ public class Tank extends Vehicle implements Serializable {
 
     @Override
     public float getBulletVelocity() {
-        return 20.0f;  // m/s
+        return 40.0f;  // m/s
     }
 
     public Turret getTurret() {

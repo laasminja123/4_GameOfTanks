@@ -81,6 +81,7 @@ public class Renderer  implements GLEventListener {
 
         drawLevel(gl);
         drawVehicles(gl);
+        drawBullets(gl);
         onRender = false;
     }
 
@@ -242,9 +243,9 @@ public class Renderer  implements GLEventListener {
 
     private void drawBullets(GL2 gl) {
         List<Bullet> bullets = data.getBullets();
-        float radius = .15f;
+        float radius = .5f;
 
-        gl.glColor3f(1.0f, 1.0f, 0.0f);
+        gl.glColor3f(1.0f, 0.0f, 0.0f);
         gl.glBegin(GL2.GL_QUADS);
         {
             for (Bullet bullet: bullets) {

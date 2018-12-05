@@ -42,6 +42,19 @@ public class Data implements Serializable {
         return (players.containsKey(nickName)) ? players.get(nickName) : null;
     }
 
+    /*
+    public Player getPlayer(int vehicleId) {
+        Set<String> playerNames = players.keySet();
+
+        for (String name: playerNames) {
+            if (players.get(name).getVehicle().getId() == vehicleId) {
+                return players.get(name);
+            }
+        }
+        return null;
+    }
+    */
+
     public void addPlayer(Player player) {
         players.put(player.getNickname(), player);
     }
@@ -65,6 +78,16 @@ public class Data implements Serializable {
     public void copyContent(Data data) {
         this.bullets.clear();
         this.bullets.addAll(data.bullets);
+    }
+
+    public void copyScores(Data data) {
+        Set<String> playerNames = data.getPlayerNames();
+
+        for (String name: playerNames) {
+            if (players.containsKey(name)) {
+                players.get(name).copyScores(data.getPlayer(name));
+            }
+        }
     }
 
     // removes disconnected players

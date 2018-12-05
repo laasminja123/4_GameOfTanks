@@ -11,6 +11,7 @@ public class Player implements Serializable {
     private int deaths;
     private int kills;
     private int shoots;
+    private int hits;
 
     public Player(String nickname) {
         this.nickname = nickname;
@@ -41,15 +42,42 @@ public class Player implements Serializable {
         }
     }
 
+    public void copyScores(Player player) {
+        this.deaths = player.deaths;
+        this.kills  = player.kills;
+        this.shoots = player.shoots;
+        this.hits   = player.hits;
+    }
+
     public int getDeaths() {
         return deaths;
+    }
+
+    public void incrementDeaths() {
+        deaths++;
     }
 
     public int getKills() {
         return kills;
     }
 
+    public void incrementKills() {
+        kills++;
+    }
+
     public int getShoots() {
         return shoots;
+    }
+
+    public void incrementShoots() {
+        shoots++;
+    }
+
+    public int getHits() {
+        return hits;
+    }
+
+    public void incrementHits() {
+        hits++;
     }
 }

@@ -1,5 +1,6 @@
 package com.accenture.gameoftanks.net;
 
+import com.accenture.gameoftanks.core.Bullet;
 import com.accenture.gameoftanks.core.Player;
 import com.accenture.gameoftanks.core.Vehicle;
 
@@ -8,9 +9,11 @@ import java.util.*;
 
 public class Data implements Serializable {
     private Map<String, Player> players;
+    private List<Bullet> bullets;
 
     public Data() {
         players = new HashMap<>();
+        bullets = new LinkedList<>();
     }
 
     public Data(Player player) {
@@ -20,6 +23,7 @@ public class Data implements Serializable {
 
     public void clear() {
         players.clear();
+        bullets.clear();
     }
 
     public Player getPlayer() {
@@ -38,6 +42,19 @@ public class Data implements Serializable {
         return (players.containsKey(nickName)) ? players.get(nickName) : null;
     }
 
+    /*
+    public Player getPlayer(int vehicleId) {
+        Set<String> playerNames = players.keySet();
+
+        for (String name: playerNames) {
+            if (players.get(name).getVehicle().getId() == vehicleId) {
+                return players.get(name);
+            }
+        }
+        return null;
+    }
+    */
+
     public void addPlayer(Player player) {
         players.put(player.getNickname(), player);
     }
@@ -54,6 +71,21 @@ public class Data implements Serializable {
                 players.get(name).copyPosition(data.getPlayer(name));
             } else {
                 players.put(name, data.getPlayer(name));
+            }
+        }
+    }
+
+    public void copyContent(Data data) {
+        this.bullets.clear();
+        this.bullets.addAll(data.bullets);
+    }
+
+    public void copyScores(Data data) {
+        Set<String> playerNames = data.getPlayerNames();
+
+        for (String name: playerNames) {
+            if (players.containsKey(name)) {
+                players.get(name).copyScores(data.getPlayer(name));
             }
         }
     }
@@ -84,6 +116,14 @@ public class Data implements Serializable {
     }
 
     public int getVehicleId(String playerName) {
-        return (players.containsKey(playerName)) ? players.get(playerName).getVehicle().getID() : -1;
+        return (players.containsKey(playerName)) ? players.get(playerName).getVehicle().getId() : -1;
+    }
+
+    public void addBullets(List<Bullet> bullets) {
+        this.bullets.addAll(bullets);
+    }
+
+    public List<Bullet> getBullets() {
+        return bullets;
     }
 }

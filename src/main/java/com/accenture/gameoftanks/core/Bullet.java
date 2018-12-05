@@ -1,19 +1,30 @@
 package com.accenture.gameoftanks.core;
 
-public class Bullet {
+import java.io.Serializable;
+
+public class Bullet implements Serializable {
 
     private final float mass;
     private final float power;
     private final float velocity;
 
-    private float posX;
-    private float posY;
-    private float angle;
+    private int vehicleId;
 
-    public Bullet(float mass, float power, float velocity) {
+    public volatile float posX;
+    public volatile float posY;
+    public volatile float angle;
+
+    public volatile boolean isConsumed;
+
+    public Bullet(int vehicleId, float mass, float power, float velocity) {
+        this.vehicleId = vehicleId;
         this.mass = mass;
         this.power = power;
         this.velocity = velocity;
+    }
+
+    public int getVehicleId() {
+        return vehicleId;
     }
 
     public float getMass() {
@@ -26,17 +37,5 @@ public class Bullet {
 
     public float getVelocity() {
         return velocity;
-    }
-
-    public float getPosX() {
-        return posX;
-    }
-
-    public float getPosY() {
-        return posY;
-    }
-
-    public float getAngle() {
-        return angle;
     }
 }

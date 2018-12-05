@@ -4,31 +4,26 @@ import com.accenture.gameoftanks.core.Player;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.List;
 
 public class DatabaseManager {
 
     private String dbAddress = "jdbc:mysql://localhost/?useSSL=false";
     //    private String userName = "root";
     //    private String password = "abcd1234";
+    private final String logStatementString = "INSERT INTO Game_of_Tanks.logs (nickname, status, time) VALUES (?, ?, ?)";
     private Connection con;
-    private Statement statement;
-    private PreparedStatement getStatement;
-    private PreparedStatement setStatement;
-    private PreparedStatement logStatement;
     private ResultSet resultSet;
 
     public DatabaseManager(String username, String password) {
         try {
             con = DriverManager.getConnection(dbAddress, username, password);
-            statement = con.createStatement();
+            Statement statement = con.createStatement();
             statement.executeUpdate("CREATE DATABASE IF NOT EXISTS Game_of_Tanks;");
-            con.setCatalog("GoT_Statistics");
-            statement = con.createStatement();
+            statement.close();
+            con.setCatalog("Game_of_Tanks");
             con.setAutoCommit(false);
-
-            getStatement = con.prepareStatement("SELECT nickname FROM Game_of_Tanks.stats WHERE nickname=?");
-            setStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET ?=? WHERE nickname=?");
-            logStatement = con.prepareStatement("INSERT INTO Game_of_Tanks.logs (nickname, status, time) VALUES (?, ?, ?)");
             createStatsTable();
             createLogsTable();
         } catch (SQLException e) {
@@ -38,28 +33,69 @@ public class DatabaseManager {
     }
 
     public void logConnect(Player player) {
-        String time = "";
-        try {
-            logStatement.setString(1, player.getNickname());
-            logStatement.setString(2, "connected");
-            logStatement.setString(3, time);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    PreparedStatement preparedStatement = con.prepareStatement(logStatementString);
+                    preparedStatement.setString(1, player.getNickname());
+                    preparedStatement.setString(2, "connected");
+                    preparedStatement.setString(3, LocalDateTime.now().toString());
+                    preparedStatement.executeUpdate();
+                    con.commit();
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     public void logDisconnect(Player player) {
-        String time = "";
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    PreparedStatement preparedStatement = con.prepareStatement(logStatementString);
+                    preparedStatement.setString(1, player.getNickname());
+                    preparedStatement.setString(2, "disconnected");
+                    preparedStatement.setString(3, LocalDateTime.now().toString());
+                    preparedStatement.executeUpdate();
+                    con.commit();
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    public List<String> getLogs() {
+        List<String> linkedList = new LinkedList();
         try {
-            logStatement.setString(1, player.getNickname());
-            logStatement.setString(2, "disconnected");
-            logStatement.setString(3, time);
+            System.out.println("Generating logs");
+            Statement statement = con.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT DISTINCT nickname, status, time FROM Game_of_Tanks.logs");
+            while (resultSet.next()) {
+                String string = "" + resultSet.getString("nickname") + " " + resultSet.getString("status") + " in " + resultSet.getString("time");
+                linkedList.add(string);
+            }
+            statement.close();
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return linkedList;
     }
 
-    public void createStatsTable() {
+    public void printLogs() {
+        List<String> linkedList = getLogs();
+        for (String string : linkedList) {
+            System.out.println(string);
+        }
+    }
+
+    private void createStatsTable() {
         String string = "CREATE TABLE IF NOT EXISTS stats " +
                 "(id INTEGER not NULL AUTO_INCREMENT," +
                 " nickname VARCHAR(255)," +
@@ -68,14 +104,16 @@ public class DatabaseManager {
                 " score INTEGER," +
                 " PRIMARY KEY ( id ))";
         try {
+            Statement statement = con.createStatement();
             statement.execute(string);
             con.commit();
+            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void createLogsTable() {
+    private void createLogsTable() {
         String string = "CREATE TABLE IF NOT EXISTS logs " +
                 "(id INTEGER not NULL AUTO_INCREMENT, " +
                 " nickname VARCHAR(255)," +
@@ -83,8 +121,10 @@ public class DatabaseManager {
                 " time VARCHAR(255)," +
                 " PRIMARY KEY ( id ))";
         try {
+            Statement statement = con.createStatement();
             statement.execute(string);
             con.commit();
+            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -99,39 +139,159 @@ public class DatabaseManager {
         return false;
     }
 
-    public void AddOrUpdatePlayer(Player player) {
-        if (playerExists(player)) {
-            updatePlayer(player);
-        } else {
-            addPlayer(player);
-        }
+    public void addOrUpdatePlayer(Player player) {
+        new Thread((new Runnable() {
+            @Override
+            public void run() {
+                if (playerExists(player)) {
+                    updatePlayer(player);
+                } else {
+                    addPlayer(player);
+                }
+            }
+        })).start();
     }
 
-    public void updatePlayer(Player player) {
+    private void updatePlayer(Player player) {
         try {
             System.out.println("Adding " + player.getNickname() + "'s values to databse.");
-            PreparedStatement statement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET kills = ?, deaths = ? WHERE nickname = ?");
-            statement.setInt(1, getKills(player) + player.getKills());
-            statement.setInt(2, getDeaths(player) + player.getDeaths());
-            statement.setString(3, player.getNickname());
-            statement.executeUpdate();
+            PreparedStatement preparedStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET kills = ?, deaths = ? WHERE nickname = ?");
+            preparedStatement.setInt(1, getKills(player) + player.getKills());
+            preparedStatement.setInt(2, getDeaths(player) + player.getDeaths());
+            preparedStatement.setString(3, player.getNickname());
+            preparedStatement.executeUpdate();
             con.commit();
+            preparedStatement.close();
             setScore(player);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void addPlayer(Player player) {
+    private void addPlayer(Player player) {
         try {
             System.out.println("Adding player " + player.getNickname() + " to database.");
-            PreparedStatement statement = con.prepareStatement("INSERT INTO Game_of_Tanks.stats (nickname, kills, deaths) VALUES (?, ?, ?)");
-            statement.setString(1, player.getNickname());
-            statement.setInt(2, player.getKills());
-            statement.setInt(3, player.getDeaths());
-            statement.executeUpdate();
+            PreparedStatement preparedStatement = con.prepareStatement("INSERT INTO Game_of_Tanks.stats (nickname, kills, deaths) VALUES (?, ?, ?)");
+            preparedStatement.setString(1, player.getNickname());
+            preparedStatement.setInt(2, player.getKills());
+            preparedStatement.setInt(3, player.getDeaths());
+            preparedStatement.executeUpdate();
             con.commit();
+            preparedStatement.close();
             setScore(player);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getNickname(Player player) {
+        String nickname = null;
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("SELECT nickname FROM Game_of_Tanks.stats WHERE nickname=?");
+            preparedStatement.setString(1, player.getNickname());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                nickname = resultSet.getString("nickname");
+            }
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            System.out.println("Player with a nickname " + player.getNickname() + " not found.");
+            e.printStackTrace();
+        }
+        return nickname;
+    }
+
+    public int getKills(Player player) {
+        int kills = 0;
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("SELECT kills FROM Game_of_Tanks.stats WHERE nickname=?");
+            preparedStatement.setString(1, player.getNickname());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                kills = resultSet.getByte("kills");
+            }
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            System.out.println("Player with a nickname " + player.getNickname() + " not found.");
+            e.printStackTrace();
+        }
+        return kills;
+    }
+
+    public int getDeaths(Player player) {
+        int deaths = 0;
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("SELECT deaths FROM Game_of_Tanks.stats WHERE nickname=?");
+            preparedStatement.setString(1, player.getNickname());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                deaths = resultSet.getByte("deaths");
+            }
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            System.out.println("Player with a nickname " + player.getNickname() + " not found.");
+            e.printStackTrace();
+        }
+        return deaths;
+    }
+
+    public int getScore(Player player) {
+        int score = 0;
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("SELECT score FROM Game_of_Tanks.stats WHERE nickname=?");
+            preparedStatement.setString(1, player.getNickname());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                score = resultSet.getByte("score");
+            }
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            System.out.println("Player with a nickname " + player.getNickname() + " not found.");
+            e.printStackTrace();
+        }
+        return score;
+    }
+
+    public void setKills(Player player) {
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET kills = ? WHERE nickname = ?");
+            preparedStatement.setInt(1, player.getKills());
+            preparedStatement.setString(2, player.getNickname());
+            preparedStatement.executeUpdate();
+            con.commit();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setDeaths(Player player) {
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET deaths = ? WHERE nickname = ?");
+            preparedStatement.setInt(1, player.getDeaths());
+            preparedStatement.setString(2, player.getNickname());
+            con.commit();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setScore(Player player) {
+        int deaths = getDeaths(player);
+        int kills = getKills(player);
+        int score = (int) (kills / (0.8 * deaths));
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET score = ? WHERE nickname = ?");
+            preparedStatement.setInt(1, score);
+            preparedStatement.setString(2, player.getNickname());
+            preparedStatement.executeUpdate();
+            con.commit();
+            preparedStatement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -146,108 +306,28 @@ public class DatabaseManager {
         con = null;
     }
 
-    public String getNickname(Player player) {
-        String string = player.getNickname();
-        try {
-            getStatement.setString(1, string);
-            resultSet = getStatement.executeQuery();
-            if (resultSet.next()) {
-                return resultSet.getString("nickname");
-            }
-        } catch (SQLException e) {
-            System.out.println("Player with a nickname " + player.getNickname() + " not found.");
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public int getKills(Player player) {
-        try {
-            getStatement.setString(1, "kills");
-            getStatement.setString(2, player.getNickname());
-            resultSet = getStatement.executeQuery();
-            if (resultSet.next()) {
-                return resultSet.getByte("kills");
-            }
-        } catch (SQLException e) {
-            System.out.println("Player with a nickname " + player.getNickname() + " not found.");
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    public int getDeaths(Player player) {
-        try {
-            getStatement.setString(1, "deaths");
-            getStatement.setString(2, player.getNickname());
-            resultSet = getStatement.executeQuery();
-            if (resultSet.next()) {
-                return resultSet.getByte("deaths");
-            }
-        } catch (SQLException e) {
-            System.out.println("Player with a nickname " + player.getNickname() + " not found.");
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    public int getScore(Player player) {
-        try {
-            getStatement.setString(1, "score");
-            getStatement.setString(2, player.getNickname());
-            resultSet = getStatement.executeQuery();
-            if (resultSet.next()) {
-                return resultSet.getByte("score");
-            }
-        } catch (SQLException e) {
-            System.out.println("Player with a nickname " + player.getNickname() + " not found.");
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    public void setKills(Player player) {
-        try {
-            setStatement.setString(1, "kills");
-            setStatement.setInt(2, player.getKills());
-            setStatement.setString(3, player.getNickname());
-            setStatement.executeUpdate();
-            con.commit();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void setDeaths(Player player) {
-        try {
-            setStatement.setString(1, "deaths");
-            setStatement.setInt(2, player.getDeaths());
-            setStatement.setString(3, player.getNickname());
-            con.commit();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void setScore(Player player) {
-        int deaths = getDeaths(player);
-        int kills = getKills(player);
-        int score = (int) (kills / (0.8 * deaths));
-        try {
-            setStatement.setString(1, "score");
-            setStatement.setInt(2, score);
-            setStatement.setString(3, player.getNickname());
-            setStatement.executeUpdate();
-            con.commit();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) {
-        LocalDateTime time = LocalDateTime.now();
-        String string = time.toString();
-        System.out.println(string);
-    }
+//    public static void main(String[] args) {
+//
+//        DatabaseManager db = new DatabaseManager("root", "abcd1234");
+//
+//        Player player1 = new Player("abc");
+//        Player player2 = new Player("zxc");
+//        Player player3 = new Player("qwe");
+//        Player player4 = new Player("aoe");
+//
+//        db.addOrUpdatePlayer(player1);
+//        db.logConnect(player1);
+//        db.addOrUpdatePlayer(player2);
+//        db.logConnect(player2);
+//        db.addOrUpdatePlayer(player3);
+//        db.logConnect(player3);
+//        db.addOrUpdatePlayer(player4);
+//        db.logConnect(player4);
+//        db.logDisconnect(player1);
+//        db.logDisconnect(player2);
+//        db.logDisconnect(player4);
+//        db.printLogs();
+//        System.out.println("Success");
+//    }
 
 }

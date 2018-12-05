@@ -18,9 +18,10 @@ public class Service extends Thread {
         // create game level
         Level gameLevel = new Level();
 
-        // TODO When testing will no longer be necessary, method should be uncommented
-        databaseManager = null;
-//        createDatabaseManager();
+
+//        databaseManager = null;
+//        Comment createDatabaseManager to get rid of prompts
+        createDatabaseManager();
 
         ConnectionManager connectionManager = new ConnectionManager(gameLevel, databaseManager);
         connectionManager.start();
@@ -28,8 +29,24 @@ public class Service extends Thread {
 
         // start core
         DataCore dataCore = new DataCore(connectionManager);
+        connectionManager.setDataCore(dataCore);
         dataCore.start();
         System.out.println("Core started!");
+
+        if (databaseManager != null) {
+            CommandListener commandListener = new CommandListener(databaseManager);
+            commandListener.start();
+            System.out.println("Command Listener started!");
+        }
+
+        try {
+            connectionManager.join();
+            dataCore.join();
+        } catch (InterruptedException exc) {
+            exc.printStackTrace();
+        } finally {
+            databaseManager.closeConnection();
+        }
     }
 
     public void createDatabaseManager() {
@@ -38,14 +55,14 @@ public class Service extends Thread {
         String string;
         while (true) {
             string = scanner.nextLine();
-            if (string.equals("y") | string.equals("Y") | string.equals("yes") | string.equals("Yes")) {
+            if (string.equals("y") || string.equals("Y") || string.equals("yes") || string.equals("Yes")) {
                 System.out.println("Enter your MySQL username");
                 String username = scanner.nextLine();
                 System.out.println("Enter your MySQL password");
                 String password = scanner.nextLine();
                 databaseManager = new DatabaseManager(username, password);
                 return;
-            } else if (string.equals("n") | string.equals("N") | string.equals("no") | string.equals("No")) {
+            } else if (string.equals("n") || string.equals("N") || string.equals("no") || string.equals("No")) {
                 databaseManager = null;
                 return;
             }

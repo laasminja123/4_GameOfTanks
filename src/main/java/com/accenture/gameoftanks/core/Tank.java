@@ -12,7 +12,7 @@ public class Tank extends Vehicle implements Serializable {
     private Turret turret;
 
     Tank(float length, float width) {
-        super(5000.0f, 5000.0f, 10000.0f, 8, 2000.0f, 1.3f, 100);
+        super(5000.0f, 5000.0f, 10000.0f, 8, 2000.0f, 1.3f, 100, 2000);
         Shape topology = new Shape(createTopology(length, width));
         setTopology(topology);
 
@@ -60,6 +60,45 @@ public class Tank extends Vehicle implements Serializable {
     @Override
     public float getShootingAngle() {
         return turret.getAngle();
+    }
+
+    @Override
+    public void incrementShootingDelay(int deltaMsec) {
+        currentDelayMsec -= deltaMsec;
+
+        if (currentDelayMsec < 0) {
+            currentDelayMsec = 0;
+        }
+    }
+
+    @Override
+    public int getShootingDelayMsec() {
+        return shootDelayMsec;
+    }
+
+    @Override
+    public void resetShootingDelay() {
+        currentDelayMsec = shootDelayMsec;
+    }
+
+    @Override
+    public int getCurrentDelayMsec() {
+        return currentDelayMsec;
+    }
+
+    @Override
+    public float getBulletMass() {
+        return 5.0f;  // kg
+    }
+
+    @Override
+    public float getBulletPower() {
+        return 50.0f;
+    }
+
+    @Override
+    public float getBulletVelocity() {
+        return 40.0f;  // m/s
     }
 
     public Turret getTurret() {

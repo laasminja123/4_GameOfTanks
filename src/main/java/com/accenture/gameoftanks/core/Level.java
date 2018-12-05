@@ -2,6 +2,7 @@ package com.accenture.gameoftanks.core;
 
 import com.accenture.gameoftanks.core.primitives.Shape;
 import com.accenture.gameoftanks.core.primitives.Vertex;
+import sun.awt.image.ImageWatched;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -10,11 +11,15 @@ public class Level {
 
     private List<Entity> content;
     private List<String> textures;
+    private float[] respawns;
+
 
     //Generate constructor
     public Level() {
         loadContent();
         loadTextures();
+
+        initRespawns();
     }
 
     private void loadContent() {
@@ -87,4 +92,44 @@ public class Level {
         }
         return id;
     }
+
+    //---------------------------------------
+
+    private void initRespawns() {
+        int size = 5;
+        respawns = new float[3 * size];
+
+        respawns[0] = 10.0f;
+        respawns[1] = 10.0f;
+        respawns[2] = 0.0f;
+        respawns[3] = 10.0f;
+        respawns[4] = 90.0f;
+        respawns[5] = 0.0f;
+        respawns[6] = 90.0f;
+        respawns[7] = 10.0f;
+        respawns[8] = 0.0f;
+        respawns[9] = 90.0f;
+        respawns[10] = 90.0f;
+        respawns[11] = 0.0f;
+        respawns[12] = 50.0f;
+        respawns[13] = 50.0f;
+        respawns[14] = 0.0f;
+
+    }
+
+    /**
+     *
+     * @param vehicles all existing vehicles on field
+     * @return respawn coords (float x 3)
+     */
+   /* public float [] getRespawns(List<Vehicle> vehicles) {
+         //Position pos = vehicles.getPosition();
+        //float x  = pos.posX;
+        // float y = pos.posY;
+        return 0;
+    }
+
+    */
+
+
 }

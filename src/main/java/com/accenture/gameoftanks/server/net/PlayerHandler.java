@@ -62,11 +62,17 @@ public class PlayerHandler extends Thread {
     }
 
     private void setupPlayer(Player player) {
+
+        if (connectionManager.getDatabaseManager() != null) {
+            connectionManager.getDatabaseManager().logConnect(player);
+        }
+
         if (connectionManager.playerExists(player)) {
             System.out.println("Player " + player.getNickname() + " already exists");
             closeConnection();
             return;
         }
+
         System.out.println("Client \"" + player.getNickname() + "\" connected to server!");
 
         float posX = 10.0f;

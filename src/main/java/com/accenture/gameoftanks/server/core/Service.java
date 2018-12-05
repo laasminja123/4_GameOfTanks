@@ -28,6 +28,7 @@ public class Service extends Thread {
 
         // start core
         DataCore dataCore = new DataCore(connectionManager);
+        connectionManager.setDataCore(dataCore);
         dataCore.start();
         System.out.println("Core started!");
     }
@@ -38,14 +39,14 @@ public class Service extends Thread {
         String string;
         while (true) {
             string = scanner.nextLine();
-            if (string.equals("y") | string.equals("Y") | string.equals("yes") | string.equals("Yes")) {
+            if (string.equals("y") || string.equals("Y") || string.equals("yes") || string.equals("Yes")) {
                 System.out.println("Enter your MySQL username");
                 String username = scanner.nextLine();
                 System.out.println("Enter your MySQL password");
                 String password = scanner.nextLine();
                 databaseManager = new DatabaseManager(username, password);
                 return;
-            } else if (string.equals("n") | string.equals("N") | string.equals("no") | string.equals("No")) {
+            } else if (string.equals("n") || string.equals("N") || string.equals("no") || string.equals("No")) {
                 databaseManager = null;
                 return;
             }

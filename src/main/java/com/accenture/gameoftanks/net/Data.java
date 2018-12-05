@@ -1,5 +1,6 @@
 package com.accenture.gameoftanks.net;
 
+import com.accenture.gameoftanks.core.Bullet;
 import com.accenture.gameoftanks.core.Player;
 import com.accenture.gameoftanks.core.Vehicle;
 
@@ -8,9 +9,11 @@ import java.util.*;
 
 public class Data implements Serializable {
     private Map<String, Player> players;
+    private List<Bullet> bullets;
 
     public Data() {
         players = new HashMap<>();
+        bullets = new LinkedList<>();
     }
 
     public Data(Player player) {
@@ -20,6 +23,7 @@ public class Data implements Serializable {
 
     public void clear() {
         players.clear();
+        bullets.clear();
     }
 
     public Player getPlayer() {
@@ -58,6 +62,11 @@ public class Data implements Serializable {
         }
     }
 
+    public void copyContent(Data data) {
+        this.bullets.clear();
+        this.bullets.addAll(data.bullets);
+    }
+
     // removes disconnected players
     public void cleanUp(Data data) {
         Set<String> thisNames = players.keySet();
@@ -84,6 +93,14 @@ public class Data implements Serializable {
     }
 
     public int getVehicleId(String playerName) {
-        return (players.containsKey(playerName)) ? players.get(playerName).getVehicle().getID() : -1;
+        return (players.containsKey(playerName)) ? players.get(playerName).getVehicle().getId() : -1;
+    }
+
+    public void addBullets(List<Bullet> bullets) {
+        this.bullets.addAll(bullets);
+    }
+
+    public List<Bullet> getBullets() {
+        return bullets;
     }
 }

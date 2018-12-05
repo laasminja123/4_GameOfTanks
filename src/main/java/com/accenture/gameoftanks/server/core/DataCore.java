@@ -13,11 +13,14 @@ public class DataCore extends Thread {
 
     private ConnectionManager connectionManager;
 
+    private List<Bullet> bullets;
+
     private boolean onDemand;
 
     DataCore(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
         TIME_STEP_FLOAT = (float) TIME_STEP_MSEC / (float) 1000;
+        bullets = new LinkedList<>();
         onDemand = true;
     }
 
@@ -35,6 +38,7 @@ public class DataCore extends Thread {
             if (level == null) {
                 continue;
             }
+            List<Entity> levelContent = level.getContent();
 
             // collect vehicles from all players --------------------------------------------------
             List<Player> players = connectionManager.getPlayers();
@@ -48,9 +52,17 @@ public class DataCore extends Thread {
                 }
             }
 
-            // compute collisions with level static objects ---------------------------------------
-            List<Entity> levelContent = level.getContent();
+            // process shooting action ------------------------------------------------------------
+            for (Vehicle vehicle: vehicles) {
+                Physics.processShootRequest(this, vehicle, TIME_STEP_MSEC);
+            }
 
+            // compute bullets motion -------------------------------------------------------------
+            for (Bullet bullet: bullets) {
+                Physics.computeBulletMotion(this, bullet, vehicles, levelContent, TIME_STEP_FLOAT);
+            }
+
+            // compute collisions with level static objects ---------------------------------------
             for (Vehicle vehicle: vehicles) {
                 for (Entity entity: levelContent) {
                     Physics.computeCollision(vehicle, entity);
@@ -74,5 +86,17 @@ public class DataCore extends Thread {
                 Physics.adjustGunDirection(vehicle);
             }
         }
+    }
+
+    void createBullet(Bullet bullet) {
+        bullets.add(bullet);
+    }
+
+    public List<Bullet> getBullets() {
+        return bullets;
+    }
+
+    void consumeBullet(Bullet bullet) {
+        bullets.remove(bullet);
     }
 }

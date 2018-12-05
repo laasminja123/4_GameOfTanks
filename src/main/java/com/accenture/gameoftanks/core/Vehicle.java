@@ -16,13 +16,18 @@ public abstract class Vehicle extends Entity implements Serializable {
     private final float torqueXY;
     private final float maxOmega;
 
+    // shoot params
+    protected final int shootDelayMsec;
+    protected int currentDelayMsec;
+
     Vehicle(float mass,
             float momentOfInertia,
             float thrust,
             float maxSpeed,
             float torqueXY,
             float maxOmega,
-            int startingHp) {
+            int startingHp,
+            int shootDelayMsec) {
         super(false, mass, momentOfInertia);
         this.id = -1;
         this.thrust = thrust;
@@ -31,6 +36,7 @@ public abstract class Vehicle extends Entity implements Serializable {
         this.maxOmega = maxOmega;
         this.startingHp = startingHp;
         this.currentHp = startingHp;
+        this.shootDelayMsec = shootDelayMsec;
     }
 
     public abstract void setShootingAngle(float angle);
@@ -39,11 +45,25 @@ public abstract class Vehicle extends Entity implements Serializable {
 
     public abstract void incrementShootingAngle(float angle);
 
+    public abstract void incrementShootingDelay(int deltaMsec);
+
+    public abstract void resetShootingDelay();
+
+    public abstract int getShootingDelayMsec();
+
+    public abstract int getCurrentDelayMsec();
+
+    public abstract float getBulletMass();
+
+    public abstract float getBulletPower();
+
+    public abstract float getBulletVelocity();
+
     public void setId(int id) {
         this.id = id;
     }
 
-    public int getID() {
+    public int getId() {
         return id;
     }
 
@@ -53,6 +73,10 @@ public abstract class Vehicle extends Entity implements Serializable {
 
     public int getCurrentHp() {
         return currentHp;
+    }
+
+    public void decreaseCurrentHp(int delta) {
+        currentHp -= delta;
     }
 
     public float getThrust() {

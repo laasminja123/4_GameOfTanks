@@ -4,6 +4,9 @@ import com.accenture.gameoftanks.core.*;
 import com.accenture.gameoftanks.core.primitives.Edge;
 import com.accenture.gameoftanks.core.primitives.Vertex;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import static java.lang.Math.*;
 import static com.accenture.gameoftanks.core.MATH.*;
 
@@ -252,6 +255,99 @@ class Physics {
                 angleIncrement *= signum(side);
             }
             vehicle.incrementShootingAngle(angleIncrement);
+        }
+    }
+
+    static void processShootRequest(DataCore core, Vehicle vehicle, int step) {
+        if (!vehicle.isAlive()) {
+            return;
+        }
+        Intent intent = vehicle.getIntent();
+
+        if (intent.onShoot) {
+            if (vehicle.getCurrentDelayMsec() == 0) {
+                // process shooting
+                float mass = vehicle.getBulletMass();
+                float power = vehicle.getBulletPower();
+                float velocity = vehicle.getBulletVelocity();
+                Bullet bullet = new Bullet(vehicle.getId(), mass, power, velocity);
+
+                // setup bullet params
+                Position position = vehicle.getPosition();
+                bullet.angle = position.alpha + vehicle.getShootingAngle();
+                bullet.posX = position.posX;
+                bullet.posY = position.posY;
+                vehicle.resetShootingDelay();
+                core.createBullet(bullet);
+            } else {
+                vehicle.incrementShootingDelay(step);
+            }
+        }
+    }
+
+    static void computeBulletMotion(DataCore core,
+                                    Bullet bullet,
+                                    List<Vehicle> vehicles,
+                                    List<Entity> entities,
+                                    float step) {
+        // update position
+        float [] startPos = new float[] {bullet.posX, bullet.posY};
+        float V = bullet.getVelocity();
+        float [] displacement = new float[2];
+        displacement[0] = (float) cos(bullet.angle) * V * step;
+        displacement[1] = (float) sin(bullet.angle) * V * step;
+
+        bullet.posX += displacement[0];
+        bullet.posY += displacement[1];
+
+        // check collisions with existing vehicles and static objects
+        List<Entity> targets = new LinkedList<>();
+        targets.addAll(vehicles);
+        targets.addAll(entities);
+        computeBulletCollision(core, bullet, targets, startPos, displacement);
+    }
+
+    private static void computeBulletCollision(DataCore core,
+                                               Bullet bullet,
+                                               List<Entity> entities,
+                                               float [] startPos,
+                                               float [] displacement) {
+        Vertex v1 = new Vertex(startPos[0], startPos[1]);
+        Vertex v2 = new Vertex(startPos[0] + displacement[0], startPos[1] + displacement[1]);
+        Edge fireLine = new Edge(v1, v2);
+
+        for (Entity entity: entities) {
+            // check whether this is NOT a parent vehicle
+            if (entity instanceof Vehicle && ((Vehicle) entity).getId() == bullet.getVehicleId()) {
+                continue;
+            }
+            Vertex [] topology = entity.getTopology();
+            Position pos = entity.getPosition();
+            transform2d(pos, topology);
+
+            Edge edge = new Edge(null, null);
+
+            for (int i = 0; i < topology.length; i++) {
+                // create edge
+                if (i < topology.length - 1) {
+                    edge.v1 = topology[i];
+                    edge.v2 = topology[i + 1];
+                } else {
+                    edge.v1 = topology[i];
+                    edge.v2 = topology[0];
+                }
+
+                // check intersection
+                if (intersects(fireLine, edge) > 0.0f) {
+                    // collision detected
+                    if (entity instanceof Vehicle) {
+                        ((Vehicle) entity).decreaseCurrentHp((int) bullet.getPower());
+                    }
+                    bullet.isConsumed = true;
+                    core.consumeBullet(bullet);
+                    return;
+                }
+            }
         }
     }
 }

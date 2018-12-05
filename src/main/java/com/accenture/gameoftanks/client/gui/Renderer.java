@@ -130,7 +130,7 @@ public class Renderer  implements GLEventListener {
                 float angle =  turret.getAngle();
 
                 // handle client's vehicle
-                if (vehicle.getID() == vehicleId) {
+                if (vehicle.getId() == vehicleId) {
                     // drag line
                     if (onDrag) {
                         Position position = vehicle.getPosition();
@@ -238,6 +238,23 @@ public class Renderer  implements GLEventListener {
                 gl.glEnd();
             }
         }
+    }
+
+    private void drawBullets(GL2 gl) {
+        List<Bullet> bullets = data.getBullets();
+        float radius = .15f;
+
+        gl.glColor3f(1.0f, 1.0f, 0.0f);
+        gl.glBegin(GL2.GL_QUADS);
+        {
+            for (Bullet bullet: bullets) {
+                gl.glVertex2f(bullet.posX - radius, bullet.posY);
+                gl.glVertex2f(bullet.posX, bullet.posY - radius);
+                gl.glVertex2f(bullet.posX + radius, bullet.posY);
+                gl.glVertex2f(bullet.posX, bullet.posY + radius);
+            }
+        }
+        gl.glEnd();
     }
 
     private float[][] getDefaultTextureCoordinates() {

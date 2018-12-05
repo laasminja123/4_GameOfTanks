@@ -1,16 +1,16 @@
 package com.accenture.gameoftanks.server.net;
 
+import com.accenture.gameoftanks.core.Bullet;
 import com.accenture.gameoftanks.core.Level;
 import com.accenture.gameoftanks.core.Player;
 import com.accenture.gameoftanks.net.Data;
+import com.accenture.gameoftanks.server.core.DataCore;
 import com.accenture.gameoftanks.server.core.DatabaseManager;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 public class ConnectionManager extends Thread {
 
@@ -19,6 +19,7 @@ public class ConnectionManager extends Thread {
 
     private ServerSocket server;
     private Vector<PlayerHandler> connections;
+    private DataCore dataCore;
     private DatabaseManager databaseManager;
 
     private Level level;
@@ -94,6 +95,10 @@ public class ConnectionManager extends Thread {
         }
     }
 
+    public void setDataCore(DataCore dataCore) {
+        this.dataCore = dataCore;
+    }
+
     private void sendData() {
         data.clear();
 
@@ -104,6 +109,25 @@ public class ConnectionManager extends Thread {
             if (player != null) {
                 data.addPlayer(player);
             }
+        }
+
+        // add information about existing bullets
+        if (dataCore != null) {
+            List<Bullet> bullets = dataCore.getBullets();
+            List<Bullet> toRemove = new LinkedList<>();
+
+            // clean up list
+            for (Bullet bullet: bullets) {
+                if (bullet.isConsumed) {
+                    toRemove.add(bullet);
+                }
+            }
+            bullets.removeAll(toRemove);
+            if (bullets.size() != 0) {
+                System.out.println("Bullet list size on send is: " + bullets.size());
+            }
+
+            data.addBullets(bullets);
         }
 
         // send data to all players

@@ -62,6 +62,10 @@ public class PlayerHandler extends Thread {
     }
 
     private void setupPlayer(Player player) {
+        if (connectionManager.getDatabaseManager() != null) {
+            connectionManager.getDatabaseManager().logConnect(getPlayer());
+        }
+
         if (connectionManager.playerExists(player)) {
             System.out.println("Player " + player.getNickname() + " already exists");
             closeConnection();

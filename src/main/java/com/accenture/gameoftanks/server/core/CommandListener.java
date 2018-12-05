@@ -15,16 +15,22 @@ public class CommandListener extends Thread {
     @Override
     public void start() {
         while (true) {
+
+            System.out.println();
+            System.out.println("Type command [exit] to exit.");
+            System.out.println("Type command [printLogs] to print logs.");
+            System.out.println();
+
             String command = scanner.nextLine();
+
             if (command.equals("exit")) {
                 break;
             }
+
             if (command.equals("printLogs")) {
                 databaseManager.printLogs();
-            } else {
-                System.out.println("Type command [exit] to exit.");
-                System.out.println("Type command [printLogs] to print logs.");
             }
+
         }
     }
 }

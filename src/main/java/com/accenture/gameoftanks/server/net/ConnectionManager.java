@@ -74,7 +74,6 @@ public class ConnectionManager extends Thread {
                             connections.add(playerHandler);
                             playerHandler.start();
                             System.out.println("Connections pull size is: " + connections.size());
-                            // TODO call database method which informs it about player connection
                         } catch (IOException exc) {
                             exc.printStackTrace();
                         }
@@ -160,7 +159,7 @@ public class ConnectionManager extends Thread {
     void removePlayer(PlayerHandler handler) {
         if (databaseManager != null) {
             databaseManager.addOrUpdatePlayer(handler.getPlayer());
-            // TODO call database manager method which informs it about player disconnection
+            databaseManager.logDisconnect(handler.getPlayer());
         }
         connections.remove(handler);
         System.out.println("Connections pull size is: " + connections.size());

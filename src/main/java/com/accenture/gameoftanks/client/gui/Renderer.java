@@ -121,17 +121,13 @@ public class Renderer  implements GLEventListener {
             Vertex[] vertices = transformVehiclePosition(vehicle);
 
             if (vehicle instanceof Tank) {
-                int id = level.getTextureID("tank01.bmp");
-                Texture texture = usedTextures.get(id);
-                texture.enable(gl);
-                texture.bind(gl);
-
                 Turret turret = ((Tank) vehicle).getTurret();
                 float offset = turret.getOffset();
                 float angle =  turret.getAngle();
+                Position pos = vehicle.getPosition();
 
                 // handle client's vehicle
-                if (vehicle.getId() == vehicleId) {
+                if (vehicle.getId() == vehicleId && vehicle.isAlive()) {
                     // drag line
                     if (onDrag) {
                         Position position = vehicle.getPosition();
@@ -166,77 +162,114 @@ public class Renderer  implements GLEventListener {
                         }
                         gl.glEnd();
                     }
-                    //gl.glColor3f(1.0f, 0.0f, 0.0f);
-                    gl.glColor3f(1.0f, 1.0f, 1.0f);
-                } else {
-                    gl.glColor3f(1.0f, 1.0f, 1.0f);
                 }
+                gl.glColor3f(1.0f, 1.0f, 1.0f);
 
                 // draw body
-                gl.glBegin(GL2.GL_QUADS);
-                {
-                    gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
-                    gl.glVertex2f(vertices[0].xt, vertices[0].yt);
+                if (!vehicle.isAlive()) {
+                    gl.glColor3f(0.3f, 0.3f, 0.3f);
+                    gl.glBegin(GL2.GL_QUADS);
+                    {
+                        gl.glVertex2f(vertices[0].xt, vertices[0].yt);
+                        gl.glVertex2f(vertices[1].xt, vertices[1].yt);
+                        gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+                        gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                    }
+                    gl.glEnd();
+                } else {
+                    int id = level.getTextureID("tank01.bmp");
+                    Texture texture = usedTextures.get(id);
+                    texture.enable(gl);
+                    texture.bind(gl);
 
-                    gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
-                    gl.glVertex2f(vertices[1].xt, vertices[1].yt);
+                    gl.glBegin(GL2.GL_QUADS);
+                    {
+                        gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
+                        gl.glVertex2f(vertices[0].xt, vertices[0].yt);
 
-                    gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
-                    gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+                        gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
+                        gl.glVertex2f(vertices[1].xt, vertices[1].yt);
 
-                    gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
-                    gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                        gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
+                        gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+
+                        gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
+                        gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                    }
+                    gl.glEnd();
                 }
-                gl.glEnd();
 
                 // draw turret
-                id = level.getTextureID("tank-turret01.bmp");
-                texture = usedTextures.get(id);
-                texture.enable(gl);
-                texture.bind(gl);
-                vertices = turret.getTurretTopology();
-                Position pos = vehicle.getPosition();
-                MATH.transform2d(pos.posX, pos.posY, offset, pos.alpha, angle, vertices);
+                if (!vehicle.isAlive()) {
+                    gl.glColor3f(0.3f, 0.3f, 0.3f);
+                    gl.glBegin(GL2.GL_QUADS);
+                    {
+                        gl.glVertex2f(vertices[0].xt, vertices[0].yt);
+                        gl.glVertex2f(vertices[1].xt, vertices[1].yt);
+                        gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+                        gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                    }
+                    gl.glEnd();
+                } else {
+                    int id = level.getTextureID("tank-turret01.bmp");
+                    Texture texture = usedTextures.get(id);
+                    texture.enable(gl);
+                    texture.bind(gl);
+                    vertices = turret.getTurretTopology();
+                    MATH.transform2d(pos.posX, pos.posY, offset, pos.alpha, angle, vertices);
 
-                gl.glBegin(GL2.GL_QUADS);
-                {
-                    gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
-                    gl.glVertex2f(vertices[0].xt, vertices[0].yt);
+                    gl.glBegin(GL2.GL_QUADS);
+                    {
+                        gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
+                        gl.glVertex2f(vertices[0].xt, vertices[0].yt);
 
-                    gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
-                    gl.glVertex2f(vertices[1].xt, vertices[1].yt);
+                        gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
+                        gl.glVertex2f(vertices[1].xt, vertices[1].yt);
 
-                    gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
-                    gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+                        gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
+                        gl.glVertex2f(vertices[2].xt, vertices[2].yt);
 
-                    gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
-                    gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                        gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
+                        gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                    }
+                    gl.glEnd();
                 }
-                gl.glEnd();
 
                 // draw gun
-                id = level.getTextureID("tank-gun01.bmp");
-                texture = usedTextures.get(id);
-                texture.enable(gl);
-                texture.bind(gl);
-                vertices = turret.getGunTopology();
-                MATH.transform2d(pos.posX, pos.posY, offset, pos.alpha, angle, vertices);
+                if (!vehicle.isAlive()) {
+                    gl.glColor3f(0.3f, 0.3f, 0.3f);
+                    gl.glBegin(GL2.GL_QUADS);
+                    {
+                        gl.glVertex2f(vertices[0].xt, vertices[0].yt);
+                        gl.glVertex2f(vertices[1].xt, vertices[1].yt);
+                        gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+                        gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                    }
+                    gl.glEnd();
+                } else {
+                    int id = level.getTextureID("tank-gun01.bmp");
+                    Texture texture = usedTextures.get(id);
+                    texture.enable(gl);
+                    texture.bind(gl);
+                    vertices = turret.getGunTopology();
+                    MATH.transform2d(pos.posX, pos.posY, offset, pos.alpha, angle, vertices);
 
-                gl.glBegin(GL2.GL_QUADS);
-                {
-                    gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
-                    gl.glVertex2f(vertices[0].xt, vertices[0].yt);
+                    gl.glBegin(GL2.GL_QUADS);
+                    {
+                        gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
+                        gl.glVertex2f(vertices[0].xt, vertices[0].yt);
 
-                    gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
-                    gl.glVertex2f(vertices[1].xt, vertices[1].yt);
+                        gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
+                        gl.glVertex2f(vertices[1].xt, vertices[1].yt);
 
-                    gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
-                    gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+                        gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
+                        gl.glVertex2f(vertices[2].xt, vertices[2].yt);
 
-                    gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
-                    gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                        gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
+                        gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                    }
+                    gl.glEnd();
                 }
-                gl.glEnd();
             }
         }
     }
@@ -319,6 +352,8 @@ public class Renderer  implements GLEventListener {
         this.level = level;
         this.data = data;
         this.clientName = clientName;
+        float [] extents = level.getExtents();
+        posX = .5f * (extents[0] + extents[1]);
         needToReloadTextures = true;
     }
 

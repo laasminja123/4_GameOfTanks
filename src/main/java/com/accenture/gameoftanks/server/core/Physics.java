@@ -147,8 +147,8 @@ class Physics {
         Intent intent = vehicle.getIntent();
 
         if (!vehicle.isAlive()) {
-            pos.vx = 0.0f;
-            pos.vy = 0.0f;
+            pos.vx = .0f;
+            pos.vy = .0f;
             return;
         }
         float mass = vehicle.getMass();
@@ -156,12 +156,13 @@ class Physics {
         float torqueXY = vehicle.getTorqueXY();
         float maxOmega = vehicle.getMaxOmega();
 
-        float tFrictionK = 4.0f; // TODO implement it for vehicle
+        float tFrictionK = 4.0f;
+        //float lFrictionK = 1.0f;
 
         float velocity = (float) sqrt(pos.vx * pos.vx + pos.vy * pos.vy);
         float thrust = computeThrust(vehicle, velocity);
 
-        // compute rotation in plane
+        // compute rotation in plane --------------------------------------------------------------
         float torque = 0.0f;
 
         if (intent.onTurnLeft) {
@@ -183,20 +184,18 @@ class Physics {
         pos.alpha += step * pos.omega;
         pos.omega += (step / momentOfInertia) * (torque + rFriction);
 
-        // compute transverse force
+        // compute transverse force ---------------------------------------------------------------
         float transverseForceMag = 0.0f;
         float angle = 0.0f;
 
+        // velocity normalized vector
+        float [] vDir = new float[2];
+        normalize(vDir, pos.vx, pos.vy);
+
+        // direction normalized vector
+        float [] dir = new float[] {(float) cos(pos.alpha), (float) sin(pos.alpha)};
+
         if (abs(velocity) > 0.01f) {
-            // velocity normalized vector
-            float [] vDir = new float[2];
-            normalize(vDir, pos.vx, pos.vy);
-
-            // direction normalized vector
-            float [] dir = new float[2];
-            dir[0] = (float) cos(pos.alpha);
-            dir[1] = (float) sin(pos.alpha);
-
             float phi = (float) acos(dot(vDir, dir));
 
             if (abs(phi) > EPSILON && abs(PI - phi) > EPSILON) {
@@ -207,14 +206,37 @@ class Physics {
             }
         }
 
+        // compute longitudinal friction force ----------------------------------------------------
+        float longFriction = .0f;
+
+        /*
+        if (abs(velocity) > 0.01f) {
+            float longComp = dot(vDir, dir);
+            float tolerance = .5f;
+
+            if (abs(longComp) >= tolerance) {
+                // usual case
+                longFriction = -mass * lFrictionK * signum(longComp);
+            } else {
+                // linear interpolation in range 0..tolerance to make soft braking near zero
+                float K = mass * lFrictionK / tolerance;
+                longFriction = -K * longComp;
+            }
+        }
+        */
+
         // compute translation along X axis
         pos.posX += step * pos.vx;
-        float forceX = (thrust * (float) cos(pos.alpha) + transverseForceMag * (float) cos(angle));
+        float forceX = (thrust * (float) cos(pos.alpha) +
+                longFriction * (float) cos(pos.alpha) +
+                transverseForceMag * (float) cos(angle));
         pos.vx += (step / mass) * forceX;
 
         // compute translation along Y axis
         pos.posY += step * pos.vy;
-        float forceY = (thrust * (float) sin(pos.alpha) + transverseForceMag * (float) sin(angle));
+        float forceY = (thrust * (float) sin(pos.alpha) +
+                longFriction * (float) sin(pos.alpha) +
+                transverseForceMag * (float) sin(angle));
         pos.vy += (step / mass) * forceY;
     }
 

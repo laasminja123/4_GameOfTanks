@@ -98,7 +98,7 @@ public class Tank extends Vehicle implements Serializable {
 
     @Override
     public float getBulletVelocity() {
-        return 40.0f;  // m/s
+        return 50.0f;  // m/s
     }
 
     public Turret getTurret() {

@@ -3,6 +3,7 @@ package com.accenture.gameoftanks.server.core;
 import com.accenture.gameoftanks.core.Player;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 
 public class DatabaseManager {
 
@@ -241,6 +242,12 @@ public class DatabaseManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        LocalDateTime time = LocalDateTime.now();
+        String string = time.toString();
+        System.out.println(string);
     }
 
 }

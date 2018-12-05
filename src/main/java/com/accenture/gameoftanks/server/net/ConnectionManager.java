@@ -74,7 +74,6 @@ public class ConnectionManager extends Thread {
                             connections.add(playerHandler);
                             playerHandler.start();
                             System.out.println("Connections pull size is: " + connections.size());
-                            // TODO call database method which informs it about player connection
                         } catch (IOException exc) {
                             exc.printStackTrace();
                         }
@@ -103,7 +102,7 @@ public class ConnectionManager extends Thread {
         data.clear();
 
         // compose Data object with all current players
-        for (PlayerHandler handler: connections) {
+        for (PlayerHandler handler : connections) {
             Player player = handler.getPlayer();
 
             if (player != null) {
@@ -117,7 +116,7 @@ public class ConnectionManager extends Thread {
             List<Bullet> toRemove = new LinkedList<>();
 
             // clean up list
-            for (Bullet bullet: bullets) {
+            for (Bullet bullet : bullets) {
                 if (bullet.isConsumed) {
                     toRemove.add(bullet);
                 }
@@ -131,7 +130,7 @@ public class ConnectionManager extends Thread {
         }
 
         // send data to all players
-        for (PlayerHandler handler: connections) {
+        for (PlayerHandler handler : connections) {
             handler.sendData(data);
         }
     }
@@ -159,8 +158,8 @@ public class ConnectionManager extends Thread {
 
     void removePlayer(PlayerHandler handler) {
         if (databaseManager != null) {
-            databaseManager.AddOrUpdatePlayer(handler.getPlayer());
-            // TODO call database manager method which informs it about player disconnection
+            databaseManager.addOrUpdatePlayer(handler.getPlayer());
+            databaseManager.logDisconnect(handler.getPlayer());
         }
         connections.remove(handler);
         System.out.println("Connections pull size is: " + connections.size());

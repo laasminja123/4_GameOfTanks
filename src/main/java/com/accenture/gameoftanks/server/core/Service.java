@@ -18,9 +18,10 @@ public class Service extends Thread {
         // create game level
         Level gameLevel = new Level();
 
-        // TODO When testing will no longer be necessary, method should be uncommented
-        databaseManager = null;
-//        createDatabaseManager();
+
+//        databaseManager = null;
+//        Comment createDatabaseManager to get rid of prompts
+        createDatabaseManager();
 
         ConnectionManager connectionManager = new ConnectionManager(gameLevel, databaseManager);
         connectionManager.start();
@@ -31,6 +32,21 @@ public class Service extends Thread {
         connectionManager.setDataCore(dataCore);
         dataCore.start();
         System.out.println("Core started!");
+
+        if (databaseManager != null) {
+            CommandListener commandListener = new CommandListener(databaseManager);
+            commandListener.start();
+            System.out.println("Command Listener started!");
+        }
+
+        try {
+            connectionManager.join();
+            dataCore.join();
+        } catch (InterruptedException exc) {
+            exc.printStackTrace();
+        } finally {
+            databaseManager.closeConnection();
+        }
     }
 
     public void createDatabaseManager() {

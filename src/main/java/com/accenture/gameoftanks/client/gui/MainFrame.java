@@ -204,7 +204,8 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         shoot.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                processShootAction();
+                onShoot = true;
+                updateIntent();
             }
         });
 
@@ -234,6 +235,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         hp.setForeground(Color.GREEN);
         hp.setString("50 / 100");
         hp.setValue(count);
+
         tankStatusPanel.add(randomStuffText = new JLabel("Turret Reload"));
         tankStatusPanel.add(turretReload = new JProgressBar());
         turretReload.setStringPainted(true);
@@ -243,7 +245,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         turretReload.setValue(100);
 
         tankInfoPanel.setLayout(new GridLayout(2,2,0,0));
-        tankInfoPanel.add(new JLabel("Your lives"));
+        tankInfoPanel.add(new JLabel("Your lives: "));
         tankInfoPanel.add(new JLabel("Your ammo"));
         tankInfoPanel.add(new JLabel("Total Players alive:"));
         tankInfoPanel.add(new JLabel("Ping - 13ms"));
@@ -477,6 +479,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
                     } catch (InterruptedException exc) {
                         //
                     }
+                    updateControlPanel();
 
                     if (onAdjustShootingAngle) {
                         shootingAngle = renderer.getShootingAngle();
@@ -494,8 +497,20 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         return rendererLoop != null && rendererLoop.isAlive();
     }
 
-    private void processShootAction() {
-        // TODO
+    private void updateControlPanel() {
+        Player currentPlayer = playerData.getPlayer(nickName);
+        Vehicle vehicle = currentPlayer.getVehicle();
+        int currentHp = vehicle.getCurrentHp();
+        int maxHp = vehicle.getStartingHp();
+
+        hp.setString(currentHp + " / " + maxHp);
+        hp.setValue((currentHp / maxHp) * 100);
+
+        // todo
+        // label.setText ...
+        currentPlayer.getKills();
+        currentPlayer.getDeaths();
+        currentPlayer.getShoots();
     }
 
     private void updateIntent() {
@@ -527,7 +542,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
             } else if (e.getKeyCode()== KeyEvent.VK_W) {
                 onTop = true;
             } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                if (reloadBlock == false) { onShoot = true; reload(); }
+                onShoot = true;
             } else {
                 return;
             }

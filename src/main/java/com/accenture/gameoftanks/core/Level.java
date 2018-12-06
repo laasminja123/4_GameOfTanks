@@ -40,6 +40,7 @@ public class Level {
                 0.0f, 100.0f
         };
 
+
         topology = new Shape(vertices);
         entity.setTopology(topology);
         content.add(entity);

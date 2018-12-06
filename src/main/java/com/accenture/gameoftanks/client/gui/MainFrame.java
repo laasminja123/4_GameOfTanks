@@ -504,54 +504,51 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
     private void updateControlPanel() {
         if (playerData != null) {
-            Player currentPlayer = playerData.getPlayer(nickName);
+            synchronized (playerData) {
+                Player currentPlayer = playerData.getPlayer(nickName);
 
-            if (currentPlayer != null) {
-                Vehicle vehicle = currentPlayer.getVehicle();
+                if (currentPlayer != null) {
+                    Vehicle vehicle = currentPlayer.getVehicle();
 
-                if (vehicle != null) {
-                    int currentHp = vehicle.getCurrentHp();
-                    int maxHp = vehicle.getStartingHp();
+                    if (vehicle != null) {
+                        int currentHp = vehicle.getCurrentHp();
+                        int maxHp = vehicle.getStartingHp();
 
-                    hp.setString(currentHp + " / " + maxHp);
-                    hp.setValue((currentHp * 100) / maxHp);
+                        hp.setString(currentHp + " / " + maxHp);
+                        hp.setValue((currentHp * 100) / maxHp);
 
-                    int currentDelay = vehicle.getCurrentDelayMsec();
-                    int maxDelay = vehicle.getShootingDelayMsec();
+                        int currentDelay = vehicle.getCurrentDelayMsec();
+                        int maxDelay = vehicle.getShootingDelayMsec();
 
-                    turretReload.setValue((currentDelay * 100) / maxDelay);
+                        turretReload.setValue((currentDelay * 100) / maxDelay);
 
-                    playerKills.setText("Kills : " + currentPlayer.getKills());
-                    playerDeaths.setText("Death : " + currentPlayer.getDeaths());
-                    playerShots.setText("Shots made : " + currentPlayer.getShoots());
-                    if (currentPlayer.getShoots() > 0) {
-                        int accuracy = currentPlayer.getHits() / currentPlayer.getShoots();
-                        playerAccuracy.setText("Accuracy : " + accuracy);
-                    } else {
-                        playerAccuracy.setText("Accuracy : 0");
+                        playerKills.setText("Kills : " + currentPlayer.getKills());
+                        playerDeaths.setText("Death : " + currentPlayer.getDeaths());
+                        playerShots.setText("Shots made : " + currentPlayer.getShoots());
+                        if (currentPlayer.getShoots() > 0) {
+                            int accuracy = currentPlayer.getHits() / currentPlayer.getShoots();
+                            playerAccuracy.setText("Accuracy : " + accuracy);
+                        } else {
+                            playerAccuracy.setText("Accuracy : 0");
+                        }
+
+
                     }
-
-
-                } else {
-                    System.out.println("Vehicle is null");
                 }
-            } else {
-                System.out.println("Player is null");
             }
-        } else {
-            System.out.println("Player DATA is null");
         }
     }
 
     private void updateIntent() {
-        if (playerData == null) {
-            return;
-        }
-        Player player = playerData.getPlayer(nickName);
+        if (playerData != null) {
+            synchronized (playerData) {
+                Player player = playerData.getPlayer(nickName);
 
-        if (player != null) {
-            Intent intent = player.getVehicle().getIntent();
-            intent.update(onLeft, onRight, onTop, onBottom, onShoot, onAdjustShootingAngle, shootingAngle);
+                if (player != null) {
+                    Intent intent = player.getVehicle().getIntent();
+                    intent.update(onLeft, onRight, onTop, onBottom, onShoot, onAdjustShootingAngle, shootingAngle);
+                }
+            }
         }
     }
 

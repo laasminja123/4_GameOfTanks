@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class Renderer  implements GLEventListener {
 
@@ -249,7 +250,7 @@ public class Renderer  implements GLEventListener {
     }
 
     private void drawBullets(GL2 gl) {
-        List<Bullet> bullets = data.getBullets();
+        Queue<Bullet> bullets = data.getBullets();
         float radius = .5f;
 
         gl.glColor3f(1.0f, 1.0f, 0.0f);

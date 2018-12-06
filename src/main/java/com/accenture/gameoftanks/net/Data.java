@@ -6,14 +6,16 @@ import com.accenture.gameoftanks.core.Vehicle;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Data implements Serializable {
     private Map<String, Player> players;
-    private List<Bullet> bullets;
+    private Queue<Bullet> bullets;
 
     public Data() {
-        players = new HashMap<>();
-        bullets = new LinkedList<>();
+        players = new ConcurrentHashMap<>();
+        bullets = new ConcurrentLinkedQueue<>();
     }
 
     public Data(Player player) {
@@ -133,7 +135,7 @@ public class Data implements Serializable {
         this.bullets.addAll(bullets);
     }
 
-    public List<Bullet> getBullets() {
+    public Queue<Bullet> getBullets() {
         return bullets;
     }
 }

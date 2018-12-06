@@ -14,7 +14,7 @@ public class PlayerConnection {
     private Socket client;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
-    private volatile Data data;
+    private final Data data;
     private String host;
     private int port;
 
@@ -64,11 +64,14 @@ public class PlayerConnection {
 
                         if (object instanceof Data) {
                             Data data = (Data) object;
-                            PlayerConnection.this.data.copyPosition(data);
-                            PlayerConnection.this.data.copyContent(data);
-                            PlayerConnection.this.data.copyScores(data);
-                            PlayerConnection.this.data.copyVehicleData(data);
-                            PlayerConnection.this.data.cleanUp(data);
+
+                            synchronized (PlayerConnection.this.data) {
+                                PlayerConnection.this.data.copyPosition(data);
+                                PlayerConnection.this.data.copyContent(data);
+                                PlayerConnection.this.data.copyScores(data);
+                                PlayerConnection.this.data.copyVehicleData(data);
+                                PlayerConnection.this.data.cleanUp(data);
+                            }
                         }
                     } catch (IOException | ClassNotFoundException exc) {
                         //exc.printStackTrace();

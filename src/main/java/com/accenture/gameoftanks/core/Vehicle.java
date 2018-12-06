@@ -108,6 +108,7 @@ public abstract class Vehicle extends Entity implements Serializable {
 
     void copyData(Vehicle vehicle) {
         this.currentHp = vehicle.currentHp;
+        this.currentDelayMsec = vehicle.currentDelayMsec;
     }
 
     void copyIntent(Vehicle vehicle) {

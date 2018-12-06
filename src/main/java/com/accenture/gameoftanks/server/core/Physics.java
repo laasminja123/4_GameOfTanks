@@ -129,7 +129,7 @@ class Physics {
 
                         // TODO apply angular momentum
                     }
-                    System.out.println("Collision detected");
+                    //System.out.println("Collision detected");
                 }
             }
         }

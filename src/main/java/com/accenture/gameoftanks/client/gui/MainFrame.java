@@ -28,6 +28,10 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
     private JLabel portText;
     private JLabel connectionText;
     private JLabel randomStuffText;
+    private JLabel playerKills;
+    private JLabel playerDeaths;
+    private JLabel playerShots;
+    private JLabel playerAccuracy;
 
     private JPanel emptyspace;
     private JPanel base;
@@ -78,7 +82,6 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
     // mouse motion processing
     private int [] mousePos1;
     private int [] mousePos2;
-    private int count = 50;
 
     public MainFrame() {
         this.setFocusable(true);
@@ -171,6 +174,8 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
                 if (renderer != null) {
                     renderer.removeGameData();
                 }
+                level = null;
+                playerData = null;
 
                 connect.setEnabled(true);
                 disconnect.setEnabled(false);
@@ -204,7 +209,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         shoot.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                onShoot = true;
+//                onShoot = true;
                 updateIntent();
             }
         });
@@ -233,29 +238,28 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         hp.setPreferredSize(new Dimension(150,25));
         hp.setBackground(Color.RED);
         hp.setForeground(Color.GREEN);
-        hp.setString("50 / 100");
-        hp.setValue(count);
+        hp.setValue(100);
 
         tankStatusPanel.add(randomStuffText = new JLabel("Turret Reload"));
         tankStatusPanel.add(turretReload = new JProgressBar());
-        turretReload.setStringPainted(true);
         turretReload.setPreferredSize(new Dimension(150,25));
-        turretReload.setBackground(Color.RED);
-        turretReload.setForeground(Color.GREEN);
+        turretReload.setBackground(Color.GREEN);
+        turretReload.setForeground(Color.RED);
         turretReload.setValue(100);
 
+
         tankInfoPanel.setLayout(new GridLayout(2,2,0,0));
-        tankInfoPanel.add(new JLabel("Your lives: "));
-        tankInfoPanel.add(new JLabel("Your ammo"));
-        tankInfoPanel.add(new JLabel("Total Players alive:"));
-        tankInfoPanel.add(new JLabel("Ping - 13ms"));
+        tankInfoPanel.add(playerKills = new JLabel());
+        tankInfoPanel.add(playerDeaths = new JLabel());
+        tankInfoPanel.add(playerShots = new JLabel());
+        tankInfoPanel.add(playerAccuracy = new JLabel());
 
 
 
         //font
         Font fontype1 = new Font("Courier New", Font.PLAIN, 10);
-        Font fontype2 = new Font("Courier New", Font.PLAIN, 20);
-        Font fontype3 = new Font("Courier New", Font.BOLD, 14);
+        Font fontype2 = new Font("Courier New", Font.PLAIN, 15);
+        Font fontype3 = new Font("Courier New", Font.BOLD, 10);
         //buttons
 //        moveUp.setFont(fontype1);
 //        moveDown.setFont(fontype1);
@@ -279,8 +283,10 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         moveRight.setBackground(Color.white);
         moveUp.setBackground(Color.white);
         moveDown.setBackground(Color.white);
-        connect.setBackground(Color.decode("#164be9"));
-        disconnect.setBackground(Color.decode("#164be9"));
+        connect.setBackground(Color.white);
+        connect.setForeground(Color.BLACK);
+        disconnect.setBackground(Color.white);
+        disconnect.setForeground(Color.BLACK);
 
     }
 
@@ -325,8 +331,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         } else if (event.getSource() == moveDown) {
             onBottom = true;
         } else if (event.getSource() == shoot){
-            if (reloadBlock == false) { onShoot = true; reload(); }
-
+           onShoot = true;
         } else if (event.getSource() == renderArea) {
             mousePos1[0] = event.getX();
             mousePos1[1] = event.getY();
@@ -498,30 +503,52 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
     }
 
     private void updateControlPanel() {
-        Player currentPlayer = playerData.getPlayer(nickName);
-        Vehicle vehicle = currentPlayer.getVehicle();
-        int currentHp = vehicle.getCurrentHp();
-        int maxHp = vehicle.getStartingHp();
+        if (playerData != null) {
+            synchronized (playerData) {
+                Player currentPlayer = playerData.getPlayer(nickName);
 
-        hp.setString(currentHp + " / " + maxHp);
-        hp.setValue((currentHp / maxHp) * 100);
+                if (currentPlayer != null) {
+                    Vehicle vehicle = currentPlayer.getVehicle();
 
-        // todo
-        // label.setText ...
-        currentPlayer.getKills();
-        currentPlayer.getDeaths();
-        currentPlayer.getShoots();
+                    if (vehicle != null) {
+                        int currentHp = vehicle.getCurrentHp();
+                        int maxHp = vehicle.getStartingHp();
+
+                        hp.setString(currentHp + " / " + maxHp);
+                        hp.setValue((currentHp * 100) / maxHp);
+
+                        int currentDelay = vehicle.getCurrentDelayMsec();
+                        int maxDelay = vehicle.getShootingDelayMsec();
+
+                        turretReload.setValue((currentDelay * 100) / maxDelay);
+
+                        playerKills.setText("Kills : " + currentPlayer.getKills());
+                        playerDeaths.setText("Death : " + currentPlayer.getDeaths());
+                        playerShots.setText("Shots made : " + currentPlayer.getShoots());
+                        if (currentPlayer.getShoots() > 0) {
+                            int accuracy = currentPlayer.getHits() / currentPlayer.getShoots();
+                            playerAccuracy.setText("Accuracy : " + accuracy);
+                        } else {
+                            playerAccuracy.setText("Accuracy : 0");
+                        }
+
+
+                    }
+                }
+            }
+        }
     }
 
     private void updateIntent() {
-        if (playerData == null) {
-            return;
-        }
-        Player player = playerData.getPlayer(nickName);
+        if (playerData != null) {
+            synchronized (playerData) {
+                Player player = playerData.getPlayer(nickName);
 
-        if (player != null) {
-            Intent intent = player.getVehicle().getIntent();
-            intent.update(onLeft, onRight, onTop, onBottom, onShoot, onAdjustShootingAngle, shootingAngle);
+                if (player != null) {
+                    Intent intent = player.getVehicle().getIntent();
+                    intent.update(onLeft, onRight, onTop, onBottom, onShoot, onAdjustShootingAngle, shootingAngle);
+                }
+            }
         }
     }
 
@@ -568,27 +595,27 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
     }
 
-        private void reload() {
-
-        Timer timer = new Timer(20, new ActionListener() {
-
-            int i = 0;
-
-            public void actionPerformed(ActionEvent evt) {
-                reloadBlock = true;
-                i++;
-                turretReload.setValue(i);
-                getContentPane().repaint();
-                if (i == 100) {
-                    reloadBlock = false;
-                    ((Timer) evt.getSource()).stop();
-                }
-            }
-        });
-        if (reloadBlock == false) {
-            timer.start();
-        } else {
-            return;
-        }
-    }
+//        private void reload() {
+//
+//        Timer timer = new Timer(20, new ActionListener() {
+//
+//            int i = 0;
+//
+//            public void actionPerformed(ActionEvent evt) {
+//                reloadBlock = true;
+//                i++;
+//                turretReload.setValue(i);
+//                getContentPane().repaint();
+//                if (i == 100) {
+//                    reloadBlock = false;
+//                    ((Timer) evt.getSource()).stop();
+//                }
+//            }
+//        });
+//        if (reloadBlock == false) {
+//            timer.start();
+//        } else {
+//            return;
+//        }
+//    }
 }

@@ -31,7 +31,7 @@ public class Level {
         Shape topology;
 
         // create level boundaries
-        entity = new Entity(true, 0.0f, 0.0f);
+        entity = new Entity(true, false, 0.0f, 0.0f, 100);
 
         vertices = new float[] {
                 0.0f, 0.0f,

@@ -4,10 +4,6 @@ import java.io.Serializable;
 
 public abstract class Vehicle extends Entity implements Serializable {
 
-    private int id;
-    private int startingHp;
-    private int currentHp;
-
     // translational parameters
     private final float thrust;
     private final float maxSpeed;
@@ -17,8 +13,8 @@ public abstract class Vehicle extends Entity implements Serializable {
     private final float maxOmega;
 
     // shoot params
-    protected final int shootDelayMsec;
-    protected int currentDelayMsec;
+    final int shootDelayMsec;
+    int currentDelayMsec;
 
     Vehicle(float mass,
             float momentOfInertia,
@@ -28,14 +24,11 @@ public abstract class Vehicle extends Entity implements Serializable {
             float maxOmega,
             int startingHp,
             int shootDelayMsec) {
-        super(false, mass, momentOfInertia);
-        this.id = -1;
+        super(false, true, mass, momentOfInertia, startingHp);
         this.thrust = thrust;
         this.maxSpeed = maxSpeed;
         this.torqueXY = torqueXY;
         this.maxOmega = maxOmega;
-        this.startingHp = startingHp;
-        this.currentHp = startingHp;
         this.shootDelayMsec = shootDelayMsec;
         currentDelayMsec = 0;
     }
@@ -60,30 +53,6 @@ public abstract class Vehicle extends Entity implements Serializable {
 
     public abstract float getBulletVelocity();
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public boolean isAlive() {
-        return currentHp > 0;
-    }
-
-    public int getStartingHp() {
-        return startingHp;
-    }
-
-    public int getCurrentHp() {
-        return currentHp;
-    }
-
-    public void decreaseCurrentHp(int delta) {
-        currentHp -= delta;
-    }
-
     public float getThrust() {
         return thrust;
     }
@@ -101,7 +70,7 @@ public abstract class Vehicle extends Entity implements Serializable {
     }
 
     void copyPosition(Vehicle vehicle) {
-        this.id = vehicle.id;
+        this.setId(vehicle.getId());
         this.setShootingAngle(vehicle.getShootingAngle());
         this.position.copy(vehicle.position);
     }

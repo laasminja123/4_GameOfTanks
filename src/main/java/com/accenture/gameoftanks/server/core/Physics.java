@@ -357,7 +357,7 @@ class Physics {
 
         for (Entity entity: entities) {
             // check whether this is NOT a parent vehicle
-            if (entity instanceof Vehicle && ((Vehicle) entity).getId() == bullet.getVehicleId()) {
+            if (entity instanceof Vehicle && entity.getId() == bullet.getVehicleId()) {
                 continue;
             }
             Vertex [] topology = entity.getTopology();

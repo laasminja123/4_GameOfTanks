@@ -23,8 +23,9 @@ public abstract class Vehicle extends Entity implements Serializable {
             float torqueXY,
             float maxOmega,
             int startingHp,
-            int shootDelayMsec) {
-        super(false, true, mass, momentOfInertia, startingHp);
+            int shootDelayMsec,
+            String textureName) {
+        super(false, true, mass, momentOfInertia, startingHp, textureName);
         this.thrust = thrust;
         this.maxSpeed = maxSpeed;
         this.torqueXY = torqueXY;

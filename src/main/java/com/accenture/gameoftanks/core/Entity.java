@@ -20,7 +20,14 @@ public class Entity implements Serializable {
     Position position;
     Intent intent;
 
-    Entity(boolean isStatic, boolean isBreakable, float mass, float momentOfInertia, int startingHp) {
+    private final String textureName;
+
+    Entity(boolean isStatic,
+           boolean isBreakable,
+           float mass,
+           float momentOfInertia,
+           int startingHp,
+           String textureName) {
         this.id = -1;
         this.isStatic = isStatic;
         this.isBreakable = isBreakable;
@@ -28,6 +35,7 @@ public class Entity implements Serializable {
         this.momentOfInertia = momentOfInertia;
         this.startingHp = startingHp;
         this.currentHp = startingHp;
+        this.textureName = textureName;
 
         this.position = new Position();
         this.intent = new Intent();
@@ -69,6 +77,10 @@ public class Entity implements Serializable {
         return isBreakable;
     }
 
+    public boolean hasConvexTopology() {
+        return topology.isConvex();
+    }
+
     public float getMass() {
         return mass;
     }
@@ -91,5 +103,9 @@ public class Entity implements Serializable {
 
     public Intent getIntent() {
         return intent;
+    }
+
+    public String getTextureName() {
+        return textureName;
     }
 }

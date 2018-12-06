@@ -12,14 +12,14 @@ public class Tank extends Vehicle implements Serializable {
     private Turret turret;
 
     public Tank(float length, float width) {
-        super(5000.0f, 5000.0f, 10000.0f, 8, 2000.0f, 1.3f, 100, 2000);
+        super(5000.0f, 5000.0f, 10000.0f, 8, 2000.0f, 1.3f, 100, 2000, "tank01.bmp");
         Shape topology = new Shape(createTopology(length, width));
         setTopology(topology);
 
         this.width = width;
         this.length = length;
 
-        this.turret = new Turret(2.0f, 1.5f, .8f, 3.2f, .18f);
+        this.turret = new Turret(2.0f, 1.5f, .8f, 3.2f, .18f, "tank-turret01.bmp", "tank-gun01.bmp");
     }
 
     private float [] createTopology(float length, float width) {

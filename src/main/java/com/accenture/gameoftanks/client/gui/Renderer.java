@@ -89,7 +89,7 @@ public class Renderer  implements GLEventListener {
     private void drawLevel(GL2 gl) {
         // draw level background
         float[][] uvCoords = getDefaultTextureCoordinates();
-        int id = level.getTextureID("battleGround01.bmp");
+        int id = level.getTextureID("battleGround03.bmp");
         Texture texture = usedTextures.get(id);
         texture.enable(gl);
         texture.bind(gl);
@@ -98,20 +98,55 @@ public class Renderer  implements GLEventListener {
         gl.glColor3f(1.0f, 1.0f, 1.0f);
         gl.glBegin(GL2.GL_QUADS);
         {
-            gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
+            gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
             gl.glVertex2f(extents[0], extents[2]);
 
-            gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
+            gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
             gl.glVertex2f(extents[1], extents[2]);
 
-            gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
+            gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
             gl.glVertex2f(extents[1], extents[3]);
 
-            gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
+            gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
             gl.glVertex2f(extents[0], extents[3]);
         }
         gl.glEnd();
         texture.disable(gl);
+
+        // draw static objects
+        List<Entity> entities = level.getContent();
+
+        for (Entity entity: entities) {
+            if (entity.hasConvexTopology() && !level.containsDeadObject(entity.getId())) {
+                String textureName = entity.getTextureName();
+                Vertex [] vertices = transformEntityPosition(entity);
+
+                if (textureName != null && vertices.length == 4) {  // only quads for now
+                    id = level.getTextureID(textureName);
+                    texture = usedTextures.get(id);
+                    texture.enable(gl);
+                    texture.bind(gl);
+
+                    gl.glColor3f(1.0f, 1.0f, 1.0f);
+                    gl.glBegin(GL2.GL_QUADS);
+                    {
+                        gl.glTexCoord2f(uvCoords[0][0], uvCoords[0][1]);
+                        gl.glVertex2f(vertices[0].xt, vertices[0].yt);
+
+                        gl.glTexCoord2f(uvCoords[3][0], uvCoords[3][1]);
+                        gl.glVertex2f(vertices[1].xt, vertices[1].yt);
+
+                        gl.glTexCoord2f(uvCoords[2][0], uvCoords[2][1]);
+                        gl.glVertex2f(vertices[2].xt, vertices[2].yt);
+
+                        gl.glTexCoord2f(uvCoords[1][0], uvCoords[1][1]);
+                        gl.glVertex2f(vertices[3].xt, vertices[3].yt);
+                    }
+                    gl.glEnd();
+                    texture.disable(gl);
+                }
+            }
+        }
     }
 
     private void drawVehicles(GL2 gl) {
@@ -120,7 +155,7 @@ public class Renderer  implements GLEventListener {
         float[][] uvCoords = getDefaultTextureCoordinates();
 
         for (Vehicle vehicle: vehicles) {
-            Vertex[] vertices = transformVehiclePosition(vehicle);
+            Vertex[] vertices = transformEntityPosition(vehicle);
 
             if (vehicle instanceof Tank) {
                 Turret turret = ((Tank) vehicle).getTurret();
@@ -173,7 +208,7 @@ public class Renderer  implements GLEventListener {
                 }
 
                 // draw body
-                int id = level.getTextureID("tank01.bmp");
+                int id = level.getTextureID(vehicle.getTextureName());
                 Texture texture = usedTextures.get(id);
                 texture.enable(gl);
                 texture.bind(gl);
@@ -197,7 +232,7 @@ public class Renderer  implements GLEventListener {
 
 
                 // draw turret
-                id = level.getTextureID("tank-turret01.bmp");
+                id = level.getTextureID(turret.getTextureName());
                 texture = usedTextures.get(id);
                 texture.enable(gl);
                 texture.bind(gl);
@@ -222,7 +257,7 @@ public class Renderer  implements GLEventListener {
                 texture.disable(gl);
 
                 // draw gun
-                id = level.getTextureID("tank-gun01.bmp");
+                id = level.getTextureID(turret.getGunTextureName());
                 texture = usedTextures.get(id);
                 texture.enable(gl);
                 texture.bind(gl);
@@ -282,9 +317,9 @@ public class Renderer  implements GLEventListener {
         return coords;
     }
 
-    private Vertex [] transformVehiclePosition(Vehicle vehicle) {
-        Position position = vehicle.getPosition();
-        Vertex [] topology = vehicle.getTopology();
+    private Vertex [] transformEntityPosition(Entity entity) {
+        Position position = entity.getPosition();
+        Vertex [] topology = entity.getTopology();
 
         // transform vertices
         MATH.transform2d(position, topology);

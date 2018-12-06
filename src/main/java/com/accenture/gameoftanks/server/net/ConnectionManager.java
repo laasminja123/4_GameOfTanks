@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ConnectionManager extends Thread {
 
@@ -18,19 +19,19 @@ public class ConnectionManager extends Thread {
     private final int TIME_STEP_MSEC = 40;
 
     private ServerSocket server;
-    private Vector<PlayerHandler> connections;
+    private ConcurrentLinkedQueue<PlayerHandler> connections;
     private DataCore dataCore;
     private DatabaseManager databaseManager;
 
-    private Level level;
-    private Data data;
+    private final Level level;
+    private final Data data;
 
     private int vehicleId;
 
     private volatile boolean onDemand;
 
     public ConnectionManager(Level level, DatabaseManager databaseManager) {
-        this.connections = new Vector<>();
+        this.connections = new ConcurrentLinkedQueue<>();
         this.level = level;
         this.data = new Data();
         this.databaseManager = databaseManager;
@@ -110,7 +111,7 @@ public class ConnectionManager extends Thread {
 
         // add information about existing bullets
         if (dataCore != null) {
-            List<Bullet> bullets = dataCore.getBullets();
+            Queue<Bullet> bullets = dataCore.getBullets();
             List<Bullet> toRemove = new LinkedList<>();
 
             // clean up list
@@ -145,8 +146,8 @@ public class ConnectionManager extends Thread {
         return databaseManager;
     }
 
-    public List<Player> getPlayers() {
-        List<Player> players = new LinkedList<>();
+    public Queue<Player> getPlayers() {
+        Queue<Player> players = new ConcurrentLinkedQueue<>();
 
         for (PlayerHandler handler : connections) {
             Player player = handler.getPlayer();

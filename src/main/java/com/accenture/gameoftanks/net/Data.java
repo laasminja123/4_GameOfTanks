@@ -1,7 +1,6 @@
 package com.accenture.gameoftanks.net;
 
 import com.accenture.gameoftanks.core.Bullet;
-import com.accenture.gameoftanks.core.Level;
 import com.accenture.gameoftanks.core.Player;
 import com.accenture.gameoftanks.core.Vehicle;
 
@@ -135,7 +134,7 @@ public class Data implements Serializable {
         return (players.containsKey(playerName)) ? players.get(playerName).getVehicle().getId() : -1;
     }
 
-    public void addBullets(List<Bullet> bullets) {
+    public void addBullets(Queue<Bullet> bullets) {
         this.bullets.addAll(bullets);
     }
 

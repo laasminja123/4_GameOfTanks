@@ -17,119 +17,160 @@ class Physics {
     private static final float PI = (float) Math.PI;
 
     /**
-     * @param entity1 active entity (it should be always movable entity)
-     * @param entity2 passive entity (it can be either movable or static)
+     * @param entity01 first entity
+     * @param entity02 second entity
      */
-    static void computeCollision(Entity entity1, Entity entity2) {
-        if (entity1 == entity2) {
+    static void computeCollision(Entity entity01, Entity entity02) {
+        if (entity01 == entity02) {
+            return;
+        } else if (entity01.isBreakable() && !entity01.isAlive() || entity02.isBreakable() && !entity02.isAlive()) {
             return;
         }
-        Vertex [] topology1 = entity1.getTopology();
-        Position pos1 = entity1.getPosition();
-        transform2d(pos1, topology1);
+        Vertex [] topology01 = entity01.getTopology();
+        Position pos01 = entity01.getPosition();
+        transform2d(pos01, topology01);
 
-        Vertex [] topology2 = entity2.getTopology();
-        Position pos2 = entity2.getPosition();
-        transform2d(pos2, topology2);
+        Vertex [] topology02 = entity02.getTopology();
+        Position pos02 = entity02.getPosition();
+        transform2d(pos02, topology02);
+
+        Entity entity1, entity2;
+        Vertex [] topology1;
+        Vertex [] topology2;
+        Position pos1;
+        Position pos2;
 
         Edge edge = new Edge(null, null);
-        Vertex v0 = new Vertex(pos1.posX, pos1.posY);
+        Vertex v0 = new Vertex(0.0f, 0.0f);
         Edge motionLine = new Edge(v0, null);
-
         float d;
 
-        for (Vertex v: topology1) {
-            for (int i = 0; i < topology2.length; i++) {
-                // create edge
-                if (i < topology2.length - 1) {
-                    edge.v1 = topology2[i];
-                    edge.v2 = topology2[i + 1];
-                } else {
-                    edge.v1 = topology2[i];
-                    edge.v2 = topology2[0];
-                }
-                motionLine.v2 = v;
+        for (int n = 1; n <= 2; n++) {
+            // set active and passive entities
+            if (n == 1) {
+                entity1 = entity01;
+                entity2 = entity02;
 
-                // check intersection
-                if ((d = intersects(motionLine, edge)) > 0.0f) {
-                    // compute new entity position ------------------------------------------------
-                    float [] normal = new float[2];
-                    getNormal(normal, edge);
+                topology1 = topology01;
+                topology2 = topology02;
 
-                    float [] normalTranslate = new float[2];
-                    System.arraycopy(normal, 0, normalTranslate, 0, 2);
+                pos1 = pos01;
+                pos2 = pos02;
+            } else {
+                entity1 = entity02;
+                entity2 = entity01;
 
-                    scale(d, normalTranslate);
+                topology1 = topology02;
+                topology2 = topology01;
 
-                    // translate active entity back to the edge
-                    pos1.posX += normalTranslate[0];
-                    pos1.posY += normalTranslate[1];
+                pos1 = pos02;
+                pos2 = pos01;
+            }
+            v0.x = v0.xt = pos1.posX;
+            v0.y = v0.yt = pos1.posY;
 
-                    // recompute velocity components ----------------------------------------------
+            if (!entity1.hasConvexTopology()) {
+                continue;
+            }
 
-                    // compute bi-normal (it's coincident with edge2)
-                    float [] biNormal = new float[2];
-                    System.arraycopy(normal, 0, biNormal, 0, 2);
-                    rotate(-PI / 2.0f, biNormal);
-
-                    // first body current velocity
-                    float [] velocity1 = new float[] {pos1.vx, pos1.vy};
-
-                    // first body tangent velocity
-                    float V11t = dot(velocity1, biNormal);  // velocity projection onto biNormal
-                    float [] velocity1t = new float[2];
-                    System.arraycopy(biNormal, 0, velocity1t, 0, 2);
-                    scale(V11t, velocity1t);
-
-                    // first body normal velocity
-                    float V11n = dot(normal, velocity1);
-
-                    if (entity2.isStatic()) {
-                        pos1.vx = velocity1t[0];
-                        pos1.vy = velocity1t[1];
-
-                        if (V11n < -0.02f) {
-                            // apply angular momentum caused by impact
-                            float d0 = dot(biNormal, pos1.posX, pos1.posY);
-                            d = dot(biNormal, v) - d0;
-                            pos1.omega += .2 * d * abs(V11n);
-                        }
+            for (Vertex v : topology1) {
+                for (int i = 0; i < topology2.length; i++) {
+                    // create edge
+                    if (i < topology2.length - 1) {
+                        edge.v1 = topology2[i];
+                        edge.v2 = topology2[i + 1];
                     } else {
-                        // second body current velocity
-                        float [] velocity2 = new float[] {pos2.vx, pos2.vy};
-
-                        // second body tangent velocity
-                        float V21t = dot(velocity2, biNormal);  // velocity projection onto biNormal
-                        float [] velocity2t = new float[2];
-                        System.arraycopy(biNormal, 0, velocity2t, 0, 2);
-                        scale(V21t, velocity2t);
-
-                        // second body normal velocity
-                        float V21n = dot(normal, velocity2);
-
-                        // resulting normal velocity Magnitude after impact considering absolutely non-elastic interaction
-                        float m1 = entity1.getMass();
-                        float m2 = entity2.getMass();
-                        float Vn = (m1 * V11n + m2 * V21n) / (m1 + m2);
-
-                        // resulting normal velocity full vector
-                        float [] velocity0n = new float[2];
-                        System.arraycopy(normal, 0, velocity0n, 0, 2);
-                        scale(Vn, velocity0n);
-
-                        // resulting velocities
-                        add(velocity1t, velocity0n);
-                        add(velocity2t, velocity0n);
-
-                        pos1.vx = velocity1t[0];
-                        pos1.vy = velocity1t[1];
-
-                        pos2.vx = velocity2t[0];
-                        pos2.vy = velocity2t[1];
-
-                        // TODO apply angular momentum
+                        edge.v1 = topology2[i];
+                        edge.v2 = topology2[0];
                     }
-                    //System.out.println("Collision detected");
+                    motionLine.v2 = v;
+
+                    // check intersection
+                    if ((d = intersects(motionLine, edge)) > 0.0f) {
+                        // compute new entity position ------------------------------------------------
+                        float[] normal = new float[2];
+                        getNormal(normal, edge);
+
+                        float[] normalTranslate = new float[2];
+                        System.arraycopy(normal, 0, normalTranslate, 0, 2);
+
+                        scale(d, normalTranslate);
+
+                        // translate active entity back to the edge
+                        if (!entity1.isStatic()) {
+                            pos1.posX += normalTranslate[0];
+                            pos1.posY += normalTranslate[1];
+                        }
+
+                        // recompute velocity components ----------------------------------------------
+
+                        // compute bi-normal (it's coincident with edge2)
+                        float[] biNormal = new float[2];
+                        System.arraycopy(normal, 0, biNormal, 0, 2);
+                        rotate(-PI / 2.0f, biNormal);
+
+                        // first body current velocity
+                        float[] velocity1 = new float[]{pos1.vx, pos1.vy};
+
+                        // first body tangent velocity
+                        float V11t = dot(velocity1, biNormal);  // velocity projection onto biNormal
+                        float[] velocity1t = new float[2];
+                        System.arraycopy(biNormal, 0, velocity1t, 0, 2);
+                        scale(V11t, velocity1t);
+
+                        // first body normal velocity
+                        float V11n = dot(normal, velocity1);
+
+                        if (entity2.isStatic()) {
+                            if (!entity1.isStatic()) {
+                                pos1.vx = velocity1t[0];
+                                pos1.vy = velocity1t[1];
+
+                                if (V11n < -0.02f) {
+                                    // apply angular momentum caused by impact
+                                    float d0 = dot(biNormal, pos1.posX, pos1.posY);
+                                    d = dot(biNormal, v) - d0;
+                                    pos1.omega += .2 * d * abs(V11n);
+                                }
+                            }
+                        } else {
+                            // second body current velocity
+                            float[] velocity2 = new float[]{pos2.vx, pos2.vy};
+
+                            // second body tangent velocity
+                            float V21t = dot(velocity2, biNormal);  // velocity projection onto biNormal
+                            float[] velocity2t = new float[2];
+                            System.arraycopy(biNormal, 0, velocity2t, 0, 2);
+                            scale(V21t, velocity2t);
+
+                            // second body normal velocity
+                            float V21n = dot(normal, velocity2);
+
+                            // resulting normal velocity Magnitude after impact considering absolutely non-elastic interaction
+                            float m1 = entity1.getMass();
+                            float m2 = entity2.getMass();
+                            float Vn = (m1 * V11n + m2 * V21n) / (m1 + m2);
+
+                            // resulting normal velocity full vector
+                            float[] velocity0n = new float[2];
+                            System.arraycopy(normal, 0, velocity0n, 0, 2);
+                            scale(Vn, velocity0n);
+
+                            // resulting velocities
+                            add(velocity1t, velocity0n);
+                            add(velocity2t, velocity0n);
+
+                            if (!entity1.isStatic()) {
+                                pos1.vx = velocity1t[0];
+                                pos1.vy = velocity1t[1];
+                            }
+
+                            pos2.vx = velocity2t[0];
+                            pos2.vy = velocity2t[1];
+
+                            // TODO apply angular momentum
+                        }
+                    }
                 }
             }
         }
@@ -400,13 +441,14 @@ class Physics {
                                 }
                             }
                         }
-                    } else if (entity instanceof Building) {
-                        if (entity.isBreakable()) {
-                            entity.decreaseCurrentHp((int) bullet.getPower());
+                    } else if (entity.isBreakable()) {
+                        if (!entity.isAlive()) {
+                            return;
+                        }
+                        entity.decreaseCurrentHp((int) bullet.getPower());
 
-                            if (!entity.isAlive()) {
-                                core.addDeadObject(entity.getId());
-                            }
+                        if (!entity.isAlive()) {
+                            core.addDeadObject(entity.getId());
                         }
                     }
                     bullet.isConsumed = true;

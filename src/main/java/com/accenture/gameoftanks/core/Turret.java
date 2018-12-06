@@ -17,12 +17,23 @@ public class Turret implements Serializable {
     private Shape turretTopology;
     private Shape gunTopology;
 
-    Turret(float length, float width, float offset, float gunLength, float gunWidth) {
+    private final String textureName;
+    private final String gunTextureName;
+
+    Turret(float length,
+           float width,
+           float offset,
+           float gunLength,
+           float gunWidth,
+           String textureName,
+           String gunTextureName) {
         this.length = length;
         this.width = width;
         this.offset = offset;
         this.gunLength = gunLength;
         this.gunWidth = gunWidth;
+        this.textureName = textureName;
+        this.gunTextureName = gunTextureName;
         this.angle = 0.0f;
 
         turretTopology = new Shape(createTurretTopology(length, width));
@@ -107,5 +118,13 @@ public class Turret implements Serializable {
 
     public Vertex[] getGunTopology() {
         return gunTopology.getVertices();
+    }
+
+    public String getTextureName() {
+        return textureName;
+    }
+
+    public String getGunTextureName() {
+        return gunTextureName;
     }
 }

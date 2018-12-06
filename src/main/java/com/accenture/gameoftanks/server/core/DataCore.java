@@ -5,6 +5,7 @@ import com.accenture.gameoftanks.server.net.ConnectionManager;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class DataCore extends Thread {
 
@@ -13,8 +14,8 @@ public class DataCore extends Thread {
 
     private ConnectionManager connectionManager;
 
-    private List<Player> players;
-    private List<Bullet> bullets;
+    private Queue<Player> players;
+    private Queue<Bullet> bullets;
     private Level level;
 
     private boolean onDemand;
@@ -72,9 +73,19 @@ public class DataCore extends Thread {
             }
 
             // compute collisions with other movable objects --------------------------------------
+            /*
             for (Vehicle activeVehicle : vehicles) {
                 for (Vehicle passiveVehicle : vehicles) {
                     Physics.computeCollision(activeVehicle, passiveVehicle);
+                }
+            }
+            */
+            for (int i = 0; i < vehicles.size(); i++) {
+                Vehicle vehicle1 = vehicles.get(i);
+
+                for (int j = i + 1; j < vehicles.size(); j++) {
+                    Vehicle vehicle2 = vehicles.get(j);
+                    Physics.computeCollision(vehicle1, vehicle2);
                 }
             }
 
@@ -94,7 +105,7 @@ public class DataCore extends Thread {
         bullets.add(bullet);
     }
 
-    public List<Bullet> getBullets() {
+    public Queue<Bullet> getBullets() {
         return bullets;
     }
 
@@ -119,7 +130,7 @@ public class DataCore extends Thread {
         return null;
     }
 
-    public void stopService() {
+    void stopService() {
         onDemand = false;
     }
 }

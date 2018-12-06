@@ -9,17 +9,6 @@ public class MATH {
 
     private MATH(){}
 
-    /*
-    public static void rotate2d(float angle, Vertex... vertices) {
-        for (Vertex vertex: vertices) {
-            float x2 = (float) (vertex.x * cos(angle) + vertex.y * -sin(angle));
-            float y2 = (float) (vertex.x * sin(angle) + vertex.y *  cos(angle));
-            vertex.xt = x2;
-            vertex.yt = y2;
-        }
-    }
-    */
-
     public static void transform2d(Position position, Vertex... vertices) {
         for (Vertex vertex: vertices) {
             float x2 = (float) (vertex.x * cos(position.alpha) + vertex.y * -sin(position.alpha));

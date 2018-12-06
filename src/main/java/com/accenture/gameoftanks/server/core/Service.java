@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class Service extends Thread {
 
-    private static final boolean USE_DATABASE_MANAGER = false;
+    private static final boolean USE_DATABASE_MANAGER = true;
     DatabaseManager databaseManager;
 
     @Override

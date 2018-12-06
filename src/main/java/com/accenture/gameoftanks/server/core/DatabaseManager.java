@@ -101,6 +101,9 @@ public class DatabaseManager {
                 " kills INTEGER," +
                 " deaths INTEGER," +
                 " score INTEGER," +
+                " shoots INTEGER," +
+                " hits INTEGER," +
+                " accuracy INTEGER," +
                 " PRIMARY KEY ( id ))";
         try {
             Statement statement = con.createStatement();
@@ -286,7 +289,7 @@ public class DatabaseManager {
         int score = 0;
 
         if (kills != 0) {
-            score = (int) (kills / (0.8 * deaths));
+            score = (int) ((kills * 30) / (0.3 * deaths));
         }
 
         try {
@@ -313,7 +316,7 @@ public class DatabaseManager {
     public List<Map<String, String>> returnTopPlayerStats() {
         List<Map<String, String>> players = new LinkedList<>();
 
-        String string = "SELECT nickname, kills, deaths, score FROM Game_of_Tanks.stats ORDER BY nickname ASC";
+        String string = "SELECT nickname, kills, deaths, score, shoots, hits, accuracy FROM Game_of_Tanks.stats ORDER BY score DESC";
         try {
             Statement statement = con.createStatement();
             ResultSet resultSet = statement.executeQuery(string);
@@ -325,9 +328,15 @@ public class DatabaseManager {
                 int kills = resultSet.getByte("kills");
                 int deaths = resultSet.getByte("deaths");
                 int score = resultSet.getByte("score");
+                int shoots = resultSet.getByte("shoots");
+                int hits = resultSet.getByte("hits");
+                int accuracy = resultSet.getByte("accuracy");
                 player.put("nickname", nickname);
                 player.put("kills", Integer.toString(kills));
                 player.put("deaths", Integer.toString(deaths));
+                player.put("shoots", Integer.toString(shoots));
+                player.put("hits", Integer.toString(shoots));
+                player.put("accuracy", Integer.toString(accuracy));
                 player.put("score", Integer.toString(score));
                 players.add(player);
                 i++;
@@ -350,34 +359,135 @@ public class DatabaseManager {
             String kills = map.get("kills");
             String deaths = map.get("deaths");
             String score = map.get("score");
-            System.out.println(nickname + " " + kills + "-" + deaths + " score: " + score);
+            String shoots = map.get("shoots");
+            String hits = map.get("hits");
+            String accuracy = map.get("accuracy");
+            System.out.println(nickname + " " + kills + "-" + deaths + " score: " + score + " accuracy: " + accuracy +"%");
         }
     }
 
-    public static void main(String[] args) {
-
-        DatabaseManager db = new DatabaseManager("root", "abcd1234");
-
-        Player player1 = new Player("abc");
-        Player player2 = new Player("zxc");
-        Player player3 = new Player("qwe");
-        Player player4 = new Player("aoe");
-        Player player5 = new Player("zxc1");
-        Player player6 = new Player("zxc2");
-        Player player7 = new Player("zxc3");
-        Player player8 = new Player("qwe4");
-        Player player9 = new Player("qwe5");
-
-        db.addOrUpdatePlayer(player1);
-        db.addOrUpdatePlayer(player2);
-        db.addOrUpdatePlayer(player3);
-        db.addOrUpdatePlayer(player4);
-        db.addOrUpdatePlayer(player5);
-        db.addOrUpdatePlayer(player6);
-        db.addOrUpdatePlayer(player7);
-        db.addOrUpdatePlayer(player8);
-        db.addOrUpdatePlayer(player9);
-
-        db.printTopPlayers();
+    public void setAccuracy(Player player) {
+        float accuracy = 0;
+        if (getShoots(player.getNickname()) > 0) {
+            accuracy = player.getHits() / player.getShoots();
+        }
+        int intValue = (int) accuracy;
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET accuracy = ? WHERE nickname = ?");
+            preparedStatement.setInt(1, intValue);
+            preparedStatement.setString(2, player.getNickname());
+            preparedStatement.executeUpdate();
+            con.commit();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
+
+    public void setShoots(Player player) {
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET shoots = ? WHERE nickname = ?");
+            preparedStatement.setInt(1, player.getShoots());
+            preparedStatement.setString(2, player.getNickname());
+            preparedStatement.executeUpdate();
+            con.commit();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setHits(Player player) {
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET hits = ? WHERE nickname = ?");
+            preparedStatement.setInt(1, player.getHits());
+            preparedStatement.setString(2, player.getNickname());
+            preparedStatement.executeUpdate();
+            con.commit();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int getAccuracy(String nick) {
+        int accuracy = 0;
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("SELECT accuracy FROM Game_of_Tanks.stats WHERE nickname=?");
+            preparedStatement.setString(1, nick);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                accuracy = resultSet.getByte("accuracy");
+            }
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            System.out.println("Player with a nickname " + nick + " not found.");
+            e.printStackTrace();
+        }
+        return accuracy;
+    }
+
+    public int getShoots(String nick) {
+        int shoots = 0;
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("SELECT shoots FROM Game_of_Tanks.stats WHERE nickname=?");
+            preparedStatement.setString(1, nick);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                shoots = resultSet.getByte("shoots");
+            }
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            System.out.println("Player with a nickname " + nick + " not found.");
+            e.printStackTrace();
+        }
+        return shoots;
+    }
+
+    public int getHits(String nick) {
+        int hits = 0;
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement("SELECT hits FROM Game_of_Tanks.stats WHERE nickname=?");
+            preparedStatement.setString(1, nick);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                hits = resultSet.getByte("hits");
+            }
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            System.out.println("Player with a nickname " + nick + " not found.");
+            e.printStackTrace();
+        }
+        return hits;
+    }
+
+//    public static void main(String[] args) {
+//
+//        DatabaseManager db = new DatabaseManager("root", "abcd1234");
+//
+//        Player player1 = new Player("abc");
+//        Player player2 = new Player("zxc");
+//        Player player3 = new Player("qwe");
+//        Player player4 = new Player("aoe");
+//        Player player5 = new Player("zxc1");
+//        Player player6 = new Player("zxc2");
+//        Player player7 = new Player("zxc3");
+//        Player player8 = new Player("qwe4");
+//        Player player9 = new Player("qwe5");
+//
+//        db.addOrUpdatePlayer(player1);
+//        db.addOrUpdatePlayer(player2);
+//        db.addOrUpdatePlayer(player3);
+//        db.addOrUpdatePlayer(player4);
+//        db.addOrUpdatePlayer(player5);
+//        db.addOrUpdatePlayer(player6);
+//        db.addOrUpdatePlayer(player7);
+//        db.addOrUpdatePlayer(player8);
+//        db.addOrUpdatePlayer(player9);
+//
+//        db.printTopPlayers();
+//    }
 }

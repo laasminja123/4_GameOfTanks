@@ -330,7 +330,6 @@ public class DatabaseManager {
                 player.put("deaths", Integer.toString(deaths));
                 player.put("score", Integer.toString(score));
                 players.add(player);
-                System.out.println(nickname);
                 i++;
             }
         } catch (SQLException e) {

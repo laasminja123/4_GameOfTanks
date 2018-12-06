@@ -124,6 +124,13 @@ public class ConnectionManager extends Thread {
             data.addBullets(bullets);
         }
 
+        // add information about dead entities
+        Queue<Integer> deadObjects = level.getLevelDeadObjects();
+
+        for (Integer id: deadObjects) {
+            data.addDeadObject(id);
+        }
+
         // send data to all players
         for (PlayerHandler handler : connections) {
             handler.sendData(data);

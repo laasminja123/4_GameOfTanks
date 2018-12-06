@@ -1,6 +1,7 @@
 package com.accenture.gameoftanks.net;
 
 import com.accenture.gameoftanks.core.Bullet;
+import com.accenture.gameoftanks.core.Level;
 import com.accenture.gameoftanks.core.Player;
 import com.accenture.gameoftanks.core.Vehicle;
 
@@ -12,10 +13,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class Data implements Serializable {
     private Map<String, Player> players;
     private Queue<Bullet> bullets;
+    private Queue<Integer> levelDeadObjects;
 
     public Data() {
         players = new ConcurrentHashMap<>();
         bullets = new ConcurrentLinkedQueue<>();
+        levelDeadObjects = new ConcurrentLinkedQueue<>();
     }
 
     public Data(Player player) {
@@ -26,6 +29,7 @@ public class Data implements Serializable {
     public void clear() {
         players.clear();
         bullets.clear();
+        levelDeadObjects.clear();
     }
 
     public Player getPlayer() {
@@ -137,5 +141,13 @@ public class Data implements Serializable {
 
     public Queue<Bullet> getBullets() {
         return bullets;
+    }
+
+    public void addDeadObject(int id) {
+        levelDeadObjects.add(id);
+    }
+
+    public Queue<Integer> getLevelDeadObjects() {
+        return levelDeadObjects;
     }
 }

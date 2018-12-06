@@ -1,5 +1,6 @@
 package com.accenture.gameoftanks.client.net;
 
+import com.accenture.gameoftanks.core.Level;
 import com.accenture.gameoftanks.net.Data;
 
 import java.io.IOException;
@@ -15,15 +16,17 @@ public class PlayerConnection {
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
     private final Data data;
+    private final Level level;
     private String host;
     private int port;
 
     private boolean onDemand;
 
-    public PlayerConnection(String host, int port, Data data) {
+    public PlayerConnection(String host, int port, Data data, Level level) {
         this.host = host;
         this.port = port;
         this.data = data;
+        this.level = level;
     }
 
     public void init() {
@@ -71,6 +74,10 @@ public class PlayerConnection {
                                 PlayerConnection.this.data.copyScores(data);
                                 PlayerConnection.this.data.copyVehicleData(data);
                                 PlayerConnection.this.data.cleanUp(data);
+                            }
+
+                            synchronized (PlayerConnection.this.level) {
+                                PlayerConnection.this.level.copyDeadObjects(data.getLevelDeadObjects());
                             }
                         }
                     } catch (IOException | ClassNotFoundException exc) {

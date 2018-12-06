@@ -15,6 +15,7 @@ public class DataCore extends Thread {
 
     private List<Player> players;
     private List<Bullet> bullets;
+    private Level level;
 
     private boolean onDemand;
 
@@ -34,7 +35,7 @@ public class DataCore extends Thread {
                 //
             }
 
-            Level level = connectionManager.getLevel();
+            level = connectionManager.getLevel();
 
             if (level == null) {
                 continue;
@@ -99,6 +100,12 @@ public class DataCore extends Thread {
 
     void consumeBullet(Bullet bullet) {
         bullets.remove(bullet);
+    }
+
+    void addDeadObject(int id) {
+        if (level != null) {
+            level.addDeadObject(id);
+        }
     }
 
     Player getPlayer(int vehicleId) {

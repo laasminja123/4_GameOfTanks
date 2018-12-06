@@ -455,7 +455,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         renderArea.display();
 
         // create connection
-        playerConnection = new PlayerConnection(address, port, playerData);
+        playerConnection = new PlayerConnection(address, port, playerData, level);
 
         try {
             playerConnection.init();
@@ -525,8 +525,9 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
                         playerKills.setText("Kills : " + currentPlayer.getKills());
                         playerDeaths.setText("Death : " + currentPlayer.getDeaths());
                         playerShots.setText("Shots made : " + currentPlayer.getShoots());
+
                         if (currentPlayer.getShoots() > 0) {
-                            int accuracy = currentPlayer.getHits() / currentPlayer.getShoots();
+                            float accuracy = currentPlayer.getHits() / currentPlayer.getShoots();
                             playerAccuracy.setText("Accuracy : " + accuracy);
                         } else {
                             playerAccuracy.setText("Accuracy : 0");

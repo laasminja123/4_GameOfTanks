@@ -359,6 +359,8 @@ class Physics {
             // check whether this is NOT a parent vehicle
             if (entity instanceof Vehicle && entity.getId() == bullet.getVehicleId()) {
                 continue;
+            } else if (entity instanceof Building && entity.isBreakable() && !entity.isAlive()) {
+                continue;
             }
             Vertex [] topology = entity.getTopology();
             Position pos = entity.getPosition();
@@ -396,6 +398,14 @@ class Physics {
                                     attacker.incrementKills();
                                     target.incrementDeaths();
                                 }
+                            }
+                        }
+                    } else if (entity instanceof Building) {
+                        if (entity.isBreakable()) {
+                            entity.decreaseCurrentHp((int) bullet.getPower());
+
+                            if (!entity.isAlive()) {
+                                core.addDeadObject(entity.getId());
                             }
                         }
                     }

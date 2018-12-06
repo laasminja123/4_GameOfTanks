@@ -4,14 +4,17 @@ import com.accenture.gameoftanks.core.primitives.Shape;
 import com.accenture.gameoftanks.core.primitives.Vertex;
 import sun.awt.image.ImageWatched;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Level {
 
     private List<Entity> content;
     private List<String> textures;
     private float[] respawns;
+
+    private Queue<Integer> deadObjects;
 
 
     //Generate constructor
@@ -20,6 +23,7 @@ public class Level {
         loadTextures();
 
         initRespawns();
+        deadObjects = new ConcurrentLinkedQueue<>();
     }
 
     private void loadContent() {
@@ -91,6 +95,22 @@ public class Level {
             id++;
         }
         return id;
+    }
+
+    public void copyDeadObjects(Queue<Integer> data) {
+        for (int id: data) {
+            addDeadObject(id);
+        }
+    }
+
+    public void addDeadObject(int id) {
+        if (!deadObjects.contains(id)) {
+            deadObjects.add(id);
+        }
+    }
+
+    public Queue<Integer> getLevelDeadObjects() {
+        return deadObjects;
     }
 
     //---------------------------------------

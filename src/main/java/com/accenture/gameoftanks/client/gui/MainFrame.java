@@ -247,11 +247,12 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         turretReload.setForeground(Color.RED);
         turretReload.setValue(100);
 
+
         tankInfoPanel.setLayout(new GridLayout(2,2,0,0));
-        tankInfoPanel.add(new JLabel("Your lives: "));
-        tankInfoPanel.add(new JLabel("Your ammo"));
-        tankInfoPanel.add(new JLabel("Total Players alive:"));
-        tankInfoPanel.add(new JLabel("Ping - 13ms"));
+        tankInfoPanel.add(playerKills = new JLabel());
+        tankInfoPanel.add(playerDeaths = new JLabel());
+        tankInfoPanel.add(playerShots = new JLabel());
+        tankInfoPanel.add(playerAccuracy = new JLabel());
 
 
 
@@ -282,8 +283,10 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         moveRight.setBackground(Color.white);
         moveUp.setBackground(Color.white);
         moveDown.setBackground(Color.white);
-        connect.setBackground(Color.decode("#164be9"));
-        disconnect.setBackground(Color.decode("#164be9"));
+        connect.setBackground(Color.white);
+        connect.setForeground(Color.BLACK);
+        disconnect.setBackground(Color.white);
+        disconnect.setForeground(Color.BLACK);
 
     }
 
@@ -518,13 +521,17 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
                     turretReload.setValue((currentDelay * 100) / maxDelay);
 
+                    playerKills.setText("Kills : " + currentPlayer.getKills());
+                    playerDeaths.setText("Death : " + currentPlayer.getDeaths());
+                    playerShots.setText("Shots made : " + currentPlayer.getShoots());
+                    if (currentPlayer.getShoots() > 0) {
+                        int accuracy = currentPlayer.getHits() / currentPlayer.getShoots();
+                        playerAccuracy.setText("Accuracy : " + accuracy);
+                    } else {
+                        playerAccuracy.setText("Accuracy : 0");
+                    }
 
-                    // todo
-                    // label.setText ...
-                    currentPlayer.getKills();
-                    currentPlayer.getDeaths();
-                    currentPlayer.getShoots();
-                    currentPlayer.getHits();
+
                 } else {
                     System.out.println("Vehicle is null");
                 }

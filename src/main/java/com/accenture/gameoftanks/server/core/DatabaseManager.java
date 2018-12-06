@@ -4,10 +4,7 @@ import com.accenture.gameoftanks.core.Player;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DatabaseManager {
 
@@ -75,7 +72,7 @@ public class DatabaseManager {
     public List<String> getLogs() {
         List<String> linkedList = new LinkedList();
         try {
-            System.out.println("Generating logs");
+            System.out.println("\nGenerating logs:\n");
             Statement statement = con.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT DISTINCT nickname, status, time FROM Game_of_Tanks.logs");
             while (resultSet.next()) {
@@ -313,56 +310,74 @@ public class DatabaseManager {
         con = null;
     }
 
-    //TODO sort the hashmap in descending order by scores and leave only top 10 players
-    private Map<String, Map<String, String>> returnPlayerStats() {
-        Map<String, Map<String, String>> players = new HashMap<>();
-        Map<String, Map<String, String>> topTen = new HashMap<>();
+    public List<Map<String, String>> returnTopPlayerStats() {
+        List<Map<String, String>> players = new LinkedList<>();
 
-        String string = "SELECT nickname, kills, deaths, score FROM Game_of_Tanks.stats";
+        String string = "SELECT nickname, kills, deaths, score FROM Game_of_Tanks.stats ORDER BY nickname ASC";
         try {
             Statement statement = con.createStatement();
             ResultSet resultSet = statement.executeQuery(string);
-            while (resultSet.next()) {
-                Map<String, String> stats = new HashMap<>();
+
+            int i = 0;
+            while (resultSet.next() && i < 10) {
+                Map<String, String> player = new HashMap<>();
                 String nickname = resultSet.getString("nickname");
                 int kills = resultSet.getByte("kills");
                 int deaths = resultSet.getByte("deaths");
                 int score = resultSet.getByte("score");
-                stats.put("kills", Integer.toString(kills));
-                stats.put("deaths", Integer.toString(deaths));
-                stats.put("score", Integer.toString(score));
-                players.put(nickname, stats);
+                player.put("nickname", nickname);
+                player.put("kills", Integer.toString(kills));
+                player.put("deaths", Integer.toString(deaths));
+                player.put("score", Integer.toString(score));
+                players.add(player);
+                i++;
             }
+            resultSet.close();
+            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        topTen = players;
-        return topTen;
+        return players;
     }
 
-//    public static void main(String[] args) {
-//
-//        DatabaseManager db = new DatabaseManager("root", "abcd1234");
-//
-//        Player player1 = new Player("abc");
-//        Player player2 = new Player("zxc");
-//        Player player3 = new Player("qwe");
-//        Player player4 = new Player("aoe");
-//
-//        db.addOrUpdatePlayer(player1);
-//        db.logConnect(player1);
-//        db.addOrUpdatePlayer(player2);
-//        db.logConnect(player2);
-//        db.addOrUpdatePlayer(player3);
-//        db.logConnect(player3);
-//        db.addOrUpdatePlayer(player4);
-//        db.logConnect(player4);
-//        db.logDisconnect(player1);
-//        db.logDisconnect(player2);
-//        db.logDisconnect(player4);
-//        db.printLogs();
-//        System.out.println("Success");
-//    }
+    public void printTopPlayers() {
+        List<Map<String, String>> topPlayers = returnTopPlayerStats();
+        System.out.println("\nShowing top 10 players ordered by score\n");
 
+        for (Map<String, String> map : topPlayers) {
+            String nickname = map.get("nickname");
+            String kills = map.get("kills");
+            String deaths = map.get("deaths");
+            String score = map.get("score");
+            System.out.println(nickname + " " + kills + "-" + deaths + " score: " + score);
+        }
+    }
+
+    public static void main(String[] args) {
+
+        DatabaseManager db = new DatabaseManager("root", "abcd1234");
+
+        Player player1 = new Player("abc");
+        Player player2 = new Player("zxc");
+        Player player3 = new Player("qwe");
+        Player player4 = new Player("aoe");
+        Player player5 = new Player("zxc1");
+        Player player6 = new Player("zxc2");
+        Player player7 = new Player("zxc3");
+        Player player8 = new Player("qwe4");
+        Player player9 = new Player("qwe5");
+
+        db.addOrUpdatePlayer(player1);
+        db.addOrUpdatePlayer(player2);
+        db.addOrUpdatePlayer(player3);
+        db.addOrUpdatePlayer(player4);
+        db.addOrUpdatePlayer(player5);
+        db.addOrUpdatePlayer(player6);
+        db.addOrUpdatePlayer(player7);
+        db.addOrUpdatePlayer(player8);
+        db.addOrUpdatePlayer(player9);
+
+        db.printTopPlayers();
+    }
 }

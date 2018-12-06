@@ -25,24 +25,15 @@ public class Service extends Thread {
         DataCore dataCore = new DataCore(connectionManager);
         connectionManager.setDataCore(dataCore);
         dataCore.start();
+        System.out.println("Core started!");
 
+        CommandListener commandListener = new CommandListener(databaseManager);
+        commandListener.run();
 
-        if (databaseManager != null) {
-            System.out.println("Core started!");
-            CommandListener commandListener = new CommandListener(databaseManager);
-            commandListener.start();
-        } else {
-            System.out.println("Core started!");
-        }
+        // close service
+        connectionManager.stopService();
+        dataCore.stopService();
 
-        try {
-            connectionManager.join();
-            dataCore.join();
-        } catch (InterruptedException exc) {
-            exc.printStackTrace();
-        } finally {
-            databaseManager.closeConnection();
-        }
     }
 
     public void createDatabaseManager() {

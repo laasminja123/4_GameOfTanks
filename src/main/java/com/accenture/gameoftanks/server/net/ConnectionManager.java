@@ -183,4 +183,15 @@ public class ConnectionManager extends Thread {
         return false;
     }
 
+    public void stopService() {
+        connections.clear();
+        dataCore = null;
+        onDemand = false;
+
+        try {
+            server.close();
+        } catch (IOException exc) {
+            exc.printStackTrace();
+        }
+    }
 }

@@ -46,7 +46,7 @@ public class DataCore extends Thread {
             players = connectionManager.getPlayers();
             List<Vehicle> vehicles = new LinkedList<>();
 
-            for (Player player: players) {
+            for (Player player : players) {
                 Vehicle vehicle = player.getVehicle();
 
                 if (vehicle != null) {
@@ -55,36 +55,36 @@ public class DataCore extends Thread {
             }
 
             // process shooting action ------------------------------------------------------------
-            for (Vehicle vehicle: vehicles) {
+            for (Vehicle vehicle : vehicles) {
                 Physics.processShootRequest(this, vehicle, TIME_STEP_MSEC);
             }
 
             // compute bullets motion -------------------------------------------------------------
-            for (Bullet bullet: bullets) {
+            for (Bullet bullet : bullets) {
                 Physics.computeBulletMotion(this, bullet, vehicles, levelContent, TIME_STEP_FLOAT);
             }
 
             // compute collisions with level static objects ---------------------------------------
-            for (Vehicle vehicle: vehicles) {
-                for (Entity entity: levelContent) {
+            for (Vehicle vehicle : vehicles) {
+                for (Entity entity : levelContent) {
                     Physics.computeCollision(vehicle, entity);
                 }
             }
 
             // compute collisions with other movable objects --------------------------------------
-            for (Vehicle activeVehicle: vehicles) {
-                for (Vehicle passiveVehicle: vehicles) {
+            for (Vehicle activeVehicle : vehicles) {
+                for (Vehicle passiveVehicle : vehicles) {
                     Physics.computeCollision(activeVehicle, passiveVehicle);
                 }
             }
 
             // compute motion ---------------------------------------------------------------------
-            for (Vehicle vehicle: vehicles) {
+            for (Vehicle vehicle : vehicles) {
                 Physics.computeMotion(vehicle, TIME_STEP_FLOAT);
             }
 
             // rotate guns ------------------------------------------------------------------------
-            for (Vehicle vehicle: vehicles) {
+            for (Vehicle vehicle : vehicles) {
                 Physics.adjustGunDirection(vehicle);
             }
         }
@@ -110,12 +110,16 @@ public class DataCore extends Thread {
 
     Player getPlayer(int vehicleId) {
         if (players != null) {
-            for (Player player: players) {
+            for (Player player : players) {
                 if (player.getVehicle().getId() == vehicleId) {
                     return player;
                 }
             }
         }
         return null;
+    }
+
+    public void stopService() {
+        onDemand = false;
     }
 }

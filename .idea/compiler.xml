@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="4_GameOfTanks" />
         <module name="4_GameOfTanks1" />
+        <module name="4_GameOfTanks2" />
         <module name="4_GameOfTanks3" />
         <module name="GameOfTanks" />
         <module name="gameoftanks" />
@@ -16,6 +17,7 @@
     <bytecodeTargetLevel>
       <module name="4_GameOfTanks" target="7" />
       <module name="4_GameOfTanks1" target="8" />
+      <module name="4_GameOfTanks2" target="1.8" />
       <module name="4_GameOfTanks3" target="1.8" />
       <module name="GameOfTanks" target="7" />
       <module name="gameoftanks" target="7" />

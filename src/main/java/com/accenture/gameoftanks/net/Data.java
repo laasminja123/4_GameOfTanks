@@ -90,6 +90,16 @@ public class Data implements Serializable {
         }
     }
 
+    public void copyVehicleData(Data data) {
+        Set<String> playerNames = data.getPlayerNames();
+
+        for (String name: playerNames) {
+            if (players.containsKey(name)) {
+                players.get(name).copyVehicleData(data.getPlayer(name));
+            }
+        }
+    }
+
     // removes disconnected players
     public void cleanUp(Data data) {
         Set<String> thisNames = players.keySet();

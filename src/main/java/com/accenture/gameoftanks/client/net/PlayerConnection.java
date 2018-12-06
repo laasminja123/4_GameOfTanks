@@ -67,6 +67,7 @@ public class PlayerConnection {
                             PlayerConnection.this.data.copyPosition(data);
                             PlayerConnection.this.data.copyContent(data);
                             PlayerConnection.this.data.copyScores(data);
+                            PlayerConnection.this.data.copyVehicleData(data);
                             PlayerConnection.this.data.cleanUp(data);
                         }
                     } catch (IOException | ClassNotFoundException exc) {

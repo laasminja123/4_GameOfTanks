@@ -49,6 +49,10 @@ public class Player implements Serializable {
         this.hits   = player.hits;
     }
 
+    public void copyVehicleData(Player player) {
+        this.vehicle.copyData(player.vehicle);
+    }
+
     public int getDeaths() {
         return deaths;
     }

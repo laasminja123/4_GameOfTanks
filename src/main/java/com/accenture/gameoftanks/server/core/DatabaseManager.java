@@ -313,9 +313,10 @@ public class DatabaseManager {
         con = null;
     }
 
-    //TODO make thīs method client will use intent to get it and show it on hīs screen using mainframe
-    private void returnPlayerStats() {
-        Map<String, Map<String, String>> playerStats = new HashMap<>();
+    //TODO sort the hashmap in descending order by scores and leave only top 10 players
+    private Map<String, Map<String, String>> returnPlayerStats() {
+        Map<String, Map<String, String>> players = new HashMap<>();
+        Map<String, Map<String, String>> topTen = new HashMap<>();
 
         String string = "SELECT nickname, kills, deaths, score FROM Game_of_Tanks.stats";
         try {
@@ -323,23 +324,21 @@ public class DatabaseManager {
             ResultSet resultSet = statement.executeQuery(string);
             while (resultSet.next()) {
                 Map<String, String> stats = new HashMap<>();
-                stats.put("kills", "0");
-                stats.put("deaths", "0");
-                stats.put("score", "0");
+                String nickname = resultSet.getString("nickname");
+                int kills = resultSet.getByte("kills");
+                int deaths = resultSet.getByte("deaths");
+                int score = resultSet.getByte("score");
+                stats.put("kills", Integer.toString(kills));
+                stats.put("deaths", Integer.toString(deaths));
+                stats.put("score", Integer.toString(score));
+                players.put(nickname, stats);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-
-        // 1 player
-        String player1Nick = "Suka";
-        Map<String, String> player1 = new HashMap<>();
-        player1.put("kills", "10");
-        player1.put("deaths", "5");
-//        stats.put(player1Nick, player1);
-
-//        pectam nosorto pec ranka un suuti tikai top 10 peec score
+        topTen = players;
+        return topTen;
     }
 
 //    public static void main(String[] args) {

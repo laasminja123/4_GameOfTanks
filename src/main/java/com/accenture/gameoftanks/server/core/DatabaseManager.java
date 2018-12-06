@@ -72,7 +72,7 @@ public class DatabaseManager {
     public List<String> getLogs() {
         List<String> linkedList = new LinkedList();
         try {
-            System.out.println("Generating logs");
+            System.out.println("\nGenerating logs:\n");
             Statement statement = con.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT DISTINCT nickname, status, time FROM Game_of_Tanks.logs");
             while (resultSet.next()) {
@@ -310,7 +310,7 @@ public class DatabaseManager {
         con = null;
     }
 
-    public List <Map<String, String>> returnTopPlayerStats() {
+    public List<Map<String, String>> returnTopPlayerStats() {
         List<Map<String, String>> players = new LinkedList<>();
 
         String string = "SELECT nickname, kills, deaths, score FROM Game_of_Tanks.stats ORDER BY nickname ASC";
@@ -332,6 +332,8 @@ public class DatabaseManager {
                 players.add(player);
                 i++;
             }
+            resultSet.close();
+            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -339,38 +341,43 @@ public class DatabaseManager {
         return players;
     }
 
-//    public static void main(String[] args) {
-//
-//        DatabaseManager db = new DatabaseManager("root", "abcd1234");
-//
-//        Player player1 = new Player("abc");
-//        Player player2 = new Player("zxc");
-//        Player player3 = new Player("qwe");
-//        Player player4 = new Player("aoe");
-//        Player player5 = new Player("zxc1");
-//        Player player6 = new Player("zxc2");
-//        Player player7 = new Player("zxc3");
-//        Player player8 = new Player("qwe4");
-//        Player player9 = new Player("qwe5");
-//
-//            db.addOrUpdatePlayer(player1);
-//            db.addOrUpdatePlayer(player2);
-//            db.addOrUpdatePlayer(player3);
-//            db.addOrUpdatePlayer(player4);
-//            db.addOrUpdatePlayer(player5);
-//            db.addOrUpdatePlayer(player6);
-//            db.addOrUpdatePlayer(player7);
-//            db.addOrUpdatePlayer(player8);
-//            db.addOrUpdatePlayer(player9);
-//
-//        List <Map<String, String>> list = db.returnTopPlayerStats();
-//
-//        for (Map<String, String> map : list) {
-//            System.out.print("Nickname: " + map.get("nickname") + " ");
-//            System.out.print("Kills: " + map.get("kills") + " ");
-//            System.out.print("Deaths: " + map.get("deaths") + " ");
-//            System.out.println("Score: " + map.get("score"));
-//        }
-//    }
+    public void printTopPlayers() {
+        List<Map<String, String>> topPlayers = returnTopPlayerStats();
+        System.out.println("\nShowing top 10 players ordered by score\n");
 
+        for (Map<String, String> map : topPlayers) {
+            String nickname = map.get("nickname");
+            String kills = map.get("kills");
+            String deaths = map.get("deaths");
+            String score = map.get("score");
+            System.out.println(nickname + " " + kills + "-" + deaths + " score: " + score);
+        }
+    }
+
+    public static void main(String[] args) {
+
+        DatabaseManager db = new DatabaseManager("root", "abcd1234");
+
+        Player player1 = new Player("abc");
+        Player player2 = new Player("zxc");
+        Player player3 = new Player("qwe");
+        Player player4 = new Player("aoe");
+        Player player5 = new Player("zxc1");
+        Player player6 = new Player("zxc2");
+        Player player7 = new Player("zxc3");
+        Player player8 = new Player("qwe4");
+        Player player9 = new Player("qwe5");
+
+        db.addOrUpdatePlayer(player1);
+        db.addOrUpdatePlayer(player2);
+        db.addOrUpdatePlayer(player3);
+        db.addOrUpdatePlayer(player4);
+        db.addOrUpdatePlayer(player5);
+        db.addOrUpdatePlayer(player6);
+        db.addOrUpdatePlayer(player7);
+        db.addOrUpdatePlayer(player8);
+        db.addOrUpdatePlayer(player9);
+
+        db.printTopPlayers();
+    }
 }

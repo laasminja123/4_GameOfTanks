@@ -1,5 +1,7 @@
 package com.accenture.gameoftanks.server.core;
 
+import com.accenture.gameoftanks.server.net.ConnectionManager;
+
 import java.util.Scanner;
 
 public class CommandListener extends Thread {
@@ -13,23 +15,39 @@ public class CommandListener extends Thread {
     }
 
     @Override
-    public void start() {
+    public void run() {
         while (true) {
 
             System.out.println();
-//            System.out.println("Type command [exit] to exit.");
-            System.out.println("Type command [printLogs] to print logs.");
+
+            if (databaseManager != null) {
+                System.out.println("Type command [logs] for logs.");
+                System.out.println("Type command [top10] for 10 highest scored players");
+            }
+
+            System.out.println("Type command [exit] to close server and exit.");
             System.out.println();
 
             String command = scanner.nextLine();
 
-//            if (command.equals("exit")) {
-//                break;
-//            }
-
-            if (command.equals("printLogs")) {
-                databaseManager.printLogs();
+            if (command.equals("exit")) {
+                if (databaseManager != null) {
+                    databaseManager.closeConnection();
+                }
+                break;
             }
+
+            if (databaseManager != null) {
+
+                if (command.equals("logs")) {
+                    databaseManager.printLogs();
+                }
+
+                if (command.equals("top10")) {
+                    databaseManager.printTopPlayers();
+                }
+            }
+
 
         }
     }

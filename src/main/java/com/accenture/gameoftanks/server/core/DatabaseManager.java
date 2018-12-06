@@ -16,7 +16,7 @@ public class DatabaseManager {
     //    private String password = "abcd1234";
     private final String logStatementString = "INSERT INTO Game_of_Tanks.logs (nickname, status, time) VALUES (?, ?, ?)";
     private Connection con;
-    private ResultSet resultSet;
+//    private ResultSet resultSet;
 
     public DatabaseManager(String username, String password) {
         try {
@@ -286,7 +286,12 @@ public class DatabaseManager {
     public void setScore(Player player) {
         int deaths = getDeaths(player);
         int kills = getKills(player);
-        int score = (int) (kills / (0.8 * deaths));
+        int score = 0;
+
+        if (kills != 0) {
+            score = (int) (kills / (0.8 * deaths));
+        }
+
         try {
             PreparedStatement preparedStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET score = ? WHERE nickname = ?");
             preparedStatement.setInt(1, score);
@@ -308,19 +313,34 @@ public class DatabaseManager {
         con = null;
     }
 
-//    //TODO make thīs method client will use intent to get it and show it on hīs screen using mainframe
-//    private void blalba() {
-//        Map<String, Map<String, String>> stats = new HashMap<>();
-//
-//        // 1 player
-//        String player1Nick = "Suka";
-//        Map<String, String> player1 = new HashMap<>();
-//        player1.put("kills", "10");
-//        player1.put("deaths", "5");
+    //TODO make thīs method client will use intent to get it and show it on hīs screen using mainframe
+    private void returnPlayerStats() {
+        Map<String, Map<String, String>> playerStats = new HashMap<>();
+
+        String string = "SELECT nickname, kills, deaths, score FROM Game_of_Tanks.stats";
+        try {
+            Statement statement = con.createStatement();
+            ResultSet resultSet = statement.executeQuery(string);
+            while (resultSet.next()) {
+                Map<String, String> stats = new HashMap<>();
+                stats.put("kills", "0");
+                stats.put("deaths", "0");
+                stats.put("score", "0");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        // 1 player
+        String player1Nick = "Suka";
+        Map<String, String> player1 = new HashMap<>();
+        player1.put("kills", "10");
+        player1.put("deaths", "5");
 //        stats.put(player1Nick, player1);
-//
-////        pectam nosorto pec ranka un suuti tikai top 10 peec score
-//    }
+
+//        pectam nosorto pec ranka un suuti tikai top 10 peec score
+    }
 
 //    public static void main(String[] args) {
 //

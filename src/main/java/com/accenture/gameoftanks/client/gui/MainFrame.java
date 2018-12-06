@@ -1,9 +1,11 @@
 package com.accenture.gameoftanks.client.gui;
 
 import com.accenture.gameoftanks.client.net.PlayerConnection;
+import com.accenture.gameoftanks.core.Player;
 import com.accenture.gameoftanks.core.Intent;
 import com.accenture.gameoftanks.core.Level;
 import com.accenture.gameoftanks.core.Player;
+import com.accenture.gameoftanks.core.Vehicle;
 import com.accenture.gameoftanks.net.Data;
 import com.jogamp.opengl.awt.GLCanvas;
 
@@ -12,6 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.border.Border;
 
 public class MainFrame extends JFrame implements KeyListener, MouseListener, MouseMotionListener {
 
@@ -220,21 +223,21 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         bottomsecond.setBackground(Color.red);
         tankInfoPanel.setPreferredSize(new Dimension(200,80));
 
-//        tankStatusPanel.setPreferredSize();
-//        tankInfoPanel.setPreferredSize();
-
         reloadBlock = new Boolean(false);
 
         tankStatusPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 1,0));
         tankStatusPanel.add(randomStuffText = new JLabel("Tank Healpoints:"));
         tankStatusPanel.add(hp = new JProgressBar());
         hp.setStringPainted(true);
+        hp.setPreferredSize(new Dimension(150,25));
         hp.setBackground(Color.RED);
         hp.setForeground(Color.GREEN);
+        hp.setString("50 / 100");
         hp.setValue(count);
         tankStatusPanel.add(randomStuffText = new JLabel("Turret Reload"));
         tankStatusPanel.add(turretReload = new JProgressBar());
         turretReload.setStringPainted(true);
+        turretReload.setPreferredSize(new Dimension(150,25));
         turretReload.setBackground(Color.RED);
         turretReload.setForeground(Color.GREEN);
         turretReload.setValue(100);
@@ -320,7 +323,8 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         } else if (event.getSource() == moveDown) {
             onBottom = true;
         } else if (event.getSource() == shoot){
-            reload();
+            if (reloadBlock == false) { onShoot = true; reload(); }
+
         } else if (event.getSource() == renderArea) {
             mousePos1[0] = event.getX();
             mousePos1[1] = event.getY();
@@ -342,6 +346,8 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
             onRight = false;
         } else if (event.getSource() == moveDown) {
             onBottom = false;
+        } else if (event.getSource() == shoot){
+            onShoot = false;
         } else if (event.getSource() == renderArea) {
             if (SwingUtilities.isLeftMouseButton(event)) {
                 onAdjustShootingAngle = false;
@@ -521,7 +527,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
             } else if (e.getKeyCode()== KeyEvent.VK_W) {
                 onTop = true;
             } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                onShoot = true;
+                if (reloadBlock == false) { onShoot = true; reload(); }
             } else {
                 return;
             }
@@ -549,7 +555,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
 
         private void reload() {
 
-        Timer timer = new Timer(10, new ActionListener() {
+        Timer timer = new Timer(20, new ActionListener() {
 
             int i = 0;
 

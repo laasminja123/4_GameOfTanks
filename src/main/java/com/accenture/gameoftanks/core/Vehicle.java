@@ -72,6 +72,10 @@ public abstract class Vehicle extends Entity implements Serializable {
         return currentHp > 0;
     }
 
+    public int getStartingHp() {
+        return startingHp;
+    }
+
     public int getCurrentHp() {
         return currentHp;
     }
@@ -100,6 +104,10 @@ public abstract class Vehicle extends Entity implements Serializable {
         this.id = vehicle.id;
         this.setShootingAngle(vehicle.getShootingAngle());
         this.position.copy(vehicle.position);
+    }
+
+    void copyData(Vehicle vehicle) {
+        this.currentHp = vehicle.currentHp;
     }
 
     void copyIntent(Vehicle vehicle) {

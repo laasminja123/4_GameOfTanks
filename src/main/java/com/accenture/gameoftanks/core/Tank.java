@@ -11,7 +11,7 @@ public class Tank extends Vehicle implements Serializable {
 
     private Turret turret;
 
-    Tank(float length, float width) {
+    public Tank(float length, float width) {
         super(5000.0f, 5000.0f, 10000.0f, 8, 2000.0f, 1.3f, 100, 2000);
         Shape topology = new Shape(createTopology(length, width));
         setTopology(topology);

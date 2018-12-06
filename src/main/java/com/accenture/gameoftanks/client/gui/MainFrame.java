@@ -174,6 +174,8 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
                 if (renderer != null) {
                     renderer.removeGameData();
                 }
+                level = null;
+                playerData = null;
 
                 connect.setEnabled(true);
                 disconnect.setEnabled(false);
@@ -498,26 +500,28 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
     }
 
     private void updateControlPanel() {
-        Player currentPlayer = playerData.getPlayer(nickName);
-        Vehicle vehicle = currentPlayer.getVehicle();
-        int currentHp = vehicle.getCurrentHp();
-        int maxHp = vehicle.getStartingHp();
+        if (playerData != null) {
+            Player currentPlayer = playerData.getPlayer(nickName);
+            Vehicle vehicle = currentPlayer.getVehicle();
+            int currentHp = vehicle.getCurrentHp();
+            int maxHp = vehicle.getStartingHp();
 
-        hp.setString(currentHp + " / " + maxHp);
-        hp.setValue((currentHp * 100) / maxHp);
+            hp.setString(currentHp + " / " + maxHp);
+            hp.setValue((currentHp * 100) / maxHp);
 
-        int currentDelay = vehicle.getCurrentDelayMsec();
-        int maxDelay = vehicle.getShootingDelayMsec();
+            int currentDelay = vehicle.getCurrentDelayMsec();
+            int maxDelay = vehicle.getShootingDelayMsec();
 
-        turretReload.setValue((currentDelay * 100) / maxDelay);
+            turretReload.setValue((currentDelay * 100) / maxDelay);
 
 
-        // todo
-        // label.setText ...
-        currentPlayer.getKills();
-        currentPlayer.getDeaths();
-        currentPlayer.getShoots();
-        currentPlayer.getHits();
+            // todo
+            // label.setText ...
+            currentPlayer.getKills();
+            currentPlayer.getDeaths();
+            currentPlayer.getShoots();
+            currentPlayer.getHits();
+        }
     }
 
     private void updateIntent() {

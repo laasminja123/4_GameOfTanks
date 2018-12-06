@@ -18,10 +18,7 @@ public class Service extends Thread {
         // create game level
         Level gameLevel = new Level();
 
-
-//        databaseManager = null;
-//        Comment createDatabaseManager to get rid of prompts
-        createDatabaseManager();
+        useDatabaseManager(true);
 
         ConnectionManager connectionManager = new ConnectionManager(gameLevel, databaseManager);
         connectionManager.start();
@@ -31,12 +28,14 @@ public class Service extends Thread {
         DataCore dataCore = new DataCore(connectionManager);
         connectionManager.setDataCore(dataCore);
         dataCore.start();
-        System.out.println("Core started!");
+
 
         if (databaseManager != null) {
+            System.out.println("Core started!");
             CommandListener commandListener = new CommandListener(databaseManager);
             commandListener.start();
-            System.out.println("Command Listener started!");
+        } else {
+            System.out.println("Core started!");
         }
 
         try {
@@ -66,6 +65,14 @@ public class Service extends Thread {
                 databaseManager = null;
                 return;
             }
+        }
+    }
+
+    public void useDatabaseManager(boolean value) {
+        if (value) {
+            createDatabaseManager();
+        } else {
+            databaseManager = null;
         }
     }
 }

@@ -308,19 +308,19 @@ public class DatabaseManager {
         con = null;
     }
 
-    //TODO make thīs method client will use intent to get it and show it on hīs screen using mainframe
-    private void blalba() {
-        Map<String, Map<String, String>> stats = new HashMap<>();
-
-        // 1 player
-        String player1Nick = "Suka";
-        Map<String, String> player1 = new HashMap<>();
-        player1.put("kills", "10");
-        player1.put("deaths", "5");
-        stats.put(player1Nick, player1);
-
-//        pectam nosorto pec ranka un suuti tikai top 10 peec score
-    }
+//    //TODO make thīs method client will use intent to get it and show it on hīs screen using mainframe
+//    private void blalba() {
+//        Map<String, Map<String, String>> stats = new HashMap<>();
+//
+//        // 1 player
+//        String player1Nick = "Suka";
+//        Map<String, String> player1 = new HashMap<>();
+//        player1.put("kills", "10");
+//        player1.put("deaths", "5");
+//        stats.put(player1Nick, player1);
+//
+////        pectam nosorto pec ranka un suuti tikai top 10 peec score
+//    }
 
 //    public static void main(String[] args) {
 //

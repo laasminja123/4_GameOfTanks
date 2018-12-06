@@ -183,16 +183,16 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         emptyspace = new JPanel();
         forthleft.setLayout(new GridLayout(3,1,5,5));
         forthleft.add(emptyspace);
-        forthleft.add(moveLeft = new JButton(new ImageIcon("src/main/resources/textures/left.png")));
+        forthleft.add(moveLeft = new JButton(new ImageIcon("src/main/resources/buttonSkins/left.png")));
         moveLeft.addKeyListener(new KeyProcessor());
         moveLeft.addMouseListener(this);
 
         forthmiddle.setLayout(new GridLayout(3,1,1,5));
-        forthmiddle.add(moveUp = new JButton(new ImageIcon("src/main/resources/textures/up.png")));
+        forthmiddle.add(moveUp = new JButton(new ImageIcon("src/main/resources/buttonSkins/up.png")));
         moveUp.addKeyListener(new KeyProcessor());
-        forthmiddle.add(shoot = new JButton(new ImageIcon("src/main/resources/textures/bullet.png")));
+        forthmiddle.add(shoot = new JButton(new ImageIcon("src/main/resources/buttonSkins/bullet.png")));
         shoot.addKeyListener(new KeyProcessor());
-        forthmiddle.add(moveDown = new JButton(new ImageIcon("src/main/resources/textures/down.png")));
+        forthmiddle.add(moveDown = new JButton(new ImageIcon("src/main/resources/buttonSkins/down.png")));
         moveDown.addKeyListener(new KeyProcessor());
         moveUp.addMouseListener(this);
         moveUp.addKeyListener(new KeyProcessor());
@@ -208,7 +208,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
         emptyspace = new JPanel();
         forthright.setLayout(new GridLayout(3,1,1,5));
         forthright.add(emptyspace);
-        forthright.add(moveRight = new JButton(new ImageIcon("src/main/resources/textures/right.png")));
+        forthright.add(moveRight = new JButton(new ImageIcon("src/main/resources/buttonSkins/right.png")));
         moveRight.addKeyListener(new KeyProcessor());
         moveRight.addMouseListener(this);
 

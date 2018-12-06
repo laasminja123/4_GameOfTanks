@@ -7,18 +7,15 @@ import java.util.Scanner;
 
 public class Service extends Thread {
 
+    private static final boolean USE_DATABASE_MANAGER = true;
     DatabaseManager databaseManager;
-
-    public Service() {
-        //
-    }
 
     @Override
     public void run() {
         // create game level
         Level gameLevel = new Level();
 
-        useDatabaseManager(true);
+        useDatabaseManager(USE_DATABASE_MANAGER);
 
         ConnectionManager connectionManager = new ConnectionManager(gameLevel, databaseManager);
         connectionManager.start();

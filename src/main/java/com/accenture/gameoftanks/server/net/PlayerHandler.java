@@ -72,6 +72,8 @@ public class PlayerHandler extends Thread {
             closeConnection();
             return;
         }
+        // add new player to pull
+        connectionManager.addNewPlayer(this);
 
         System.out.println("Client \"" + player.getNickname() + "\" connected to server!");
 

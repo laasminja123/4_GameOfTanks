@@ -71,9 +71,7 @@ public class ConnectionManager extends Thread {
                             Socket socket = server.accept();
                             System.out.println("Player connected");
                             PlayerHandler playerHandler = new PlayerHandler(ConnectionManager.this, socket, vehicleId++);
-                            connections.add(playerHandler);
                             playerHandler.start();
-                            System.out.println("Connections pull size is: " + connections.size());
                         } catch (IOException exc) {
                             exc.printStackTrace();
                         }
@@ -122,9 +120,6 @@ public class ConnectionManager extends Thread {
                 }
             }
             bullets.removeAll(toRemove);
-            if (bullets.size() != 0) {
-                System.out.println("Bullet list size on send is: " + bullets.size());
-            }
 
             data.addBullets(bullets);
         }
@@ -154,6 +149,11 @@ public class ConnectionManager extends Thread {
             }
         }
         return players;
+    }
+
+    void addNewPlayer(PlayerHandler handler) {
+        this.connections.add(handler);
+        System.out.println("Connections pull size is: " + connections.size());
     }
 
     void removePlayer(PlayerHandler handler) {

@@ -502,25 +502,37 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
     private void updateControlPanel() {
         if (playerData != null) {
             Player currentPlayer = playerData.getPlayer(nickName);
-            Vehicle vehicle = currentPlayer.getVehicle();
-            int currentHp = vehicle.getCurrentHp();
-            int maxHp = vehicle.getStartingHp();
 
-            hp.setString(currentHp + " / " + maxHp);
-            hp.setValue((currentHp * 100) / maxHp);
+            if (currentPlayer != null) {
+                Vehicle vehicle = currentPlayer.getVehicle();
 
-            int currentDelay = vehicle.getCurrentDelayMsec();
-            int maxDelay = vehicle.getShootingDelayMsec();
+                if (vehicle != null) {
+                    int currentHp = vehicle.getCurrentHp();
+                    int maxHp = vehicle.getStartingHp();
 
-            turretReload.setValue((currentDelay * 100) / maxDelay);
+                    hp.setString(currentHp + " / " + maxHp);
+                    hp.setValue((currentHp * 100) / maxHp);
+
+                    int currentDelay = vehicle.getCurrentDelayMsec();
+                    int maxDelay = vehicle.getShootingDelayMsec();
+
+                    turretReload.setValue((currentDelay * 100) / maxDelay);
 
 
-            // todo
-            // label.setText ...
-            currentPlayer.getKills();
-            currentPlayer.getDeaths();
-            currentPlayer.getShoots();
-            currentPlayer.getHits();
+                    // todo
+                    // label.setText ...
+                    currentPlayer.getKills();
+                    currentPlayer.getDeaths();
+                    currentPlayer.getShoots();
+                    currentPlayer.getHits();
+                } else {
+                    System.out.println("Vehicle is null");
+                }
+            } else {
+                System.out.println("Player is null");
+            }
+        } else {
+            System.out.println("Player DATA is null");
         }
     }
 

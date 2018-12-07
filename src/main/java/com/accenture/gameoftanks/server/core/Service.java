@@ -54,12 +54,13 @@ public class Service extends Thread {
 
                     try {
                         databaseManager = new DatabaseManager(username, password);
+                        databaseManager.setupDatabase();
                         break;
                     } catch (Exception e) {
                         i--;
                         System.out.println("Could not connect to database, possibly username or password is incorrect or you have not setup MySQL properly.");
                         if (i == 0) {
-                            System.out.println("You're out of tries, database functionality hsa been disabled, continuing with the creation of server.");
+                            System.out.println("Database functionality hsa been disabled, continuing with the creation of server.");
                             System.out.println();
                             break;
                         } else if (i == 1) {
@@ -71,7 +72,6 @@ public class Service extends Thread {
                     }
 
                 }
-                databaseManager.setupDatabase();
                 return;
 
                 } else if (string.equals("n") || string.equals("N") || string.equals("no") || string.equals("No")) {

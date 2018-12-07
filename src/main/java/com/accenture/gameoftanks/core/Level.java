@@ -165,9 +165,77 @@ public class Level {
         topology = new Shape(vertices);
         entity.setTopology(topology);
         position = entity.getPosition();
-        position.posX = 12.0f;
-        position.posY = 45.0f;
+        position.posX = 15.0f;
+        position.posY = 22.0f;
         position.alpha = -.57f;
+        content.add(entity);
+
+        // crate 4
+        entity = new Entity(true, true, 1.0f, 1.0f, 100, "crate01.bmp");
+        entity.setId(id++);
+        vertices = new float[] {
+                -1.5f, -1.5f,
+                -1.5f,  1.5f,
+                1.5f,  1.5f,
+                1.5f, -1.5f
+        };
+        topology = new Shape(vertices);
+        entity.setTopology(topology);
+        position = entity.getPosition();
+        position.posX = 57.0f;
+        position.posY = 22.0f;
+        position.alpha = -.57f;
+        content.add(entity);
+
+        // crate 5
+        entity = new Entity(true, true, 1.0f, 1.0f, 100, "crate01.bmp");
+        entity.setId(id++);
+        vertices = new float[] {
+                -1.5f, -1.5f,
+                -1.5f,  1.5f,
+                1.5f,  1.5f,
+                1.5f, -1.5f
+        };
+        topology = new Shape(vertices);
+        entity.setTopology(topology);
+        position = entity.getPosition();
+        position.posX = 54.0f;
+        position.posY = 19.4f;
+        position.alpha = .0f;
+        content.add(entity);
+
+        // crate 6
+        entity = new Entity(true, true, 1.0f, 1.0f, 100, "crate01.bmp");
+        entity.setId(id++);
+        vertices = new float[] {
+                -1.5f, -1.5f,
+                -1.5f,  1.5f,
+                1.5f,  1.5f,
+                1.5f, -1.5f
+        };
+        topology = new Shape(vertices);
+        entity.setTopology(topology);
+        position = entity.getPosition();
+        position.posX = 53.2f;
+        position.posY = 23.0f;
+        position.alpha = .3f;
+        content.add(entity);
+
+        // long truck
+        entity = new Entity(true, false, 1.0f, 1.0f, 100, "truck01.bmp");
+        entity.setId(id++);
+        vertices = new float[] {
+                -12.0f, -2.2f,
+                -12.0f,  2.2f,
+                12.0f,  2.2f,
+                12.0f, -2.2f
+        };
+        topology = new Shape(vertices);
+        entity.setTopology(topology);
+        position = entity.getPosition();
+        position.posX = 13.0f;
+        position.posY = 40.0f;
+        position.alpha = -(float) PI / 2.0f - .04f;
         content.add(entity);
     }
 
@@ -210,6 +278,7 @@ public class Level {
         textures.add("roof01.bmp");
         textures.add("roof02.bmp");
         textures.add("roof03.bmp");
+        textures.add("truck01.bmp");
     }
 
     public List<String> getTextures() {
@@ -254,37 +323,72 @@ public class Level {
         int size = 5;
         respawns = new float[3 * size];
 
+        // 1
         respawns[0] = 10.0f;
         respawns[1] = 10.0f;
         respawns[2] = 0.0f;
+
+        // 2
         respawns[3] = 10.0f;
         respawns[4] = 90.0f;
-        respawns[5] = 0.0f;
+        respawns[5] = -.5f;
+
+        // 3
         respawns[6] = 90.0f;
         respawns[7] = 10.0f;
-        respawns[8] = 0.0f;
-        respawns[9] = 90.0f;
-        respawns[10] = 90.0f;
-        respawns[11] = 0.0f;
-        respawns[12] = 50.0f;
-        respawns[13] = 50.0f;
-        respawns[14] = 0.0f;
+        respawns[8] = (float) PI / 2.0f;
 
+        // 4
+        respawns[9] = 90.0f;
+        respawns[10] = 60.0f;
+        respawns[11] = -(float) PI;
+
+        // 5
+        respawns[12] = 60.0f;
+        respawns[13] = 60.0f;
+        respawns[14] = -2.0f;
     }
 
     /**
-     *
-     * @param vehicles all existing vehicles on field
+     * computes best respawn which has maximal distance to all existing player current positions
+     * @param players all existing players on field
      * @return respawn coords (float x 3)
      */
-   /* public float [] getRespawns(List<Vehicle> vehicles) {
-         //Position pos = vehicles.getPosition();
-        //float x  = pos.posX;
-        // float y = pos.posY;
-        return 0;
+    public float [] getRespawn(Queue<Player> players) {
+        int size = respawns.length / 3;
+        float [] respawn = new float[3];
+        System.arraycopy(respawns, 0, respawn, 0, 3);
+
+        if (!players.isEmpty()) {
+            float [] distances = new float[size];
+            float maxDistance = 0.0f;
+            int bestRespIndex = 0;
+
+            // compute min distances from respawn to player position
+            for (int i = 0; i < size; i++) {
+                float dist = 1.0e5f;
+
+                float x = i * 3;
+                float y = i * 3 + 1;
+
+                for (Player player : players) {
+                    Vehicle vehicle = player.getVehicle();
+                    Position position = vehicle.getPosition();
+
+                    float dx = position.posX - x;
+                    float dy = position.posY - y;
+
+                    dist = min(dist, (float) sqrt(dx * dx + dy * dy));
+                }
+                distances[i] = dist;
+
+                if (dist > maxDistance) {
+                    maxDistance = dist;
+                    bestRespIndex = i;
+                }
+            }
+            System.arraycopy(respawns, bestRespIndex * 3, respawn, 0, 3);
+        }
+        return respawn;
     }
-
-    */
-
-
 }

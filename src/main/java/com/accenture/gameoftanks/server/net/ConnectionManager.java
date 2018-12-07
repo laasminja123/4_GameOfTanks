@@ -112,7 +112,7 @@ public class ConnectionManager extends Thread {
         // add information about existing bullets
         if (dataCore != null) {
             Queue<Bullet> bullets = dataCore.getBullets();
-            List<Bullet> toRemove = new LinkedList<>();
+            Queue<Bullet> toRemove = new ConcurrentLinkedQueue<>();
 
             // clean up list
             for (Bullet bullet : bullets) {

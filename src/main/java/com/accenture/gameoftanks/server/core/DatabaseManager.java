@@ -15,9 +15,12 @@ public class DatabaseManager {
     private Connection con;
 //    private ResultSet resultSet;
 
-    public DatabaseManager(String username, String password) {
-        try {
+    public DatabaseManager(String username, String password) throws SQLException {
             con = DriverManager.getConnection(dbAddress, username, password);
+    }
+
+    public void setupDatabase() {
+        try {
             Statement statement = con.createStatement();
             statement.executeUpdate("CREATE DATABASE IF NOT EXISTS Game_of_Tanks;");
             statement.close();
@@ -26,7 +29,6 @@ public class DatabaseManager {
             createStatsTable();
             createLogsTable();
         } catch (SQLException e) {
-            System.out.println("Exception in DatabaseManager class constructor");
             e.printStackTrace();
         }
     }
@@ -157,14 +159,17 @@ public class DatabaseManager {
     private void updatePlayer(Player player) {
         try {
             System.out.println("Adding " + player.getNickname() + "'s values to databse.");
-            PreparedStatement preparedStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET kills = ?, deaths = ? WHERE nickname = ?");
+            PreparedStatement preparedStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET kills = ?, deaths = ?, shoots = ?, hits = ? WHERE nickname = ?");
             preparedStatement.setInt(1, getKills(player) + player.getKills());
             preparedStatement.setInt(2, getDeaths(player) + player.getDeaths());
-            preparedStatement.setString(3, player.getNickname());
+            preparedStatement.setInt(3, getShoots(player.getNickname()) + player.getShoots());
+            preparedStatement.setInt(4, getHits(player.getNickname()) + player.getHits());
+            preparedStatement.setString(5, player.getNickname());
             preparedStatement.executeUpdate();
             con.commit();
             preparedStatement.close();
             setScore(player);
+            updateAccuracy(player);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -173,10 +178,13 @@ public class DatabaseManager {
     private void addPlayer(Player player) {
         try {
             System.out.println("Adding player " + player.getNickname() + " to database.");
-            PreparedStatement preparedStatement = con.prepareStatement("INSERT INTO Game_of_Tanks.stats (nickname, kills, deaths) VALUES (?, ?, ?)");
+            PreparedStatement preparedStatement = con.prepareStatement("INSERT INTO Game_of_Tanks.stats (nickname, kills, deaths, shoots, hits, accuracy) VALUES (?, ?, ?, ?, ?, ?)");
             preparedStatement.setString(1, player.getNickname());
             preparedStatement.setInt(2, player.getKills());
             preparedStatement.setInt(3, player.getDeaths());
+            preparedStatement.setInt(4, player.getShoots());
+            preparedStatement.setInt(5, player.getHits());
+            preparedStatement.setInt(6, calculateAccuracy(player));
             preparedStatement.executeUpdate();
             con.commit();
             preparedStatement.close();
@@ -289,7 +297,12 @@ public class DatabaseManager {
         int score = 0;
 
         if (kills != 0) {
-            score = (int) ((kills * 30) / (0.3 * deaths));
+            score = (kills - deaths);
+//            score = (int) ((kills * 3) / (0.3 * deaths));
+        }
+
+        if (score < 0) {
+            score = 0;
         }
 
         try {
@@ -335,7 +348,7 @@ public class DatabaseManager {
                 player.put("kills", Integer.toString(kills));
                 player.put("deaths", Integer.toString(deaths));
                 player.put("shoots", Integer.toString(shoots));
-                player.put("hits", Integer.toString(shoots));
+                player.put("hits", Integer.toString(hits));
                 player.put("accuracy", Integer.toString(accuracy));
                 player.put("score", Integer.toString(score));
                 players.add(player);
@@ -362,16 +375,19 @@ public class DatabaseManager {
             String shoots = map.get("shoots");
             String hits = map.get("hits");
             String accuracy = map.get("accuracy");
-            System.out.println(nickname + " " + kills + "-" + deaths + " score: " + score + " accuracy: " + accuracy +"%");
+            System.out.println(nickname + " " + kills + "-" + deaths + " score:" + score + " accuracy:" + accuracy +"%" + " (shoots:" + shoots + " hits:" + hits +")");
         }
     }
 
-    public void setAccuracy(Player player) {
+    public void updateAccuracy(Player player) {
+        int shoots = getShoots(player.getNickname());
+        int hits = getHits(player.getNickname());
         float accuracy = 0;
-        if (getShoots(player.getNickname()) > 0) {
-            accuracy = player.getHits() / player.getShoots();
+        if (shoots > 0) {
+            accuracy = (hits * 1.0f) / (shoots * 1.0f);
         }
-        int intValue = (int) accuracy;
+        int intValue = (int) (accuracy * 100);
+
         try {
             PreparedStatement preparedStatement = con.prepareStatement("UPDATE Game_of_Tanks.stats SET accuracy = ? WHERE nickname = ?");
             preparedStatement.setInt(1, intValue);
@@ -382,6 +398,17 @@ public class DatabaseManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+
+
+    private int calculateAccuracy(Player player) {
+        float accuracy = 0;
+        if (player.getShoots() > 0) {
+            accuracy = (player.getHits() * 1.0f) / (player.getShoots() * 1.0f);
+        }
+        int intValue = (int) (accuracy * 100);
+        return intValue;
     }
 
     public void setShoots(Player player) {
@@ -466,7 +493,13 @@ public class DatabaseManager {
 
 //    public static void main(String[] args) {
 //
-//        DatabaseManager db = new DatabaseManager("root", "abcd1234");
+//        DatabaseManager db = null;
+//        try {
+//            db = new DatabaseManager("root", "abcd1234");
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        db.setupDatabase();
 //
 //        Player player1 = new Player("abc");
 //        Player player2 = new Player("zxc");
@@ -478,6 +511,48 @@ public class DatabaseManager {
 //        Player player8 = new Player("qwe4");
 //        Player player9 = new Player("qwe5");
 //
+//        player1.incrementKills();
+//        player1.incrementKills();
+//        player1.incrementKills();
+//        player1.incrementKills();
+//        player1.incrementKills();
+//        player2.incrementDeaths();
+//        player2.incrementDeaths();
+//        player2.incrementDeaths();
+//        player2.incrementDeaths();
+//        player3.incrementKills();
+//        player3.incrementKills();
+//        player3.incrementKills();
+//        player3.incrementDeaths();
+//        player3.incrementDeaths();
+//        player1.incrementShoots();
+//        player1.incrementShoots();
+//        player1.incrementShoots();
+//        player1.incrementShoots();
+//        player1.incrementShoots();
+//        player1.incrementShoots();
+//        player1.incrementShoots();
+//        player1.incrementShoots();
+//        player1.incrementShoots();
+//        player1.incrementShoots();
+//        player1.incrementShoots();
+//        player1.incrementHits();
+//        player1.incrementHits();
+//        player1.incrementHits();
+//        player1.incrementHits();
+//        player1.incrementHits();
+//        player1.incrementHits();
+//        player1.incrementHits();
+//        player1.incrementHits();
+//        player1.incrementHits();
+//        player1.incrementHits();
+//        player2.incrementShoots();
+//        player2.incrementShoots();
+//        player2.incrementHits();
+//        player3.incrementShoots();
+//        player3.incrementHits();
+//        player3.incrementKills();
+//
 //        db.addOrUpdatePlayer(player1);
 //        db.addOrUpdatePlayer(player2);
 //        db.addOrUpdatePlayer(player3);
@@ -488,6 +563,9 @@ public class DatabaseManager {
 //        db.addOrUpdatePlayer(player8);
 //        db.addOrUpdatePlayer(player9);
 //
-//        db.printTopPlayers();
+//        int i = db.getShoots(player1.getNickname());
+//        int x = db.getHits(player1.getNickname());
+//        System.err.println(i + " TEXT");
+//        System.err.println(x + " TEXT");
 //    }
 }

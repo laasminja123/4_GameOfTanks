@@ -43,24 +43,49 @@ public class Service extends Thread {
         while (true) {
             string = scanner.nextLine();
             if (string.equals("y") || string.equals("Y") || string.equals("yes") || string.equals("Yes")) {
-                System.out.println("Enter your MySQL username");
-                String username = scanner.nextLine();
-                System.out.println("Enter your MySQL password");
-                String password = scanner.nextLine();
-                databaseManager = new DatabaseManager(username, password);
+                int i = 5;
+
+                while (i > 0) {
+
+                    System.out.println("Enter your MySQL username");
+                    String username = scanner.nextLine();
+                    System.out.println("Enter your MySQL password");
+                    String password = scanner.nextLine();
+
+                    try {
+                        databaseManager = new DatabaseManager(username, password);
+                        break;
+                    } catch (Exception e) {
+                        i--;
+                        System.out.println("Could not connect to database, possibly username or password is incorrect or you have not setup MySQL properly.");
+                        if (i == 0) {
+                            System.out.println("You're out of tries, database functionality hsa been disabled, continuing with the creation of server.");
+                            System.out.println();
+                            break;
+                        } else if (i == 1) {
+                            System.out.println(i + " try remaining.");
+                        } else {
+                            System.out.println(i + " tries remaining.");
+                        }
+
+                    }
+
+                }
+                databaseManager.setupDatabase();
                 return;
-            } else if (string.equals("n") || string.equals("N") || string.equals("no") || string.equals("No")) {
+
+                } else if (string.equals("n") || string.equals("N") || string.equals("no") || string.equals("No")) {
+                    databaseManager = null;
+                    return;
+                }
+            }
+        }
+
+        public void useDatabaseManager ( boolean value){
+            if (value) {
+                createDatabaseManager();
+            } else {
                 databaseManager = null;
-                return;
             }
         }
     }
-
-    public void useDatabaseManager(boolean value) {
-        if (value) {
-            createDatabaseManager();
-        } else {
-            databaseManager = null;
-        }
-    }
-}

@@ -527,7 +527,7 @@ public class MainFrame extends JFrame implements KeyListener, MouseListener, Mou
                         playerShots.setText("Shots made : " + currentPlayer.getShoots());
 
                         if (currentPlayer.getShoots() > 0) {
-                            float accuracy = currentPlayer.getHits() / currentPlayer.getShoots();
+                            float accuracy = (float) currentPlayer.getHits() / (float) currentPlayer.getShoots();
                             playerAccuracy.setText("Accuracy : " + accuracy);
                         } else {
                             playerAccuracy.setText("Accuracy : 0");
